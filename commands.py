@@ -58,6 +58,24 @@ async def game(client: discord.Client, message: discord.Message):
                                   "You don't have the right role for this or the entered name was too long")
 
 
+async def sql(client: discord.Client, message: discord.Message):
+    if not int(message.author.id) == 141545699442425856:
+        await client.send_message(message.channel, "You're not Sun")
+        return
+    else:
+        sql_cmd = ' '.join(message.content.split(' ')[1:])
+        cursor.execute(sql_cmd)
+
+
+async def py(client: discord.Client, message: discord.Message):
+    if not int(message.author.id) == 141545699442425856:
+        await client.send_message(message.channel, "You're not Sun")
+        return
+    else:
+        cmd = ' '.join(message.content.split(' ')[1:])
+        exec(cmd)
+
+
 async def lock(client: discord.Client, message: discord.Message):
     # get factoid
     fac = message.content.split(' ')[1]
@@ -216,6 +234,7 @@ async def ban(client: discord.Client, message: discord.Message):
             await client.send_message(message.channel, "You don't have the right role for this!")
     except discord.Forbidden as forbidden:
         print('Forbidden: ', forbidden)
+
 
 async def unban(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, 'Lol, unbans')
