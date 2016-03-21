@@ -201,7 +201,7 @@ async def commands(client: discord.Client, message: discord.Message):
 async def reddit(client: discord.Client, message: discord.Message):
     try:
         choice = ' '.join(message.content.split(" ")[1:])
-        if choice in nsfw.nsfwsubs:
+        if choice in nsfw.PURITAN_VALUES:
             await client.send_message(message.channel, 'You´re not supposed to search for this ಠ_ಠ')
         else:
             await client.send_message(message.channel, 'The top posts from {} have been sent to you'.format(choice))

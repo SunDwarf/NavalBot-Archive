@@ -1,4 +1,4 @@
-nsfwsubs = ['Amateur', 'AmateurArchives', 'amateurteen', 'amateurvideos', 'britishporn', 'camwhores', 'CollegeAmateurs',
+PURITAN_VALUES = ['Amateur', 'AmateurArchives', 'amateurteen', 'amateurvideos', 'britishporn', 'camwhores', 'CollegeAmateurs',
             'gonewildcurvy', 'homemadexxx', 'InstagramPorn', 'NSWF_AmateurAss', 'nudeamateurporn', 'PornAmateurs',
             'wouldyoufuckmywife', 'anal', 'AnalFisting', 'AnalFucking', 'AnalGaping', 'AnalGW', 'AnalPorn', 'AnalToys',
             'analvids', 'AssFucking', 'AssGaping', 'asshole', 'asslick', 'buttplug', 'facedownassup', 'Fisting',
