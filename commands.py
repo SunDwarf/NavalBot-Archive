@@ -5,7 +5,9 @@ import sqlite3
 
 import aiohttp
 import discord
-
+import nsfw
+from google import search
+from exceptions import CommandError
 import red
 
 factoid_matcher = re.compile(r'(.*?) is (.*)')
@@ -59,7 +61,7 @@ async def game(client: discord.Client, message: discord.Message):
 
 
 async def sql(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) == 141545699442425856:
+    if not int(message.author.id) == 151196442986414080:
         await client.send_message(message.channel, "You're not Sun")
         return
     else:
@@ -68,7 +70,7 @@ async def sql(client: discord.Client, message: discord.Message):
 
 
 async def py(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) == 141545699442425856:
+    if not int(message.author.id) == 151196442986414080:
         await client.send_message(message.channel, "You're not Sun")
         return
     else:
@@ -199,10 +201,13 @@ async def commands(client: discord.Client, message: discord.Message):
 async def reddit(client: discord.Client, message: discord.Message):
     try:
         choice = ' '.join(message.content.split(" ")[1:])
-        await client.send_message(message.channel, 'The top posts from {} have been sent to you'.format(choice))
-        red_fetched = red.main(userchoice=choice)
-        for link in red_fetched:
-            await client.send_message(message.author, content=link)
+        if choice in nsfw.nsfwsubs:
+            await client.send_message(message.channel, 'You´re not supposed to search for this ಠ_ಠ')
+        else:
+            await client.send_message(message.channel, 'The top posts from {} have been sent to you'.format(choice))
+            red_fetched = red.main(userchoice=choice)
+            for link in red_fetched:
+                await client.send_message(message.author, content=link)
     except TypeError as f:
         print('[ERROR]', f)
 
@@ -214,14 +219,13 @@ async def private(client: discord.Client, message: discord.Message):
 async def kick(client: discord.Client, message: discord.Message):
     try:
         if message.author.permissions_in(message.channel).manage_roles:
-            await client.send_message(message.channel, '{}'.format(message.mentions[0]))
             await client.kick(member=message.mentions[0])
             await client.send_message(message.channel,
                                       '{} got kicked by {}!'.format(message.mentions[0], message.author.name))
         else:
             await client.send_message(message.channel, "You don't have the right role for this!")
-    except discord.Forbidden as forbidden:
-        print('Forbidden', forbidden)
+    except (discord.Forbidden, IndexError) as kickerror:
+        print('[Error]', kickerror)
 
 
 async def ban(client: discord.Client, message: discord.Message):
@@ -232,9 +236,18 @@ async def ban(client: discord.Client, message: discord.Message):
                                       '{} got banned by {}!'.format(message.mentions[0], message.author.name))
         else:
             await client.send_message(message.channel, "You don't have the right role for this!")
-    except discord.Forbidden as forbidden:
-        print('Forbidden: ', forbidden)
+    except (discord.Forbidden, IndexError) as banerror:
+        print('[ERROR]:', banerror)
 
 
 async def unban(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, 'Lol, unbans')
+
+
+async def google(client: discord.Client, message: discord.Message):
+    userinput = ' '.join(message.content.split(" ")[1:])
+
+    for url in search(userinput, stop=2):
+        await client.send_message(message.channel, "The links have been sent to you {}".format(message.author))
+        await client.send_message(message.author, url)
+
