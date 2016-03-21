@@ -7,8 +7,12 @@ import aiohttp
 import discord
 import nsfw
 from google import search
-#from exceptions import CommandError
 import red
+
+RCE_IDS = [
+    141545699442425856
+]
+
 
 factoid_matcher = re.compile(r'(.*?) is (.*)')
 
@@ -61,7 +65,7 @@ async def game(client: discord.Client, message: discord.Message):
 
 
 async def sql(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) == 151196442986414080:
+    if not int(message.author.id) in RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")
         return
     else:
@@ -70,7 +74,7 @@ async def sql(client: discord.Client, message: discord.Message):
 
 
 async def py(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) == 151196442986414080:
+    if not int(message.author.id) in RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")
         return
     else:
