@@ -192,7 +192,7 @@ async def guess(client: discord.Client, message: discord.Message):
 
 
 async def commands(client: discord.Client, message: discord.Message):
-    com = ['-game', '-lock', '-guessing', '-reddit', '-private']
+    com = ['-game', '-lock', '-guess', '-reddit', '-private']
     await client.send_message(message.channel, "These commands are available:\n{}".format('\n'.join(com)))
 
 
@@ -214,7 +214,6 @@ async def private(client: discord.Client, message: discord.Message):
 async def kick(client: discord.Client, message: discord.Message):
     try:
         if message.author.permissions_in(message.channel).manage_roles:
-            await client.send_message(message.channel, '{}'.format(message.mentions[0]))
             await client.kick(member=message.mentions[0])
             await client.send_message(message.channel,
                                       '{} got kicked by {}!'.format(message.mentions[0], message.author.name))
