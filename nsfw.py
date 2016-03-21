@@ -47,5 +47,5 @@ nsfwsubs = ['Amateur', 'AmateurArchives', 'amateurteen', 'amateurvideos', 'briti
             'zombiesgonewild', 'DirtyGaming', 'gamersgonewild', 'girlsdoingnerdythings', 'Pee', 'peegonewild', 'piss',
             'poop', 'beef_flaps', 'bigclit', 'ButterflyWings', 'celebritypussy', 'Creampie', 'creampies', 'hairypussy',
             'lipsthatgrip', 'pussy', 'pussygape', 'rearpussy', 'simps', 'dirtypenpals', 'erotica', 'eroticliterature',
-            'gonewildstories', 'hotwife', 'NSFWIAmA', 'sexystories']
+            'gonewildstories', 'hotwife', 'NSFWIAmA', 'sexystories', 'shinyporn']
 
