@@ -7,7 +7,7 @@ import aiohttp
 import discord
 import nsfw
 from google import search
-from exceptions import CommandError
+#from exceptions import CommandError
 import red
 
 factoid_matcher = re.compile(r'(.*?) is (.*)')
