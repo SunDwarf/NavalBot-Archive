@@ -246,8 +246,7 @@ async def unban(client: discord.Client, message: discord.Message):
 
 async def google(client: discord.Client, message: discord.Message):
     userinput = ' '.join(message.content.split(" ")[1:])
-
+    await client.send_message(message.channel, "The links have been sent to you {}".format(message.author))
     for url in search(userinput, stop=2):
-        await client.send_message(message.channel, "The links have been sent to you {}".format(message.author))
         await client.send_message(message.author, url)
 
