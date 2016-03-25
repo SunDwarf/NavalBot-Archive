@@ -2,6 +2,7 @@ import discord
 from discord import Client
 import commands
 import os
+import traceback
 
 import sys
 
@@ -32,10 +33,23 @@ async def on_message(message: discord.Message):
         return
     if message.content[0] == COMMAND_PREFIX:
         try:
-            await getattr(commands, message.content[1:].split(' ')[0])(client, message)
+            coro = getattr(commands, message.content[1:].split(' ')[0])
         except AttributeError as e:
             print("-> No such command:", e)
-            await getattr(commands, "default")(client, message)
+            try:
+                await getattr(commands, "default")(client, message)
+            except Exception as e:
+                if isinstance(e, discord.HTTPException):
+                    pass
+                else:
+                    await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
+        else:
+            try:
+                await coro
+            except Exception as e:
+                if isinstance(e, discord.HTTPException): pass
+                else:
+                    await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
 
 
 if __name__ == "__main__":

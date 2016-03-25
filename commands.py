@@ -162,7 +162,7 @@ async def default(client: discord.Client, message: discord.Message):
         name = matches.groups()[0]
         fac = matches.groups()[1]
         assert isinstance(fac, str)
-        if fac.startswith("http"):
+        if fac.startswith("http") and 'youtube' not in fac:
             # download as a file
             file = sanitize(fac.split('/')[-1])
             client.loop.create_task(get_file((client, message), url=fac, name=file))
@@ -194,9 +194,9 @@ async def default(client: discord.Client, message: discord.Message):
         # Check if it's a file
         if content.startswith("file:"):
             fname = content.split("file:")[1]
-            if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
-                await client.send_message(message.channel, "This kills the bot")
-                return
+            #if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
+            #    await client.send_message(message.channel, "This kills the bot")
+            #    return
             # Load the file
             with open(os.path.join(os.getcwd(), 'files', fname), 'rb') as f:
                 await client.send_file(message.channel, f)
