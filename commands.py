@@ -175,8 +175,7 @@ async def default(client: discord.Client, message: discord.Message):
         row = cursor.fetchone()
         if row:
             locked, locker = row
-            print(locker, message.author.id, locker == message.author.id)
-            if locked and locker != message.author.id:
+            if locked and locker != message.author.id and int(message.author.id) not in RCE_IDS:
                 await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
                                           .format(name, locker))
                 return
