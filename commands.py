@@ -20,6 +20,9 @@ SERVERS = [
     ("gorch.tf.naval.tf", 27015),
     ("gorch.tf.naval.tf", 27016),
     ("gorch.tf.naval.tf", 27017),
+    ("prinzeugen.tf.naval.tf", 27015),
+    ("prinzeugen.tf.naval.tf", 27016),
+    ("prinzeugen.tf.naval.tf", 27017)
 ]
 
 factoid_matcher = re.compile(r'(.*?) is (.*)')
