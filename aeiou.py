@@ -33,7 +33,7 @@ async def on_message(message: discord.Message):
         return
     if message.content[0] == COMMAND_PREFIX:
         try:
-            coro = getattr(commands, message.content[1:].split(' ')[0])
+            coro = getattr(commands, message.content[1:].split(' ')[0])(client, message)
         except AttributeError as e:
             print("-> No such command:", e)
             try:
