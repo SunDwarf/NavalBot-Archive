@@ -60,6 +60,7 @@ async def servers(client: discord.Client, message: discord.Message):
             await client.send_message(message.channel,
                     content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`\n"
                         .format(q=info, num=num+1))
+        querier.socket.close()
 
 
 async def on_ready(client: discord.Client):
