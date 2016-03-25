@@ -8,11 +8,19 @@ import discord
 import nsfw
 from google import search
 import red
+from valve.source import a2s
 
 RCE_IDS = [
     141545699442425856
 ]
 
+SERVERS = [
+    ("yamato.tf.naval.tf", 27015),
+    ("musashi.tf.naval.tf", 27015),
+    ("gorch.tf.naval.tf", 27015),
+    ("gorch.tf.naval.tf", 27016),
+    ("gorch.tf.naval.tf", 27017),
+]
 
 factoid_matcher = re.compile(r'(.*?) is (.*)')
 
@@ -32,6 +40,23 @@ CREATE TABLE IF NOT EXISTS configuration (
   value VARCHAR
 )
 """)
+
+
+attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
+
+async def servers(client: discord.Client, message: discord.Message):
+    await client.send_message(message.channel, "**Servers:**")
+    for num, serv in enumerate(SERVERS):
+        querier = a2s.ServerQuerier(serv, timeout=0.5)
+        try:
+            info = attrdict(querier.get_info())
+        except a2s.NoResponseError:
+            await client.send_message(message.channel,
+                      content="**Server {num}:** `({t[0]}:{t[1]})` - not responding\n".format(t=serv, num=num+1))
+        else:
+            await client.send_message(message.channel,
+                    content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`\n"
+                        .format(q=info, num=num+1))
 
 
 async def on_ready(client: discord.Client):
@@ -253,4 +278,3 @@ async def google(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "The links have been sent to you {}".format(message.author))
     for url in search(userinput, stop=2):
         await client.send_message(message.author, url)
-
