@@ -114,10 +114,11 @@ async def py(client: discord.Client, message: discord.Message):
         cmd = ' '.join(message.content.split(' ')[1:])
 
         def smsg(content):
-            loop.create_task(client.send_message(message.channel, content))
+            loop.create_task(client.send_message(message.channel, '`' + content + '`'))
 
         def ec(cmd):
             data = subprocess.check_output(cmd, shell=True)
+            data = data.decode().replace('\n', '')
             smsg(data)
 
         exec(cmd)
