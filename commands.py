@@ -4,6 +4,7 @@ import re
 import sqlite3
 
 import aiohttp
+import asyncio
 import discord
 import nsfw
 from google import search
@@ -44,6 +45,8 @@ CREATE TABLE IF NOT EXISTS configuration (
 )
 """)
 
+
+loop = asyncio.get_event_loop()
 
 attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
 
@@ -107,6 +110,8 @@ async def py(client: discord.Client, message: discord.Message):
         return
     else:
         cmd = ' '.join(message.content.split(' ')[1:])
+        def smsg(content):
+            loop.create_task(client.send_message(message.channel, content))
         exec(cmd)
 
 
