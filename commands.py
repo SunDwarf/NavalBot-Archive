@@ -2,6 +2,7 @@ import os
 import random
 import re
 import sqlite3
+import subprocess
 
 import aiohttp
 import asyncio
@@ -45,10 +46,10 @@ CREATE TABLE IF NOT EXISTS configuration (
 )
 """)
 
-
 loop = asyncio.get_event_loop()
 
 attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
+
 
 async def servers(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "**Servers:**")
@@ -58,11 +59,12 @@ async def servers(client: discord.Client, message: discord.Message):
             info = attrdict(querier.info())
         except a2s.NoResponseError:
             await client.send_message(message.channel,
-                      content="**Server {num}:** `({t[0]}:{t[1]})` - not responding\n".format(t=serv, num=num+1))
+                                      content="**Server {num}:** `({t[0]}:{t[1]})` - not responding\n".format(t=serv,
+                                                                                                              num=num + 1))
         else:
             await client.send_message(message.channel,
-                    content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`"
-                        .format(q=info, num=num+1) + " - steam://connect/{t[0]}:{t[1]}".format(t=serv))
+                                      content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`"
+                                      .format(q=info, num=num + 1) + " - steam://connect/{t[0]}:{t[1]}".format(t=serv))
 
 
 async def on_ready(client: discord.Client):
@@ -110,8 +112,14 @@ async def py(client: discord.Client, message: discord.Message):
         return
     else:
         cmd = ' '.join(message.content.split(' ')[1:])
+
         def smsg(content):
             loop.create_task(client.send_message(message.channel, content))
+
+        def ec(cmd):
+            data = subprocess.check_output(cmd, shell=True)
+            smsg(data)
+
         exec(cmd)
 
 
@@ -201,7 +209,7 @@ async def default(client: discord.Client, message: discord.Message):
         # Check if it's a file
         if content.startswith("file:"):
             fname = content.split("file:")[1]
-            #if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
+            # if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
             #    await client.send_message(message.channel, "This kills the bot")
             #    return
             # Load the file
