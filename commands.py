@@ -1,3 +1,4 @@
+import asyncio
 import os
 import random
 import re
@@ -5,15 +6,15 @@ import sqlite3
 import subprocess
 
 import aiohttp
-import asyncio
 import discord
-import nsfw
 from google import search
-import red
 from valve.source import a2s
 
+import nsfw
+import red
+
 RCE_IDS = [
-    141545699442425856
+    141545699442425856, 151196442986414080
 ]
 
 SERVERS = [
@@ -239,13 +240,13 @@ async def guess(client: discord.Client, message: discord.Message):
 
 
 async def commands(client: discord.Client, message: discord.Message):
-    com = ['-game', '-lock', '-guessing', '-reddit', '-private']
+    com = ['-game', '-lock', '-guess', '-reddit', '-private', '-servers']
     await client.send_message(message.channel, "These commands are available:\n{}".format('\n'.join(com)))
 
 
 async def reddit(client: discord.Client, message: discord.Message):
     try:
-        choice = ' '.join(message.content.split(" ")[1:])
+        choice = ' '.join(message.content.split(" ")[1:]).lower()
         if choice in nsfw.PURITAN_VALUES:
             await client.send_message(message.channel, 'You´re not supposed to search for this ಠ_ಠ')
         else:
