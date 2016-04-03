@@ -9,7 +9,7 @@ def main(userchoice):
     # Gets 30 top posts from the specific subreddit.
     submissions = r.get_subreddit(userchoice.split('/')[-1]).get_top(limit=30)
     # Formats the printed output and adds a nice counter.
-    if userchoice.split('/')[-1].lower in nsfw.PURITAN_VALUES:
+    if userchoice.split('/')[-1].lower() in nsfw.PURITAN_VALUES:
         print('NSFW')
     else:
         submission_form = "{}) {} : {} <{}>"

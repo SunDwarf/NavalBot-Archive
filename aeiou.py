@@ -1,10 +1,11 @@
-import discord
-from discord import Client
-import commands
 import os
 import traceback
-
 import sys
+
+import discord
+from discord import Client
+
+import commands
 
 client = Client()
 
@@ -21,7 +22,8 @@ async def on_ready():
     # make file dir
     try:
         os.makedirs(os.path.join(os.getcwd(), "files"))
-    except FileExistsError: pass
+    except FileExistsError:
+        pass
 
 
 @client.event
@@ -47,7 +49,8 @@ async def on_message(message: discord.Message):
             try:
                 await coro
             except Exception as e:
-                if isinstance(e, discord.HTTPException): pass
+                if isinstance(e, discord.HTTPException):
+                    pass
                 else:
                     await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
 

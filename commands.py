@@ -7,6 +7,7 @@ import subprocess
 
 import aiohttp
 import discord
+import pyowm
 from google import search
 from valve.source import a2s
 
@@ -222,7 +223,7 @@ async def default(client: discord.Client, message: discord.Message):
 
 
 async def guess(client: discord.Client, message: discord.Message):
-    await client.send_message(message.channel, "Number Game:\nEnter a number between 1 and 10")
+    await client.send_message(message.channel, "Number Game:\nEnter a number between 1 and 10!")
 
     def guess_check(m):
         return m.content.isdigit()
@@ -295,3 +296,20 @@ async def google(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "The links have been sent to you {}".format(message.author))
     for url in search(userinput, stop=2):
         await client.send_message(message.author, url)
+
+
+async def weather(client: discord.Client, message: discord.Message):
+    owm = pyowm.OWM('66e61909a496e06f2e37a984fbb12d66')
+    userinput = ' '.join(message.content.split(" ")[1:])
+    observation = owm.weather_at_place(userinput)
+    w = observation.get_weather()
+    w.get_wind()
+    wind = w.get_wind()['speed']
+    humidity = w.get_humidity()
+    temp = w.get_temperature('celsius')['temp']
+    await client.send_message(message.channel,
+                              '☁__Weather for {}:__\n** Temperature:** {} °C **Humidity:** {} % **Wind:** {} m/s'.format(
+                                  userinput, temp,
+                                  humidity, wind))
+
+
