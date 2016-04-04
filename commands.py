@@ -13,6 +13,7 @@ from valve.source import a2s
 
 import nsfw
 import red
+from exceptions import CommandError
 
 RCE_IDS = [
     141545699442425856, 151196442986414080
@@ -299,17 +300,48 @@ async def google(client: discord.Client, message: discord.Message):
 
 
 async def weather(client: discord.Client, message: discord.Message):
-    owm = pyowm.OWM('66e61909a496e06f2e37a984fbb12d66')
-    userinput = ' '.join(message.content.split(" ")[1:])
-    observation = owm.weather_at_place(userinput)
-    w = observation.get_weather()
-    w.get_wind()
-    wind = w.get_wind()['speed']
-    humidity = w.get_humidity()
-    temp = w.get_temperature('celsius')['temp']
-    await client.send_message(message.channel,
-                              '☁__Weather for {}:__\n** Temperature:** {} °C **Humidity:** {} % **Wind:** {} m/s'.format(
-                                  userinput, temp,
-                                  humidity, wind))
+    owm = pyowm.OWM('9f74a3874a03fd3d9a30cdd64b652b5c')
+    try:
+        userinput = ' '.join(message.content.split(" ")[1:])
+        observation = owm.weather_at_place(userinput)
+        w = observation.get_weather()
+        w.get_wind()
+        wind = w.get_wind()['speed']
+        humidity = w.get_humidity()
+        temp = w.get_temperature('celsius')['temp']
+        await client.send_message(message.channel,
+                                  '☁__Weather for {}:__\n** Temperature:** {} °C **Humidity:** {} % **Wind:** {} m/s'.format(
+                                      userinput, temp,
+                                      humidity, wind))
+    except AttributeError:
+        await client.send_message(message.channel, "This city does not exist")
 
 
+async def mute(client: discord.Client, message: discord.Message):
+    muterole = discord.utils.get(message.server.roles, name='Muted')
+
+    if not muterole:
+        raise CommandError('No Muted role created')
+    try:
+        await client.add_roles(message.mentions[0], muterole)
+        await client.server_voice_state(message.mentions[0], mute=True)
+        await client.send_message(message.channel,
+                                  'User {} got muted by {}'.format(message.mentions[0], message.author))
+    except discord.Forbidden:
+        await client.send_message('Not enough permissions to mute user {}'.format(message.mentions[0].name))
+        raise CommandError('Not enough permissions to mute user : {}'.format(message.mentions[0].name))
+
+
+async def unmute(client: discord.Client, message: discord.Message):
+    muterole = discord.utils.get(message.server.roles, name='Muted')
+
+    if not muterole:
+        raise CommandError('No Muted role created')
+    try:
+        await client.remove_roles(message.mentions[0], muterole)
+        await client.server_voice_state(message.mentions[0], mute=False)
+        await client.send_message(message.channel,
+                                  'User {} got unmuted by {}'.format(message.mentions[0], message.author))
+    except discord.Forbidden:
+        await client.send_message('Not enough permissions to unmute user {}'.format(message.mentions[0].name))
+        raise CommandError('Not enough permissions to unmute user : {}'.format(message.mentions[0].name))
