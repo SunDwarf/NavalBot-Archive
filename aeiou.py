@@ -11,6 +11,8 @@ client = Client()
 
 COMMAND_PREFIX = "?"
 
+VERSION = "1.0.1"
+VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Methods
 @client.event
@@ -38,21 +40,14 @@ async def on_message(message: discord.Message):
             coro = getattr(commands, message.content[1:].split(' ')[0])(client, message)
         except AttributeError as e:
             print("-> No such command:", e)
-            try:
-                await getattr(commands, "default")(client, message)
-            except Exception as e:
-                if isinstance(e, discord.HTTPException):
-                    pass
-                else:
-                    await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
-        else:
-            try:
-                await coro
-            except Exception as e:
-                if isinstance(e, discord.HTTPException):
-                    pass
-                else:
-                    await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
+            coro = commands.default(client, message)
+        try:
+            await coro
+        except Exception as e:
+            if isinstance(e, discord.HTTPException):
+                pass
+            else:
+                await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
 
 
 if __name__ == "__main__":

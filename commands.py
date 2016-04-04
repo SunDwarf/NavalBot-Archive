@@ -14,6 +14,7 @@ from valve.source import a2s
 import nsfw
 import red
 from exceptions import CommandError
+import aeiou
 
 RCE_IDS = [
     141545699442425856, 151196442986414080
@@ -54,6 +55,12 @@ loop = asyncio.get_event_loop()
 attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
 
 
+async def version(client: discord.Client, message: discord.Message):
+    await client.send_message(message.channel,
+          "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
+            .format(aeiou.VERSION))
+
+
 async def servers(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "**Servers:**")
     for num, serv in enumerate(SERVERS):
@@ -62,12 +69,11 @@ async def servers(client: discord.Client, message: discord.Message):
             info = attrdict(querier.info())
         except a2s.NoResponseError:
             await client.send_message(message.channel,
-                                      content="**Server {num}:** `({t[0]}:{t[1]})` - not responding\n".format(t=serv,
-                                                                                                              num=num + 1))
+                  content="**Server {num}:** `({t[0]}:{t[1]})` - not responding\n".format(t=serv, num=num + 1))
         else:
             await client.send_message(message.channel,
-                                      content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`"
-                                      .format(q=info, num=num + 1) + " - steam://connect/{t[0]}:{t[1]}".format(t=serv))
+                  content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`"
+                    .format(q=info, num=num + 1) + " - steam://connect/{t[0]}:{t[1]}".format(t=serv))
 
 
 async def on_ready(client: discord.Client):
