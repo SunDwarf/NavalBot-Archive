@@ -55,10 +55,34 @@ loop = asyncio.get_event_loop()
 attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
 
 
+def read_version(data):
+    regexp = re.compile(r"^VERSION\W*=\W*([\d.abrc]+)")
+
+    for line in data:
+        match = regexp.match(line)
+        if match is not None:
+            return match.group(1)
+    else:
+        print("Cannot get new version from GitHub.")
+
+
 async def version(client: discord.Client, message: discord.Message):
-    await client.send_message(message.channel,
-                              "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-                              .format(aeiou.VERSION))
+    await client.send_message(
+            message.channel,
+            "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
+            .format(aeiou.VERSION)
+    )
+    # Download the latest version
+    async with aiohttp.ClientSession() as sess:
+        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/master/aeiou.py")
+        assert isinstance(s, aiohttp.ClientResponse)
+        data = await s.read()
+        data = data.decode().split('\n')
+    version = read_version(data)
+    if tuple(int(i) for i in version.split(".")) > aeiou.VERSIONT:
+        await client.send_message(message.channel, ":exclamation: *New version available:* **{}**".format(version))
+    else:
+        await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
 
 
 async def servers(client: discord.Client, message: discord.Message):
@@ -284,13 +308,16 @@ async def kick(client: discord.Client, message: discord.Message):
 
 
 async def ban(client: discord.Client, message: discord.Message):
+    print(len(message.mentions))
     try:
         if message.author.permissions_in(message.channel).manage_roles:
-            await client.ban(member=message.mentions[0])
+            await client.ban(member=message.mentions[0]) \
+                if len(message.mentions) > 0 \
+                else client.send_message(message.channel, content=":question: You must provide a user to ban.")
             await client.send_message(message.channel,
                                       '{} got banned by {}!'.format(message.mentions[0], message.author.name))
         else:
-            await client.send_message(message.channel, "You don't have the right role for this!")
+            await client.send_message(message.channel, ":no_entry_sign: You don't have the right role for this!")
     except (discord.Forbidden, IndexError) as banerror:
         print('[ERROR]:', banerror)
 
@@ -365,7 +392,7 @@ async def delete(client: discord.Client, message: discord.Message, count=None):
     if message.author.permissions_in(message.channel).manage_roles:
         try:
             count = int(' '.join(message.content.split(" ")[1:]))
-        except ValueError('Invalid integer supplied!'):
+        except ValueError:
             await client.send_message(message.channel, "This is not a number")
         async for msg in client.logs_from(message.channel, count + 1):
             await client.delete_message(msg)
