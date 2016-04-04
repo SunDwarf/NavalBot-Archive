@@ -11,10 +11,10 @@ import pyowm
 from google import search
 from valve.source import a2s
 
+import aeiou
 import nsfw
 import red
 from exceptions import CommandError
-import aeiou
 
 RCE_IDS = [
     141545699442425856, 151196442986414080
@@ -57,8 +57,8 @@ attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setatt
 
 async def version(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel,
-          "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-            .format(aeiou.VERSION))
+                              "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
+                              .format(aeiou.VERSION))
 
 
 async def servers(client: discord.Client, message: discord.Message):
@@ -69,11 +69,12 @@ async def servers(client: discord.Client, message: discord.Message):
             info = attrdict(querier.info())
         except a2s.NoResponseError:
             await client.send_message(message.channel,
-                  content="**Server {num}:** `({t[0]}:{t[1]})` - not responding\n".format(t=serv, num=num + 1))
+                                      content="**Server {num}:** `({t[0]}:{t[1]})` - not responding\n".format(t=serv,
+                                                                                                              num=num + 1))
         else:
             await client.send_message(message.channel,
-                  content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`"
-                    .format(q=info, num=num + 1) + " - steam://connect/{t[0]}:{t[1]}".format(t=serv))
+                                      content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`"
+                                      .format(q=info, num=num + 1) + " - steam://connect/{t[0]}:{t[1]}".format(t=serv))
 
 
 async def on_ready(client: discord.Client):
@@ -306,7 +307,7 @@ async def google(client: discord.Client, message: discord.Message):
 
 
 async def weather(client: discord.Client, message: discord.Message):
-    owm = pyowm.OWM('9f74a3874a03fd3d9a30cdd64b652b5c')
+    owm = pyowm.OWM('9f74a3874a03fd3d9a30cdd64b652b5c')  # Example API-Key
     try:
         userinput = ' '.join(message.content.split(" ")[1:])
         observation = owm.weather_at_place(userinput)
@@ -328,14 +329,18 @@ async def mute(client: discord.Client, message: discord.Message):
 
     if not muterole:
         raise CommandError('No Muted role created')
-    try:
-        await client.add_roles(message.mentions[0], muterole)
-        await client.server_voice_state(message.mentions[0], mute=True)
-        await client.send_message(message.channel,
-                                  'User {} got muted by {}'.format(message.mentions[0], message.author))
-    except discord.Forbidden:
-        await client.send_message('Not enough permissions to mute user {}'.format(message.mentions[0].name))
-        raise CommandError('Not enough permissions to mute user : {}'.format(message.mentions[0].name))
+
+    if len(message.mentions) > 0:
+        try:
+            await client.add_roles(message.mentions[0], muterole)
+            await client.server_voice_state(message.mentions[0], mute=True)
+            await client.send_message(message.channel,
+                                      'User {} got muted by {}'.format(message.mentions[0], message.author))
+        except discord.Forbidden:
+            await client.send_message('Not enough permissions to mute user {}'.format(message.mentions[0].name))
+            raise CommandError('Not enough permissions to mute user : {}'.format(message.mentions[0].name))
+    else:
+        await client.send_message(message.channel, "Usage: ?mute @UserName")
 
 
 async def unmute(client: discord.Client, message: discord.Message):
@@ -343,14 +348,18 @@ async def unmute(client: discord.Client, message: discord.Message):
 
     if not muterole:
         raise CommandError('No Muted role created')
-    try:
-        await client.remove_roles(message.mentions[0], muterole)
-        await client.server_voice_state(message.mentions[0], mute=False)
-        await client.send_message(message.channel,
-                                  'User {} got unmuted by {}'.format(message.mentions[0], message.author))
-    except discord.Forbidden:
-        await client.send_message('Not enough permissions to unmute user {}'.format(message.mentions[0].name))
-        raise CommandError('Not enough permissions to unmute user : {}'.format(message.mentions[0].name))
+    if len(message.mentions) > 0:
+        try:
+            await client.remove_roles(message.mentions[0], muterole)
+            await client.server_voice_state(message.mentions[0], mute=False)
+            await client.send_message(message.channel,
+                                      'User {} got unmuted by {}'.format(message.mentions[0], message.author))
+        except discord.Forbidden:
+            await client.send_message('Not enough permissions to unmute user {}'.format(message.mentions[0].name))
+            raise CommandError('Not enough permissions to unmute user : {}'.format(message.mentions[0].name))
+    else:
+        await client.send_message(message.channel, "Usage: ?unmute @UserName")
+
 
 async def delete(client: discord.Client, message: discord.Message, count=None):
     if message.author.permissions_in(message.channel).manage_roles:
@@ -358,11 +367,13 @@ async def delete(client: discord.Client, message: discord.Message, count=None):
             count = int(' '.join(message.content.split(" ")[1:]))
         except ValueError('Invalid integer supplied!'):
             await client.send_message(message.channel, "This is not a number")
-        async for msg in client.logs_from(message.channel, count):
+        async for msg in client.logs_from(message.channel, count + 1):
             await client.delete_message(msg)
-        await client.send_message(message.channel, '{} messages delete by {}'.format(count, message.author))
+        if count == 1:
+            await client.send_message(message.channel, '**{} message deleted by {}**💣'.format(count, message.author))
+        else:
+            await client.send_message(message.channel, '**{} messages deleted by {}** 💣'.format(count, message.author))
     else:
         await client.send_message(message.channel,
                                   'Not enough permissions to use ?delete')
         raise CommandError('Not enough permissions to use ?delete')
-
