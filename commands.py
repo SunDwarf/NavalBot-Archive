@@ -351,3 +351,18 @@ async def unmute(client: discord.Client, message: discord.Message):
     except discord.Forbidden:
         await client.send_message('Not enough permissions to unmute user {}'.format(message.mentions[0].name))
         raise CommandError('Not enough permissions to unmute user : {}'.format(message.mentions[0].name))
+
+async def delete(client: discord.Client, message: discord.Message, count=None):
+    if message.author.permissions_in(message.channel).manage_roles:
+        try:
+            count = int(' '.join(message.content.split(" ")[1:]))
+        except ValueError('Invalid integer supplied!'):
+            await client.send_message(message.channel, "This is not a number")
+        async for msg in client.logs_from(message.channel, count):
+            await client.delete_message(msg)
+        await client.send_message(message.channel, '{} messages delete by {}'.format(count, message.author))
+    else:
+        await client.send_message(message.channel,
+                                  'Not enough permissions to use ?delete')
+        raise CommandError('Not enough permissions to use ?delete')
+
