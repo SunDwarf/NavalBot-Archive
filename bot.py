@@ -4,6 +4,9 @@ import re
 import sqlite3
 import sys
 import traceback
+
+from ctypes.util import find_library
+
 import cmds.ndc
 
 import aiohttp
@@ -16,14 +19,16 @@ from cmds import commands
 # Fuck off PyCharm
 import importlib
 
-
-
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
+importlib.import_module("cmds.voice")
 
 # =============== End commands
+
+# Load opus
+discord.opus.load_opus(find_library("opus"))
 
 # Create a client.
 client = Client()
