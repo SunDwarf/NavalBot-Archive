@@ -68,7 +68,7 @@ async def reddit(client: discord.Client, message: discord.Message):
 async def whois(client: discord.Client, message: discord.Message):
     try:
         await client.send_message(message.channel,
-                                  '**Name:** {}\n**ID:** {}\n**Created at:** {}\n**Avatar:** {}'.format(
+                                  '**Name:** {}\n**ID:** `{}`\n**Created at:** {}\n**Avatar:** {}'.format(
                                       message.mentions[0],
                                       message.mentions[0].id,
                                       message.mentions[0].created_at,
