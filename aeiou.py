@@ -11,7 +11,7 @@ client = Client()
 
 COMMAND_PREFIX = "?"
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Methods

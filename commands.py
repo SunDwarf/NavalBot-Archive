@@ -68,8 +68,8 @@ def read_version(data):
 
 async def version(client: discord.Client, message: discord.Message):
     await client.send_message(
-            message.channel,
-            "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
+        message.channel,
+        "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
             .format(aeiou.VERSION)
     )
     # Download the latest version
@@ -273,8 +273,9 @@ async def guess(client: discord.Client, message: discord.Message):
 
 
 async def commands(client: discord.Client, message: discord.Message):
-    com = ['-game', '-lock', '-guess', '-reddit', '-private', '-servers']
-    await client.send_message(message.channel, "These commands are available:\n{}".format('\n'.join(com)))
+    com = ['-lock', '-guess', '-reddit', '-private', '-servers', '-version', '-weather', '\n**Admins only:**',
+           '-game', '-kick', '-ban', '-unban', '-mute', '-unmute', '-delete']
+    await client.send_message(message.channel, "**These commands are available:**\n{}".format('\n'.join(com)))
 
 
 async def reddit(client: discord.Client, message: discord.Message):
