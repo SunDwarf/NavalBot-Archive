@@ -25,7 +25,12 @@ async def google(client: discord.Client, message: discord.Message):
 @cmds.command("weather")
 async def weather(client: discord.Client, message: discord.Message):
     api_key = util.get_config("owm_api_key")
-    owm = pyowm.OWM('9f74a3874a03fd3d9a30cdd64b652b5c')  # Example API-Key
+    if not api_key:
+        await client.send_message(message.channel, ":exclamation: You have not set the API key. Set it with `setcfg "
+                                                   "owm_api_key <your_api_key>`.")
+        return
+    api_key = api_key[0]
+    owm = pyowm.OWM(api_key)  # Example API-Key
     try:
         userinput = ' '.join(message.content.split(" ")[1:])
         # Get it from the place

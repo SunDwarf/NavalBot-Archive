@@ -19,6 +19,7 @@ def set_config(key: str, value: str):
     cursor.execute("INSERT OR REPLACE "
                    "INTO configuration (id, name, value)"
                    "VALUES ((SELECT id FROM factoids WHERE name = ?), ?, ?)", (key, key, value))
+    db.commit()
 
 
 def with_permission(*role: str):

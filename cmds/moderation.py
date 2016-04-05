@@ -1,3 +1,5 @@
+import shlex
+
 import discord
 import cmds
 from exceptions import CommandError
@@ -101,3 +103,35 @@ async def inv(client: discord.Client, message: discord.Message):
 
     await client.accept_invite(invite)
     await client.send_message(message.channel, "Joined server specified.")
+
+
+@cmds.command("setcfg")
+@util.with_permission("Admin")
+async def set_config(client: discord.Client, message: discord.Message):
+    # Split the content with shlex.
+    split = shlex.split(message.content)
+    if len(split) != 3:
+        await client.send_message(message.channel, ":x: Config set must be in `setcfg 'key' 'value'` format, "
+                                                   "with quotation marks surrounding the spaces")
+        return
+    # Get the config values
+    name, val = split[1:3]
+    # Set them.
+    util.set_config(name, val)
+    await client.send_message(message.channel, ":heavy_check_mark: Config updated: `{}` -> `{}`".format(name, val))
+
+
+@cmds.command("getcfg")
+@util.with_permission("Admin")
+async def set_config(client: discord.Client, message: discord.Message):
+    # Split the content with shlex.
+    split = shlex.split(message.content)
+    if len(split) != 2:
+        await client.send_message(message.channel, ":x: Config set must be in `getcfg 'key'` format, "
+                                                   "with quotation marks surrounding the spaces")
+        return
+
+    name = split[1]
+    # Get the value
+    val = util.get_config(name)
+    await client.send_message(message.channel, "`{}` -> `{}`".format(name, val))
