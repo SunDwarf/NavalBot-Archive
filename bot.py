@@ -33,23 +33,13 @@ discord.opus.load_opus(find_library("opus"))
 # Create a client.
 client = Client()
 
-# Define the command prefix.
-COMMAND_PREFIX = os.environ.get("NAVALBOT_CMD_PREFIX", "?")
-
-# Version information.
-VERSION = "1.3.0"
-VERSIONT = tuple(int(i) for i in VERSION.split("."))
-
-# Factoid matcher compiled
-factoid_matcher = re.compile(r'(.*?) is (.*)')
-
 # Get DB
 db = sqlite3.connect("navalbot.db")
 cursor = db.cursor()
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS factoids (
-  id INTEGER PRIMARY KEY, name VARCHAR, content VARCHAR, locked INTEGER, locker VARCHAR
+  id INTEGER PRIMARY KEY, name VARCHAR, content VARCHAR, locked INTEGER, locker VARCHAR, server VARCHAR
 );
 """)
 cursor.execute("""
@@ -59,6 +49,16 @@ CREATE TABLE IF NOT EXISTS configuration (
   value VARCHAR
 )
 """)
+
+# Define the command prefix.
+COMMAND_PREFIX = os.environ.get("NAVALBOT_CMD_PREFIX", "?")
+
+# Version information.
+VERSION = "1.3.0"
+VERSIONT = tuple(int(i) for i in VERSION.split("."))
+
+# Factoid matcher compiled
+factoid_matcher = re.compile(r'(.*?) is (.*)')
 
 loop = asyncio.get_event_loop()
 
@@ -209,9 +209,9 @@ async def default(client: discord.Client, message: discord.Message):
         # Check if it's a file
         if content.startswith("file:"):
             fname = content.split("file:")[1]
-            # if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
-            #    await client.send_message(message.channel, "This kills the bot")
-            #    return
+            if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
+                await client.send_message(message.channel, ":x: Unknown error: File {} does not exist".format(fname))
+                return
             # Load the file
             with open(os.path.join(os.getcwd(), 'files', fname), 'rb') as f:
                 await client.send_file(message.channel, f)
