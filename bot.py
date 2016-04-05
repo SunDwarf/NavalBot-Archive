@@ -7,6 +7,7 @@ from ctypes.util import find_library
 
 import aiohttp
 import discord
+import time
 from discord import Client
 
 import cmds.ndc

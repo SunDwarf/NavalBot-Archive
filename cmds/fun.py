@@ -1,3 +1,7 @@
+import datetime
+import math
+import os
+
 import discord
 import pyowm
 from google import search
@@ -84,3 +88,12 @@ async def whois(client: discord.Client, message: discord.Message):
                                       ))
     except IndexError:
         await client.send_message(message.channel, "Usage: ?whois @UserName")
+
+
+@cmds.command("uptime")
+async def uptime(client: discord.Client, message: discord.Message):
+    upt = datetime.datetime.now() - util.startup
+    s = upt.total_seconds()
+    formatted = util.format_timedelta(s, "`{hours_total} hours, {minutes} minutes, {seconds} seconds`")
+    await client.send_message(message.channel, "Bot has been running for {} since startup of process `#{}`"
+                              .format(formatted, os.getpid()))
