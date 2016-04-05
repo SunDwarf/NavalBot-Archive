@@ -62,3 +62,17 @@ async def reddit(client: discord.Client, message: discord.Message):
                 await client.send_message(message.author, content=link)
     except TypeError as f:
         print('[ERROR]', f)
+
+
+@cmds.command("whois")
+async def whois(client: discord.Client, message: discord.Message):
+    try:
+        await client.send_message(message.channel,
+                                  '**Name:** {}\n**ID:** {}\n**Created at:** {}\n**Avatar:** {}'.format(
+                                      message.mentions[0],
+                                      message.mentions[0].id,
+                                      message.mentions[0].created_at,
+                                      message.mentions[0].avatar_url,
+                                      ))
+    except IndexError:
+        await client.send_message(message.channel, "Usage: ?whois @UserName")

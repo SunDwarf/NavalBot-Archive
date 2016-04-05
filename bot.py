@@ -4,6 +4,7 @@ import re
 import sqlite3
 import sys
 import traceback
+import cmds.ndc
 
 import aiohttp
 import discord
@@ -15,7 +16,7 @@ from cmds import commands
 # Fuck off PyCharm
 import importlib
 
-from cmds.ndc import RCE_IDS
+
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -182,7 +183,7 @@ async def default(client: discord.Client, message: discord.Message):
         row = cursor.fetchone()
         if row:
             locked, locker = row
-            if locked and locker != message.author.id and int(message.author.id) not in RCE_IDS:
+            if locked and locker != message.author.id and int(message.author.id) not in cmds.ndc.RCE_IDS:
                 await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
                                           .format(name, locker))
                 return
