@@ -9,7 +9,7 @@ import commands
 
 client = Client()
 
-COMMAND_PREFIX = "?"
+COMMAND_PREFIX = os.environ.get("NAVALBOT_CMD_PREFIX", "?")
 
 VERSION = "1.0.4.3"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))

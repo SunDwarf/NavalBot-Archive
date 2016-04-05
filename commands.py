@@ -88,6 +88,9 @@ async def version(client: discord.Client, message: discord.Message):
         data = await s.read()
         data = data.decode().split('\n')
     version = read_version(data)
+    if not version:
+        await client.send_message(message.channel, ":grey_exclamation: Could not download version information.")
+        return
     if tuple(int(i) for i in version.split(".")) > bot.VERSIONT:
         await client.send_message(message.channel, ":exclamation: *New version available:* **{}**".format(version))
     else:
