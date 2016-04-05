@@ -32,7 +32,7 @@ client = Client()
 COMMAND_PREFIX = os.environ.get("NAVALBOT_CMD_PREFIX", "?")
 
 # Version information.
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
