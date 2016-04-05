@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 COMMAND_PREFIX = os.environ.get("NAVALBOT_CMD_PREFIX", "?")
 
 # Version information.
-VERSION = "1.3.0"
+VERSION = "1.3.1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
