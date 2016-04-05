@@ -11,7 +11,7 @@ import pyowm
 from google import search
 from valve.source import a2s
 
-import aeiou
+import bot
 import nsfw
 import red
 from exceptions import CommandError
@@ -70,16 +70,16 @@ async def version(client: discord.Client, message: discord.Message):
     await client.send_message(
         message.channel,
         "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-            .format(aeiou.VERSION)
+            .format(bot.VERSION)
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
-        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/master/aeiou.py")
+        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/master/bot.py")
         assert isinstance(s, aiohttp.ClientResponse)
         data = await s.read()
         data = data.decode().split('\n')
     version = read_version(data)
-    if tuple(int(i) for i in version.split(".")) > aeiou.VERSIONT:
+    if tuple(int(i) for i in version.split(".")) > bot.VERSIONT:
         await client.send_message(message.channel, ":exclamation: *New version available:* **{}**".format(version))
     else:
         await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
