@@ -56,6 +56,7 @@ async def py(client: discord.Client, message: discord.Message):
         exec(cmd)
 
 
+@cmds.command("servers")
 async def servers(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "**Servers:**")
     for num, serv in enumerate(SERVERS):

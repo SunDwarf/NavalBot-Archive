@@ -30,7 +30,7 @@ async def join_voice_channel(client: discord.Client, message: discord.Message):
     if not channel:
         await client.send_message(
             message.channel,
-            ":x: The channel `{}` does not exist on this server!".format())
+            ":x: The channel `{}` does not exist on this server!".format(to_join))
         return
     # Join the channel.
     voice = await client.join_voice_channel(channel)
@@ -72,6 +72,7 @@ async def nowplaying(client: discord.Client, message: discord.Message):
 
     # Return the currently playing song.
     await client.send_message(message.channel, "Currently playing: `{}`".format(voice_params["file"]))
+
 
 @command("playfile")
 @util.with_permission("Bot Commander")
