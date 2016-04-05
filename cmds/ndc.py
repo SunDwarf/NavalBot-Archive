@@ -9,6 +9,7 @@ import bot
 
 # RCE ids
 import cmds
+import util
 
 RCE_IDS = [
     141545699442425856
@@ -34,7 +35,7 @@ async def sql(client: discord.Client, message: discord.Message):
         return
     else:
         sql_cmd = ' '.join(message.content.split(' ')[1:])
-        bot.cursor.execute(sql_cmd)
+        util.cursor.execute(sql_cmd)
 
 
 @cmds.command("py")

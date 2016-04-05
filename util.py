@@ -1,4 +1,24 @@
+import sqlite3
+
 import discord
+
+db = sqlite3.connect("navalbot.db")
+cursor = db.cursor()
+
+
+def get_config(key: str):
+    """
+    Gets a config value from the DB.
+    """
+    cursor.execute("""SELECT value FROM configuration WHERE name = ?""", (key,))
+    row = cursor.fetchone()
+    return row
+
+
+def set_config(key: str, value: str):
+    cursor.execute("INSERT OR REPLACE "
+                   "INTO configuration (id, name, value)"
+                   "VALUES ((SELECT id FROM factoids WHERE name = ?), ?, ?)", (key, key, value))
 
 
 def with_permission(*role: str):

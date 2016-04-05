@@ -2,6 +2,7 @@ import discord
 
 import bot
 import cmds
+import util
 
 
 @cmds.command("game")
@@ -14,9 +15,9 @@ async def game(client: discord.Client, message: discord.Message):
         await client.change_status(game=discord.Game(name=game))
         await client.send_message(message.channel, "Changed game to `{}`".format(game))
         # save it in the DB
-        bot.cursor.execute("""INSERT OR REPLACE INTO configuration (id, name, value)
+        util.cursor.execute("""INSERT OR REPLACE INTO configuration (id, name, value)
                       VALUES ((SELECT id FROM configuration WHERE name = 'game'), 'game', ?)""", (game,))
-        bot.db.commit()
+        util.db.commit()
 
     else:
         await client.send_message(message.channel,
@@ -28,8 +29,8 @@ async def lock(client: discord.Client, message: discord.Message):
     # get factoid
     fac = message.content.split(' ')[1]
     # check if it's locked
-    bot.cursor.execute("SELECT locked, locker FROM factoids WHERE name = ?", (fac,))
-    row = bot.cursor.fetchone()
+    util.cursor.execute("SELECT locked, locker FROM factoids WHERE name = ?", (fac,))
+    row = util.cursor.fetchone()
     if row:
         if row[0] and row[1] != message.author.id:
             await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
@@ -39,8 +40,8 @@ async def lock(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, "Factoid `{}` does not exist".format(fac))
         return
     # Update factoid to be locked
-    bot.cursor.execute("""UPDATE factoids SET locked = 1, locker = ? WHERE name = ?""",
-                       (str(message.author.id), fac))
-    bot.db.commit()
+    util.cursor.execute("""UPDATE factoids SET locked = 1, locker = ? WHERE name = ?""",
+                        (str(message.author.id), fac))
+    util.db.commit()
     await client.send_message(message.channel, "Factoid `{}` locked to ID `{}` ({})".format(fac, message.author.id,
                                                                                             message.author.name))

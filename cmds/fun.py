@@ -6,6 +6,8 @@ import cmds
 import nsfw
 import red
 
+import util
+
 
 @cmds.command("private")
 async def private(client: discord.Client, message: discord.Message):
@@ -22,6 +24,7 @@ async def google(client: discord.Client, message: discord.Message):
 
 @cmds.command("weather")
 async def weather(client: discord.Client, message: discord.Message):
+    api_key = util.get_config("owm_api_key")
     owm = pyowm.OWM('9f74a3874a03fd3d9a30cdd64b652b5c')  # Example API-Key
     try:
         userinput = ' '.join(message.content.split(" ")[1:])

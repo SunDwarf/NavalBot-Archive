@@ -1,23 +1,22 @@
 import asyncio
 import os
 import re
-import sqlite3
 import sys
 import traceback
-
 from ctypes.util import find_library
-
-import cmds.ndc
 
 import aiohttp
 import discord
 from discord import Client
 
+import cmds.ndc
 # =============== Commands
 import cmds
 from cmds import commands
 # Fuck off PyCharm
 import importlib
+
+from util import db, cursor
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -34,8 +33,6 @@ discord.opus.load_opus(find_library("opus"))
 client = Client()
 
 # Get DB
-db = sqlite3.connect("navalbot.db")
-cursor = db.cursor()
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS factoids (
