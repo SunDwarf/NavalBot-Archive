@@ -7,15 +7,26 @@ import util
 
 from cmds import command
 
-voice_channel = []
-voice_params = {"playing": False, "player": None, "file": ""}
+voice_params = {"playing": False, "player": None, "file": "", "in_server": None}
 
 
 @command("joinvoice")
 @util.with_permission("Bot Commander")
 async def join_voice_channel(client: discord.Client, message: discord.Message):
     if client.is_voice_connected():
-        await voice_channel.pop().disconnect()
+        assert isinstance(message.server, discord.Server)
+        if message.server.id == voice_params["in_server"]:
+            await client.voice.disconnect()
+            if voice_params["playing"]:
+                # Get the player.
+                player = voice_params["player"]
+                assert isinstance(player, StreamPlayer)
+                # Stop it.
+                player.stop()
+                voice_params["playing"] = False
+        else:
+            await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
+            return
     # Get the server.
     server = message.server
     # Get the voice channel.
@@ -24,7 +35,7 @@ async def join_voice_channel(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, ":x: You must provide a channel!")
         return
     else:
-        to_join = split[1]
+        to_join = ' '.join(split[1:])
     # Try and find the voice channel.
     channel = discord.utils.get(server.channels, name=to_join, type=discord.ChannelType.voice)
     if not channel:
@@ -33,8 +44,9 @@ async def join_voice_channel(client: discord.Client, message: discord.Message):
             ":x: The channel `{}` does not exist on this server!".format(to_join))
         return
     # Join the channel.
-    voice = await client.join_voice_channel(channel)
-    voice_channel.append(voice)
+    await client.join_voice_channel(channel)
+    # Set the server ID.
+    voice_params["in_server"] = message.server.id
     await client.send_message(message.channel, ":heavy_check_mark: Joined voice channel!")
 
 
@@ -44,7 +56,13 @@ async def leave_voice_channels(client: discord.Client, message: discord.Message)
     if not client.is_voice_connected():
         await client.send_message(message.channel, ":x: I am not in voice currently!")
     else:
-        await voice_channel.pop().disconnect()
+        assert isinstance(message.server, discord.Server)
+        if message.server.id == voice_params["in_server"]:
+            await client.voice.disconnect()
+            voice_params["in_server"] = None
+        else:
+            await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
+            return
         if voice_params["playing"]:
             # Get the player.
             player = voice_params["player"]
@@ -80,8 +98,14 @@ async def play_file(client: discord.Client, message: discord.Message):
     if not client.is_voice_connected():
         await client.send_message(message.channel, ":x: I am not in voice currently!")
         return
+
+    assert isinstance(message.server, discord.Server)
+    if message.server.id != voice_params["in_server"]:
+        await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
+        return
+
     # Get the voice client.
-    voice_client = voice_channel[0]
+    voice_client = client.voice
     assert isinstance(voice_client, VoiceClient)
     # Check if we're playing something
     if voice_params["playing"]:
@@ -108,3 +132,49 @@ async def play_file(client: discord.Client, message: discord.Message):
     voice_params["playing"] = True
     voice_params["file"] = fname
     await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(fname))
+
+
+@command("playyt")
+@command("playyoutube")
+async def play_youtube(client: discord.Client, message: discord.Message):
+    # Standard checks.
+    if not client.is_voice_connected():
+        await client.send_message(message.channel, ":x: I am not in voice currently!")
+        return
+
+    assert isinstance(message.server, discord.Server)
+    if message.server.id != voice_params["in_server"]:
+        await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
+        return
+
+    # Get the voice client.
+    voice_client = client.voice
+    assert isinstance(voice_client, VoiceClient)
+    # Check if we're playing something
+    if voice_params["playing"]:
+        # Get the player.
+        player = voice_params["player"]
+        assert isinstance(player, StreamPlayer)
+        # Stop it.
+        player.stop()
+        voice_params["playing"] = False
+
+    # Get the video
+    split = message.content.split(" ")
+    if len(split) < 2:
+        await client.send_message(message.channel, ":x: You must pass a video!")
+        return
+
+    vidname = split[1]
+    if 'youtube' not in vidname or 'watch?v=' not in vidname:
+        await client.send_message(message.channel, ":x: Video must be a valid YT video.")
+        return
+
+    # Do the same as play_file, but with a youtube streamer.
+    # Play it via ffmpeg.
+    player = await voice_client.create_ytdl_player(url=vidname)
+    player.start()
+    voice_params["player"] = player
+    voice_params["playing"] = True
+    voice_params["file"] = player.title
+    await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(player.title))
