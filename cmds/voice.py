@@ -36,7 +36,7 @@ async def join_voice_channel(client: discord.Client, message: discord.Message):
 @command("leavevoice")
 @util.with_permission("Bot Commander")
 async def leave_voice_channels(client: discord.Client, message: discord.Message):
-    if not client.is_voice_connected:
+    if not client.is_voice_connected():
         await client.send_message(message.channel, ":no_entry: I am not in voice currently!")
     else:
         await voice_channel.pop().disconnect()
