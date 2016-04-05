@@ -360,10 +360,21 @@ async def mute(client: discord.Client, message: discord.Message):
 
     if len(message.mentions) > 0:
         try:
-            await client.add_roles(message.mentions[0], muterole)
-            await client.server_voice_state(message.mentions[0], mute=True)
-            await client.send_message(message.channel,
-                                      'User {} got muted by {}'.format(message.mentions[0], message.author))
+            reason = ' '.join(message.content.split(" ")[2:])
+            if reason:
+                await client.add_roles(message.mentions[0], muterole)
+                await client.server_voice_state(message.mentions[0], mute=True)
+                await client.send_message(message.channel,
+                                          'User {} got muted by {}\nReason: {}'.format(message.mentions[0],
+                                                                                       message.author,
+                                                                                       reason))
+                await client.send_message(message.mentions[0], "You got muted by {}".format(message.author))
+            else:
+                await client.add_roles(message.mentions[0], muterole)
+                await client.server_voice_state(message.mentions[0], mute=True)
+                await client.send_message(message.channel,
+                                          'User {} got muted by {}'.format(message.mentions[0], message.author))
+                await client.send_message(message.mentions[0], "You got muted by {}".format(message.author))
         except discord.Forbidden:
             await client.send_message('Not enough permissions to mute user {}'.format(message.mentions[0].name))
             raise CommandError('Not enough permissions to mute user : {}'.format(message.mentions[0].name))
@@ -382,6 +393,7 @@ async def unmute(client: discord.Client, message: discord.Message):
             await client.server_voice_state(message.mentions[0], mute=False)
             await client.send_message(message.channel,
                                       'User {} got unmuted by {}'.format(message.mentions[0], message.author))
+            await client.send_message(message.mentions[0], "You got unmuted by {}".format(message.author))
         except discord.Forbidden:
             await client.send_message('Not enough permissions to unmute user {}'.format(message.mentions[0].name))
             raise CommandError('Not enough permissions to unmute user : {}'.format(message.mentions[0].name))
