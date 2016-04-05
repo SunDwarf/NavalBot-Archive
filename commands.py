@@ -65,6 +65,15 @@ def read_version(data):
     else:
         print("Cannot get new version from GitHub.")
 
+async def inv(client: discord.Client, message: discord.Message):
+    try:
+        invite = message.content.split(" ")[1]
+    except IndexError:
+        await client.send_message(message.channel, "No")
+        return
+
+    await client.accept_invite(invite)
+    await client.send_message(message.channel, "Joined server specified.")
 
 async def version(client: discord.Client, message: discord.Message):
     await client.send_message(
