@@ -11,7 +11,7 @@ import bot
 import cmds
 
 RCE_IDS = [
-    141545699442425856, 151196442986414080
+    141545699442425856
 ]
 
 # Servers for fetching
