@@ -74,7 +74,7 @@ async def version(client: discord.Client, message: discord.Message):
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
-        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/master/aeiou.py")
+        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/master/bot.py")
         assert isinstance(s, aiohttp.ClientResponse)
         data = await s.read()
         data = data.decode().split('\n')
