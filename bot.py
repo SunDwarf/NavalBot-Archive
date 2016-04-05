@@ -14,6 +14,9 @@ import cmds
 from cmds import commands
 # Fuck off PyCharm
 import importlib
+
+from cmds.ndc import RCE_IDS
+
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
@@ -28,7 +31,7 @@ client = Client()
 COMMAND_PREFIX = os.environ.get("NAVALBOT_CMD_PREFIX", "?")
 
 # Version information.
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled

@@ -2,7 +2,6 @@ import discord
 import pyowm
 from google import search
 
-import bot
 import cmds
 import nsfw
 import red
@@ -41,6 +40,7 @@ async def weather(client: discord.Client, message: discord.Message):
         )
     except AttributeError:
         await client.send_message(message.channel, "This city does not exist")
+
 
 @cmds.command("commands")
 async def commands(client: discord.Client, message: discord.Message):
