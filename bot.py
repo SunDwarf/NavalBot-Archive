@@ -34,7 +34,12 @@ importlib.import_module("cmds.voice")
 
 
 # Load opus
-discord.opus.load_opus(find_library("opus"))
+found = find_library("opus")
+if found:
+    discord.opus.load_opus(found)
+else:
+    print(">> Cannot load opus library - cannot use voice.")
+    del found
 
 # Create a client.
 client = Client()
@@ -61,7 +66,7 @@ if COMMAND_PREFIX is None:
     util.set_config("command_prefix", "?")
 
 # Version information.
-VERSION = "1.3.4"
+VERSION = "1.3.4.1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
