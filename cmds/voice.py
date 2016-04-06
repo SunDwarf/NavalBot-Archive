@@ -13,6 +13,10 @@ voice_params = {"playing": False, "player": None, "file": "", "in_server": None}
 @command("joinvoice")
 @util.with_permission("Bot Commander")
 async def join_voice_channel(client: discord.Client, message: discord.Message):
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
     if client.is_voice_connected():
         assert isinstance(message.server, discord.Server)
         if message.server.id == voice_params["in_server"]:
@@ -53,6 +57,10 @@ async def join_voice_channel(client: discord.Client, message: discord.Message):
 @command("leavevoice")
 @util.with_permission("Bot Commander")
 async def leave_voice_channels(client: discord.Client, message: discord.Message):
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
     if not client.is_voice_connected():
         await client.send_message(message.channel, ":x: I am not in voice currently!")
     else:
@@ -75,6 +83,10 @@ async def leave_voice_channels(client: discord.Client, message: discord.Message)
 @command("nowplaying")
 @command("np")
 async def nowplaying(client: discord.Client, message: discord.Message):
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
     if not client.is_voice_connected():
         await client.send_message(message.channel, ":x: I am not in voice currently!")
         return
@@ -95,6 +107,10 @@ async def nowplaying(client: discord.Client, message: discord.Message):
 @command("playfile")
 @util.with_permission("Bot Commander")
 async def play_file(client: discord.Client, message: discord.Message):
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
     if not client.is_voice_connected():
         await client.send_message(message.channel, ":x: I am not in voice currently!")
         return
@@ -137,6 +153,10 @@ async def play_file(client: discord.Client, message: discord.Message):
 @command("playyt")
 @command("playyoutube")
 async def play_youtube(client: discord.Client, message: discord.Message):
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
     # Standard checks.
     if not client.is_voice_connected():
         await client.send_message(message.channel, ":x: I am not in voice currently!")
