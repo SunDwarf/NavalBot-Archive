@@ -106,7 +106,8 @@ async def nowplaying(client: discord.Client, message: discord.Message):
 
 @command("playfile")
 @util.with_permission("Bot Commander")
-async def play_file(client: discord.Client, message: discord.Message):
+@util.enforce_args(1, ":x: You must pass a file parameter!")
+async def play_file(client: discord.Client, message: discord.Message, args: list):
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
@@ -131,12 +132,7 @@ async def play_file(client: discord.Client, message: discord.Message):
         # Stop it.
         player.stop()
         voice_params["playing"] = False
-    # Get the filename.
-    split = message.content.split(" ")
-    if len(split) < 2:
-        await client.send_message(message.channel, ":x: You must pass a file parameter!")
-        return
-    fname = ' '.join(split[1:])
+    fname = ' '.join(args[1:])
     # Check to see if the file exists.
     if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
         await client.send_message(message.channel, ":x: That file does not exist!")

@@ -105,6 +105,8 @@ def enforce_args(count: int, error_msg: str = None):
     if not error_msg:
         error_msg = (":x: Not enough arguments provided! You must provide at least `{}` args! "
                      "You can have spaces in these arguments by surrounding them in `\"\"`.".format(count))
+    else:
+        error_msg = error_msg.format(max_count=count)
 
     def __decorator(func):
         async def __fake_enforcing_func(client: discord.Client, message: discord.Message):
