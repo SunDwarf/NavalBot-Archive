@@ -227,7 +227,9 @@ async def default(client: discord.Client, message: discord.Message):
             client.loop.create_task(get_file((client, message), url=fac, name=file))
             fac = "file:{}".format(file)
         # check if locked
-        cursor.execute("SELECT locked, locker FROM factoids WHERE factoids.name = ?", (name,))
+        cursor.execute("SELECT locked, locker FROM factoids "
+                       "WHERE factoids.name = ?"
+                       "AND factoids.server = ?", (name, message.server.id))
         row = cursor.fetchone()
         if row:
             locked, locker = row
@@ -236,13 +238,16 @@ async def default(client: discord.Client, message: discord.Message):
                                           .format(name, locker))
                 return
         cursor.execute("INSERT OR REPLACE "
-                       "INTO factoids (id, name, content) "
-                       "VALUES ((SELECT id FROM factoids WHERE name = ?), ?, ?)", (name, name, fac))
+                       "INTO factoids (id, name, content, server) "
+                       "VALUES ((SELECT id FROM factoids WHERE name = ?), ?, ?, ?)", (name, name, fac,
+                                                                                      message.server.id))
         db.commit()
         await client.send_message(message.channel, "Factoid `{}` is now `{}`".format(name, fac))
     else:
         # Get factoid
-        cursor.execute("SELECT (content) FROM factoids WHERE factoids.name = ?", (data,))
+        cursor.execute("SELECT (content) FROM factoids "
+                       "WHERE factoids.name = ?"
+                       "AND factoids.server = ?", (data, message.server.id))
         rows = cursor.fetchone()
         if not rows:
             return
