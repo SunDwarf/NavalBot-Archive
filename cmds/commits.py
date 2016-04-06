@@ -78,6 +78,6 @@ async def check_for_commits(client: discord.Client):
                     # Create a message.
                     await client.send_message(
                         chan,
-                        "**{data[sha][0:10]}**: {data[commit][message]}\n".format(data=commit) +
+                        "**{sha}**: {data[commit][message]}\n".format(data=commit, sha=commit['sha'][0:10]) +
                         "by *{data[commit][committer][name]".format(data=commit)
                     )
