@@ -132,7 +132,7 @@ async def play_file(client: discord.Client, message: discord.Message, args: list
         # Stop it.
         player.stop()
         voice_params["playing"] = False
-    fname = ' '.join(args[1:])
+    fname = ' '.join(args[0:])
     # Check to see if the file exists.
     if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
         await client.send_message(message.channel, ":x: That file does not exist!")
@@ -176,7 +176,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         player.stop()
         voice_params["playing"] = False
 
-    vidname = args[1]
+    vidname = args[0]
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
     player = await voice_client.create_ytdl_player(url=vidname)
