@@ -98,10 +98,13 @@ def with_permission(*role: str):
     return __decorator
 
 
-def enforce_args(count: int):
+def enforce_args(count: int, error_msg: str = None):
     """
     Ensure a command has been passed a certain amount of arguments.
     """
+    if not error_msg:
+        error_msg = (":x: Not enough arguments provided! You must provide at least `{}` args! "
+                     "You can have spaces in these arguments by surrounding them in `\"\"`.".format(count))
 
     def __decorator(func):
         async def __fake_enforcing_func(client: discord.Client, message: discord.Message):
@@ -112,8 +115,8 @@ def enforce_args(count: int):
             if len(split) < count:
                 await client.send_message(
                     message.channel,
-                    ":x: Not enough arguments provided! You must provide at least `{}` args! "
-                    "You can have spaces in these arguments by surrounding them in `\"\"`.".format(count))
+                    error_msg
+                )
                 return
             else:
                 # Await the function.
