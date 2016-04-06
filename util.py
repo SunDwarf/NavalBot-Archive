@@ -93,9 +93,11 @@ def get_config(server_id: str, key: str, default=None) -> str:
 
 
 def set_config(server_id: str, key: str, value: str):
-    cursor.execute("INSERT OR REPLACE "
-                   "INTO configuration (id, name, value)"
-                   "VALUES ((SELECT id FROM configuration WHERE name = ?), ?, ?)", (key, key, value))
+    cursor.execute("""INSERT OR REPLACE
+                   INTO configuration (id, name, value, server)
+                   VALUES (
+                   (SELECT id FROM configuration WHERE name = ? AND server = ?),
+                   ?, ?, ?)""", (key, server_id, key, value, server_id))
     db.commit()
 
 

@@ -232,10 +232,11 @@ async def default(client: discord.Client, message: discord.Message):
                 await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
                                           .format(name, locker))
                 return
-        cursor.execute("INSERT OR REPLACE "
-                       "INTO factoids (id, name, content, server) "
-                       "VALUES ((SELECT id FROM factoids WHERE name = ?), ?, ?, ?)", (name, name, fac,
-                                                                                      message.server.id))
+        cursor.execute("""INSERT OR REPLACE
+                       INTO factoids (id, name, content, server)
+                       VALUES (
+                       (SELECT id FROM factoids WHERE name = ? AND server = ?),
+                       ?, ?, ?)""", (name, message.server.id, name, fac, message.server.id))
         db.commit()
         await client.send_message(message.channel, "Factoid `{}` is now `{}`".format(name, fac))
     else:
