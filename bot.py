@@ -28,7 +28,7 @@ importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
 importlib.import_module("cmds.voice")
-importlib.import_module("cmds.commits")
+commits = importlib.import_module("cmds.commits")
 
 # =============== End commands
 
@@ -96,6 +96,9 @@ async def on_ready():
     else:
         game = result[0]
         await client.change_status(game=discord.Game(name=game))
+    # boot up the github handler
+    loop.create_task(commits.check_for_commits(client))
+
 
 
 @client.event

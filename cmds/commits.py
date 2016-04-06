@@ -10,6 +10,7 @@ async def check_for_commits(client: discord.Client):
     """
     This isn't decorated with a command, as it runs within a loop.
     """
+    print("==> Loaded CommitBot.")
     # First, check to see if we're enabled.
     gh_enabled = util.get_config("github_enabled", 0)
     if not int(gh_enabled):
@@ -26,8 +27,6 @@ async def check_for_commits(client: discord.Client):
     if not chan_id:
         print("==> Cannot resolve channel for CommitBot.")
         return
-    else:
-        chan_id = int(chan_id)
 
     # Find the channel.
     for server in client.servers:
@@ -35,6 +34,7 @@ async def check_for_commits(client: discord.Client):
         # Find the channel specified by the ID.
         chan = server.get_channel(chan_id)
         if chan:
+            print("==> CommitBot got channel: {}".format(chan.name))
             break
     else:
         print("==> Cannot resolve channel for CommitBot. (could not find the channel with id {})".format(chan_id))
@@ -50,10 +50,11 @@ async def check_for_commits(client: discord.Client):
 
     # Define the custom authorization header.
     headers = {"Authorization": "token {}".format(token),
-               "User-Agent": "NavalBot Commit Module v1.0 Arbitrary Number"}
+               "User-Agent": "NavalBot Commit Module v1.0 Arbitrary Number",
+               "Time-Zone": "Etc/UTC"}  # Force the UTC time zone.
 
     # Define the last time.
-    last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+    last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # Enter the client session.
     with session:
@@ -67,3 +68,15 @@ async def check_for_commits(client: discord.Client):
                 last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
                 # Next, JSON decode the body.
                 body = await r.json()
+                if len(body) == 0:
+                    continue
+                # Create the head of a message
+                await client.send_message(chan, "**{} new commits to** *{}*:\n".format(len(body), repo))
+                # Loop over the commits.
+                for commit in body:
+                    # Create a message.
+                    await client.send_message(
+                        chan,
+                        "**{data['sha'][0:10]}**: {data['commit']['message']}\n".format(commit) +
+                        "by *{data['commit']['committer']['name']".format(commit)
+                    )
