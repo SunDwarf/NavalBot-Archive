@@ -1,5 +1,6 @@
 import datetime
 import os
+import random
 
 import discord
 import pyowm
@@ -10,6 +11,13 @@ import nsfw
 import red
 import util
 
+
+@cmds.command("choice")
+@util.enforce_args(2)
+async def choice(client: discord.Client, message: discord.Message, args: list):
+    # Choose a random argument from the list.
+    chosen = random.choice(args)
+    await client.send_message(message.channel, "My choice was: `{}`".format(chosen))
 
 @cmds.command("info")
 async def info(client: discord.Client, message: discord.Message):
@@ -83,7 +91,7 @@ async def whois(client: discord.Client, message: discord.Message):
                                       message.mentions[0].id,
                                       message.mentions[0].created_at,
                                       message.mentions[0].avatar_url,
-                                      ))
+                                  ))
     except IndexError:
         await client.send_message(message.channel, "Usage: ?whois @UserName")
 

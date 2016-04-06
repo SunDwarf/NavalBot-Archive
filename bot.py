@@ -100,7 +100,6 @@ async def on_ready():
     loop.create_task(commits.check_for_commits(client))
 
 
-
 @client.event
 async def on_message(message: discord.Message):
     print("-> Recieved message:", message.content, "from", message.author.name)

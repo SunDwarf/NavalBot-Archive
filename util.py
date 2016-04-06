@@ -1,3 +1,4 @@
+import shlex
 import sqlite3
 import datetime
 import time
@@ -97,6 +98,32 @@ def with_permission(*role: str):
     return __decorator
 
 
+def enforce_args(count: int):
+    """
+    Ensure a command has been passed a certain amount of arguments.
+    """
+
+    def __decorator(func):
+        async def __fake_enforcing_func(client: discord.Client, message: discord.Message):
+            # Check the number of args.
+            split = shlex.split(message.content)
+            # Remove the `command` from the front.
+            split.pop(0)
+            if len(split) < count:
+                await client.send_message(
+                    message.channel,
+                    ":x: Not enough arguments provided! You must provide at least `{}` args! "
+                    "You can have spaces in these arguments by surrounding them in `\"\"`.".format(count))
+                return
+            else:
+                # Await the function.
+                await func(client, message, split)
+
+        return __fake_enforcing_func
+
+    return __decorator
+
+
 def only(ids):
     """
     Only allows a specific set of IDs to run the command.
@@ -116,4 +143,5 @@ def only(ids):
                                           ":no_entry: This command is restricted to bot owners!")
 
         return __fake_permission_func
+
     return __decorator
