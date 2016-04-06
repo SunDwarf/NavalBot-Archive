@@ -65,11 +65,12 @@ async def check_for_commits(client: discord.Client):
                                    headers=headers, params={"since": last_time}) as r:
                 # Save the last access time.
                 assert isinstance(r, aiohttp.ClientResponse)
-                last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
                 # Next, JSON decode the body.
                 body = await r.json()
-                #if len(body) == 0:
-                #    continue
+                if len(body) == 0:
+                    continue
+                else:
+                    last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
                 # Create the head of a message
                 await client.send_message(chan, "**{} new commits to** *{}*:\n".format(len(body), repo))
                 # Loop over the commits.
