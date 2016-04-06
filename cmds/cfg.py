@@ -22,8 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import shlex
 
+import asyncio
 import discord
 
+import bot
 import cmds
 import util
 
@@ -100,3 +102,44 @@ async def get_config(client: discord.Client, message: discord.Message):
     # Get the value
     val = util.get_config(message.server.id, name)
     await client.send_message(message.channel, "`{}` -> `{}`".format(name, val))
+
+
+async def get_stdout_and_return_code(cmd: str):
+    proc = await asyncio.create_subprocess_exec(*cmd.split())
+    stdout, stderr = await proc.communicate()
+    return stdout, stderr, proc.returncode
+
+
+@cmds.command("update")
+@util.only(bot.RCE_IDS)
+async def update(client: discord.Client, message: discord.Message):
+    await client.send_message(message.channel, "First, fetching the new data from GitHub.")
+    stdout, stderr, ret = await get_stdout_and_return_code("git fetch")
+    if ret != 0:
+        await client.send_message(message.channel, "Command failed!\n```\nstdout:\n\n{}\nstderr:\n\n{}".format(
+            stdout, stderr
+        ))
+        return
+    await client.send_message(message.channel, "Stashing your changes.")
+    stdout, stderr, ret = await get_stdout_and_return_code("git stash")
+    if ret != 0:
+        await client.send_message(message.channel, "Command failed!\n```\nstdout:\n\n{}\nstderr:\n\n{}".format(
+            stdout, stderr
+        ))
+        return
+    await client.send_message(message.channel, "Resetting to origin.")
+    stdout, stderr, ret = await get_stdout_and_return_code("git reset origin/stable")
+    if ret != 0:
+        await client.send_message(message.channel, "Command failed!\n```\nstdout:\n\n{}\nstderr:\n\n{}".format(
+            stdout, stderr
+        ))
+        return
+    await client.send_message(message.channel, "Unstashing your changes.")
+    stdout, stderr, ret = await get_stdout_and_return_code("git stash apply")
+    if ret != 0:
+        await client.send_message(message.channel, "Command failed!\n```\nstdout:\n\n{}\nstderr:\n\n{}".format(
+            stdout, stderr
+        ))
+        return
+    tdout, stderr, ret = await get_stdout_and_return_code("git rev-parse HEAD")
+    await client.send_message(message.channel, "Done! Navalbot is now at revision {}.".format(tdout))
