@@ -68,8 +68,8 @@ async def check_for_commits(client: discord.Client):
                 last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
                 # Next, JSON decode the body.
                 body = await r.json()
-                if len(body) == 0:
-                    continue
+                #if len(body) == 0:
+                #    continue
                 # Create the head of a message
                 await client.send_message(chan, "**{} new commits to** *{}*:\n".format(len(body), repo))
                 # Loop over the commits.
