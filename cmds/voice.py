@@ -148,7 +148,8 @@ async def play_file(client: discord.Client, message: discord.Message, args: list
 
 @command("playyt")
 @command("playyoutube")
-async def play_youtube(client: discord.Client, message: discord.Message):
+@util.enforce_args(1, ":x: You must pass a video!")
+async def play_youtube(client: discord.Client, message: discord.Message, args: list):
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
@@ -175,17 +176,7 @@ async def play_youtube(client: discord.Client, message: discord.Message):
         player.stop()
         voice_params["playing"] = False
 
-    # Get the video
-    split = message.content.split(" ")
-    if len(split) < 2:
-        await client.send_message(message.channel, ":x: You must pass a video!")
-        return
-
-    vidname = split[1]
-    if 'youtube' not in vidname or 'watch?v=' not in vidname:
-        await client.send_message(message.channel, ":x: Video must be a valid YT video.")
-        return
-
+    vidname = args[1]
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
     player = await voice_client.create_ytdl_player(url=vidname)
