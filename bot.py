@@ -66,7 +66,7 @@ if COMMAND_PREFIX is None:
     util.set_config("command_prefix", "?")
 
 # Version information.
-VERSION = "1.4.0"
+VERSION = "1.4.1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
