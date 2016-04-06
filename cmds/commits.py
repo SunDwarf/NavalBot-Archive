@@ -54,10 +54,10 @@ async def check_for_commits(client: discord.Client):
                "Time-Zone": "Etc/UTC"}  # Force the UTC time zone.
 
     # Define the last time.
-    last_time = util.get_config(
-        "github_last_successful_check",
-        datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-    )
+    last_time = util.get_config("github_last_successful_check")
+    if last_time is None:
+        last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        util.set_config("github_last_successful_check", last_time)
 
     # Enter the client session.
     with session:
