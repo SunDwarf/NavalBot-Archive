@@ -35,18 +35,18 @@ async def check_for_commits(client: discord.Client):
     """
     print("==> Loaded CommitBot.")
     # First, check to see if we're enabled.
-    gh_enabled = util.get_config("github_enabled", 0)
+    gh_enabled = util.get_config(None, "github_enabled", 0)
     if not int(gh_enabled):
         return
 
     # Get the token.
-    token = util.get_config("github_token")
+    token = util.get_config(None, "github_token")
     if not token:
         print("==> GitHub commit bot token doesn't exist. Cannot use commit module.")
         return
 
     # Get the channel ID.
-    chan_id = util.get_config("github_channel")
+    chan_id = util.get_config(None, "github_channel")
     if not chan_id:
         print("==> Cannot resolve channel for CommitBot.")
         return
@@ -63,7 +63,7 @@ async def check_for_commits(client: discord.Client):
         print("==> Cannot resolve channel for CommitBot. (could not find the channel with id {})".format(chan_id))
         return
 
-    repo = util.get_config("github_repo")
+    repo = util.get_config(None, "github_repo")
     if not repo:
         print("==> Cannot resolve repository for CommitBot.")
         return
@@ -77,7 +77,7 @@ async def check_for_commits(client: discord.Client):
                "Time-Zone": "Etc/UTC"}  # Force the UTC time zone.
 
     # Define the last time.
-    last_time = util.get_config("github_last_successful_check")
+    last_time = util.get_config(None, "github_last_successful_check")
     if last_time is None:
         last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         util.set_config("github_last_successful_check", last_time)
@@ -97,7 +97,7 @@ async def check_for_commits(client: discord.Client):
                     continue
                 else:
                     last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-                    util.set_config("github_last_successful_check", last_time)
+                    util.set_config(None, "github_last_successful_check", last_time)
                 # Create the head of a message
                 await client.send_message(chan, "**{} new commits to** *{}*:\n".format(len(body), repo))
                 # Loop over the commits.

@@ -80,15 +80,10 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS configuration (
   id INTEGER PRIMARY KEY,
   name VARCHAR,
-  value VARCHAR
+  value VARCHAR,
+  server VARCHAR
 )
 """)
-
-# Define the command prefix.
-COMMAND_PREFIX = util.get_config("command_prefix")
-if COMMAND_PREFIX is None:
-    COMMAND_PREFIX = "?"
-    util.set_config("command_prefix", "?")
 
 # Version information.
 VERSION = "1.5.0"
@@ -134,7 +129,7 @@ async def on_message(message: discord.Message):
     if message.author.name == "NavalBot":
         print("--> Not processing own message")
         return
-    if message.content[0] == COMMAND_PREFIX:
+    if message.content[0] == util.get_config(message.server.id, "command_prefix", "?"):
         try:
             coro = commands[message.content[1:].split(' ')[0]](client, message)
         except KeyError as e:
