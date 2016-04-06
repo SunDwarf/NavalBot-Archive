@@ -1,6 +1,7 @@
 import os
 
 import discord
+import youtube_dl
 from discord.voice_client import StreamPlayer, VoiceClient
 
 import util
@@ -179,7 +180,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     vidname = args[0]
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
-    player = await voice_client.create_ytdl_player(url=vidname)
+    try:
+        player = await voice_client.create_ytdl_player(url=vidname)
+    except youtube_dl.utils.ExtractorError:
+        await client.send_message(message.channel, ":x: That is not a valid video!")
     player.start()
     voice_params["player"] = player
     voice_params["playing"] = True
