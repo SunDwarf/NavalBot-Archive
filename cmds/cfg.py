@@ -105,9 +105,10 @@ async def get_config(client: discord.Client, message: discord.Message):
 
 
 async def get_stdout_and_return_code(cmd: str):
-    proc = await asyncio.create_subprocess_exec(*cmd.split())
+    proc = await asyncio.create_subprocess_exec(*cmd.split(), stdout=asyncio.subprocess.PIPE)
     stdout, stderr = await proc.communicate()
-    return stdout, stderr, proc.returncode
+    returncode = await proc.wait()
+    return stdout, stderr, returncode
 
 
 @cmds.command("update")
@@ -120,6 +121,9 @@ async def update(client: discord.Client, message: discord.Message):
             stdout, stderr
         ))
         return
+    else:
+        if stdout:
+            await client.send_message(message.channel, "```\n{}\n```".format(stdout.decode()))
     await client.send_message(message.channel, "Stashing your changes.")
     stdout, stderr, ret = await get_stdout_and_return_code("git stash")
     if ret != 0:
@@ -127,6 +131,9 @@ async def update(client: discord.Client, message: discord.Message):
             stdout, stderr
         ))
         return
+    else:
+        if stdout:
+            await client.send_message(message.channel, "```\n{}\n```".format(stdout.decode()))
     await client.send_message(message.channel, "Resetting to origin.")
     stdout, stderr, ret = await get_stdout_and_return_code("git reset origin/stable")
     if ret != 0:
@@ -134,6 +141,9 @@ async def update(client: discord.Client, message: discord.Message):
             stdout, stderr
         ))
         return
+    else:
+        if stdout:
+            await client.send_message(message.channel, "```\n{}\n```".format(stdout.decode()))
     await client.send_message(message.channel, "Unstashing your changes.")
     stdout, stderr, ret = await get_stdout_and_return_code("git stash apply")
     if ret != 0:
@@ -141,5 +151,9 @@ async def update(client: discord.Client, message: discord.Message):
             stdout, stderr
         ))
         return
+    else:
+        if stdout:
+            await client.send_message(message.channel, "```\n{}\n```".format(stdout.decode()))
     tdout, stderr, ret = await get_stdout_and_return_code("git rev-parse HEAD")
-    await client.send_message(message.channel, "Done! Navalbot is now at revision {}.".format(tdout))
+    await client.send_message(message.channel, "Done! Navalbot is now at revision `{}`."
+                              .format(tdout.decode().replace('\n', '')))
