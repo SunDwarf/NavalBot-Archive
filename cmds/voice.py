@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 import discord
 import youtube_dl
@@ -9,6 +10,8 @@ import util
 from cmds import command
 
 voice_params = {"playing": False, "player": None, "file": "", "in_server": None}
+
+loop = asyncio.get_event_loop()
 
 
 @command("joinvoice")
@@ -178,6 +181,7 @@ async def stop(client: discord.Client, message: discord.Message):
 
     await client.send_message(message.channel, ":heavy_check_mark: Stopped playing.")
 
+
 @command("playyt")
 @command("playyoutube")
 @util.with_permission("Bot Commander")
@@ -216,6 +220,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         player = await voice_client.create_ytdl_player(url=vidname)
     except (youtube_dl.utils.ExtractorError, youtube_dl.utils.DownloadError):
         await client.send_message(message.channel, ":x: That is not a valid video!")
+        return
     player.start()
     voice_params["player"] = player
     voice_params["playing"] = True

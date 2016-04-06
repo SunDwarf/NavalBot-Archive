@@ -146,7 +146,7 @@ async def version(client: discord.Client, message: discord.Message):
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
-        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/master/bot.py")
+        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/stable/bot.py")
         assert isinstance(s, aiohttp.ClientResponse)
         data = await s.read()
         data = data.decode().split('\n')
@@ -156,6 +156,9 @@ async def version(client: discord.Client, message: discord.Message):
         return
     if tuple(int(i) for i in version.split(".")) > VERSIONT:
         await client.send_message(message.channel, ":exclamation: *New version available:* **{}**".format(version))
+    elif tuple(int(i) for i in version.split(".")) < VERSIONT:
+        await client.send_message(message.channel, ":grey_exclamation: *You are running a newer version than the one "
+                                                   "available online ({}).".format(version))
     else:
         await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
 
