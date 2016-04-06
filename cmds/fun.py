@@ -33,7 +33,6 @@ async def weather(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, ":exclamation: You have not set the API key. Set it with `setcfg "
                                                    "owm_api_key <your_api_key>`.")
         return
-    api_key = api_key[0]
     owm = pyowm.OWM(api_key)  # Example API-Key
     try:
         userinput = ' '.join(message.content.split(" ")[1:])

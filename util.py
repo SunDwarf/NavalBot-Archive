@@ -52,19 +52,22 @@ def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{secon
     })
 
 
-def get_config(key: str):
+def get_config(key: str) -> str:
     """
     Gets a config value from the DB.
     """
     cursor.execute("""SELECT value FROM configuration WHERE name = ?""", (key,))
     row = cursor.fetchone()
-    return row
+    if row:
+        return row[0]
+    else:
+        return None
 
 
 def set_config(key: str, value: str):
     cursor.execute("INSERT OR REPLACE "
                    "INTO configuration (id, name, value)"
-                   "VALUES ((SELECT id FROM factoids WHERE name = ?), ?, ?)", (key, key, value))
+                   "VALUES ((SELECT id FROM configuration WHERE name = ?), ?, ?)", (key, key, value))
     db.commit()
 
 

@@ -7,12 +7,12 @@ from ctypes.util import find_library
 
 import aiohttp
 import discord
-import time
 from discord import Client
 
 import cmds.ndc
 # =============== Commands
 import cmds
+import util
 from cmds import commands
 # Fuck off PyCharm
 import importlib
@@ -49,7 +49,10 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Define the command prefix.
-COMMAND_PREFIX = os.environ.get("NAVALBOT_CMD_PREFIX", "?")
+COMMAND_PREFIX = util.get_config("command_prefix")
+if COMMAND_PREFIX is None:
+    COMMAND_PREFIX = "?"
+    util.set_config("command_prefix", "?")
 
 # Version information.
 VERSION = "1.3.3"
