@@ -75,10 +75,9 @@ async def check_for_commits(client: discord.Client):
                 await client.send_message(chan, "**{} new commits to** *{}*:\n".format(len(body), repo))
                 # Loop over the commits.
                 for commit in body:
-                    print(commit)
                     # Create a message.
                     await client.send_message(
                         chan,
-                        "**{data['commit']['sha'][0:10]}**: {data['commit']['message']}\n".format(data=commit) +
-                        "by *{data['commit']['committer']['name']".format(data=commit)
+                        "**{data[sha][0:10]}**: {data[commit][message]}\n".format(data=commit) +
+                        "by *{data[commit][committer][name]".format(data=commit)
                     )
