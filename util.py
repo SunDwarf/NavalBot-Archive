@@ -34,6 +34,9 @@ cursor = db.cursor()
 
 startup = datetime.datetime.fromtimestamp(time.time())
 
+# Some useful variables
+msgcount = 0
+
 
 def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{seconds2}"):
     if hasattr(value, 'seconds'):
