@@ -4,11 +4,8 @@ import discord
 
 import bot
 import cmds
-from exceptions import CommandError
-
 import util
-
-from cmds import ndc
+from exceptions import CommandError
 
 
 @cmds.command("mute")
@@ -97,12 +94,12 @@ async def delete(client: discord.Client, message: discord.Message, count=None):
         await client.send_message(message.channel, '**{} messages deleted by {}** 💣'.format(count, message.author))
 
 
-@cmds.command("inv")
-async def inv(client: discord.Client, message: discord.Message):
+@cmds.command("invite")
+async def invite(client: discord.Client, message: discord.Message):
     try:
         invite = message.content.split(" ")[1]
     except IndexError:
-        await client.send_message(message.channel, "No")
+        await client.send_message(message.channel, "Usage: ?invite [link]")
         return
 
     await client.accept_invite(invite)

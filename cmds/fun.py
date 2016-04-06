@@ -1,5 +1,4 @@
 import datetime
-import math
 import os
 
 import discord
@@ -9,13 +8,13 @@ from google import search
 import cmds
 import nsfw
 import red
-
 import util
 
 
-@cmds.command("private")
-async def private(client: discord.Client, message: discord.Message):
-    await client.send_message(message.author, content='Whatsup, you called me?')
+@cmds.command("info")
+async def info(client: discord.Client, message: discord.Message):
+    await client.send_message(message.channel, "{} `Ok, check your private messages` 👍".format(message.author.mention))
+    await client.send_message(message.author, 'TODO: ADD SOMETHING HERE')
 
 
 @cmds.command("google")
@@ -33,14 +32,13 @@ async def weather(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, ":exclamation: You have not set the API key. Set it with `setcfg "
                                                    "owm_api_key <your_api_key>`.")
         return
-    owm = pyowm.OWM(api_key)  # Example API-Key
+    owm = pyowm.OWM(api_key)
     try:
         userinput = ' '.join(message.content.split(" ")[1:])
         # Get it from the place
         observation = owm.weather_at_place(userinput)
         # Get the weather and stuff.
         w = observation.get_weather()
-        w.get_wind()
         wind = w.get_wind()['speed']
         humidity = w.get_humidity()
         temp = w.get_temperature('celsius')['temp']

@@ -23,7 +23,6 @@ RCE_IDS = [
     141545699442425856
 ]
 
-
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
@@ -66,7 +65,7 @@ if COMMAND_PREFIX is None:
     util.set_config("command_prefix", "?")
 
 # Version information.
-VERSION = "1.3.4.1"
+VERSION = "1.3.4.2"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
@@ -101,8 +100,10 @@ async def on_ready():
 @client.event
 async def on_message(message: discord.Message):
     print("-> Recieved message:", message.content, "from", message.author.name)
-    if not isinstance(message.channel, discord.PrivateChannel):
+    try:
         print("--> On channel: #" + message.channel.name)
+    except AttributeError:
+        print("--> Private Message")
     # Check if it matches the command prefix.
     if message.author.name == "NavalBot":
         print("--> Not processing own message")
@@ -201,7 +202,7 @@ async def default(client: discord.Client, message: discord.Message):
         row = cursor.fetchone()
         if row:
             locked, locker = row
-            if locked and locker != message.author.id and int(message.author.id) not in cmds.ndc.RCE_IDS:
+            if locked and locker != message.author.id and int(message.author.id) not in RCE_IDS:
                 await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
                                           .format(name, locker))
                 return
