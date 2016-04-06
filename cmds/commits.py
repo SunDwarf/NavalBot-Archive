@@ -1,4 +1,6 @@
 import asyncio
+from datetime import datetime
+
 import discord
 import aiohttp
 import util
@@ -50,20 +52,18 @@ async def check_for_commits(client: discord.Client):
     headers = {"Authorization": "token {}".format(token),
                "User-Agent": "NavalBot Commit Module v1.0 Arbitrary Number"}
 
-    # Define the last etag.
-    etag = ""
+    # Define the last time.
+    last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
 
     # Enter the client session.
     with session:
         while True:
             await asyncio.sleep(5)  # Sleep for 5 seconds between requests.
             # Get the repo details.
-            async with session.get("https://api.github.com/repos/{}/events".format(repo),
-                                   headers={**headers, **{"If-None-Match": etag}}) as r:
-                # Save the e-tag.
+            async with session.get("https://api.github.com/repos/{}/commits".format(repo),
+                                   headers=headers, params={"since": last_time}) as r:
+                # Save the last access time.
                 assert isinstance(r, aiohttp.ClientResponse)
-                if r.status == 304:
-                    continue
-                etag = r.headers["ETag"]
-
-                # Load the
+                last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+                # Next, JSON decode the body.
+                body = await r.json()
