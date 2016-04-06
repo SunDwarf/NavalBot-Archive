@@ -100,10 +100,8 @@ async def on_ready():
 @client.event
 async def on_message(message: discord.Message):
     print("-> Recieved message:", message.content, "from", message.author.name)
-    try:
+    if not isinstance(message.channel, discord.PrivateChannel):
         print("--> On channel: #" + message.channel.name)
-    except AttributeError:
-        print("--> Private Message")
     # Check if it matches the command prefix.
     if message.author.name == "NavalBot":
         print("--> Not processing own message")
