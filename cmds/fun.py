@@ -42,6 +42,7 @@ async def choice(client: discord.Client, message: discord.Message, args: list):
     chosen = random.choice(args)
     await client.send_message(message.channel, "My choice was: `{}`".format(chosen))
 
+
 @cmds.command("info")
 async def info(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "{} `Ok, check your private messages` 👍".format(message.author.mention))
@@ -126,3 +127,11 @@ async def uptime(client: discord.Client, message: discord.Message):
     formatted = util.format_timedelta(s, "`{hours_total} hours, {minutes} minutes, {seconds} seconds`")
     await client.send_message(message.channel, "Bot has been running for {} since startup of process `#{}`"
                               .format(formatted, os.getpid()))
+
+
+@cmds.command("stats")
+async def stats(client: discord.Client, message: discord.Message):
+    server_count = len(client.servers)
+    msgcount = util.msgcount
+    await client.send_message(message.channel, "Currently running on `{}` server(s). Processed `{}` messages since "
+                                               "startup.".format(server_count, msgcount))

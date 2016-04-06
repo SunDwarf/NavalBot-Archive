@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "1.6.1"
+VERSION = "1.6.2"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
@@ -122,6 +122,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
+    # Increment the message count.
+    util.msgcount += 1
     print("-> Recieved message:", message.content, "from", message.author.name)
     if not isinstance(message.channel, discord.PrivateChannel):
         print("--> On channel: #" + message.channel.name)
