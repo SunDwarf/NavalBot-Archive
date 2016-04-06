@@ -53,8 +53,9 @@ async def weather(client: discord.Client, message: discord.Message):
 
 @cmds.command("commands")
 async def commands(client: discord.Client, message: discord.Message):
-    com = ['-lock', '-guess', '-reddit', '-private', '-servers', '-version', '-weather', '\n**Admins only:**',
-           '-game', '-kick', '-ban', '-unban', '-mute', '-unmute', '-delete']
+    com = ['-lock', '-guess', '-reddit', '-info', '-servers', '-version', '-weather', '-whois', '-uptime', '-google',
+           '-invite''\n**Admins only:**', '-game', '-kick', '-ban', '-unban', '-mute', '-unmute', '-delete', '-getcfg',
+           '-setcfg', '-py', '-sql']
     await client.send_message(message.channel, "**These commands are available:**\n{}".format('\n'.join(com)))
 
 
