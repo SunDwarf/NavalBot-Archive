@@ -54,7 +54,10 @@ async def check_for_commits(client: discord.Client):
                "Time-Zone": "Etc/UTC"}  # Force the UTC time zone.
 
     # Define the last time.
-    last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    last_time = util.get_config(
+        "github_last_successful_check",
+        datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    )
 
     # Enter the client session.
     with session:
@@ -71,6 +74,7 @@ async def check_for_commits(client: discord.Client):
                     continue
                 else:
                     last_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+                    util.set_config("github_last_successful_check", last_time)
                 # Create the head of a message
                 await client.send_message(chan, "**{} new commits to** *{}*:\n".format(len(body), repo))
                 # Loop over the commits.
