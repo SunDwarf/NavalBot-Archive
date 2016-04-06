@@ -28,6 +28,7 @@ importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
 importlib.import_module("cmds.voice")
+importlib.import_module("cmds.commits")
 
 # =============== End commands
 

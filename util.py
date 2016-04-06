@@ -52,7 +52,7 @@ def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{secon
     })
 
 
-def get_config(key: str, default: None=None) -> str:
+def get_config(key: str, default=None) -> str:
     """
     Gets a config value from the DB.
     """
