@@ -86,7 +86,6 @@ def with_permission(*role: str):
                 await client.send_message(message.channel, ":no_entry: Cannot determine your role!")
                 return
             roles = set([r.name for r in message.author.roles])
-            print(roles, role)
             if roles.intersection(role):
                 await func(client, message)
             else:
@@ -95,4 +94,26 @@ def with_permission(*role: str):
 
         return __fake_func
 
+    return __decorator
+
+
+def only(ids):
+    """
+    Only allows a specific set of IDs to run the command.
+    """
+    if isinstance(ids, int):
+        ids = [ids]
+
+    def __decorator(func):
+        async def __fake_permission_func(client: discord.Client, message: discord.Message):
+            # Get the ID.
+            u_id = int(message.author.id)
+            # Check if it is in the ids specified.
+            if u_id in ids:
+                await func(client, message)
+            else:
+                await client.send_message(message.channel,
+                                          ":no_entry: This command is restricted to bot owners!")
+
+        return __fake_permission_func
     return __decorator

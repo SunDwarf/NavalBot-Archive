@@ -9,7 +9,6 @@ import aiohttp
 import discord
 from discord import Client
 
-import cmds.ndc
 # =============== Commands
 import cmds
 import util
@@ -19,6 +18,12 @@ import importlib
 
 from util import db, cursor
 
+# Define the admins.
+RCE_IDS = [
+    141545699442425856
+]
+
+
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
@@ -26,6 +31,7 @@ importlib.import_module("cmds.ndc")
 importlib.import_module("cmds.voice")
 
 # =============== End commands
+
 
 # Load opus
 discord.opus.load_opus(find_library("opus"))

@@ -11,10 +11,6 @@ import bot
 import cmds
 import util
 
-RCE_IDS = [
-    141545699442425856
-]
-
 # Servers for fetching
 SERVERS = [
     ("yamato.tf.naval.tf", 27015),
@@ -30,7 +26,7 @@ SERVERS = [
 
 @cmds.command("sql")
 async def sql(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) in RCE_IDS:
+    if not int(message.author.id) in bot.RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")
         return
     else:
@@ -40,7 +36,7 @@ async def sql(client: discord.Client, message: discord.Message):
 
 @cmds.command("py")
 async def py(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) in RCE_IDS:
+    if not int(message.author.id) in bot.RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")
         return
     else:

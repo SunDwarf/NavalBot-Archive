@@ -1,10 +1,14 @@
 import shlex
 
 import discord
+
+import bot
 import cmds
 from exceptions import CommandError
 
 import util
+
+from cmds import ndc
 
 
 @cmds.command("mute")
@@ -106,7 +110,7 @@ async def inv(client: discord.Client, message: discord.Message):
 
 
 @cmds.command("setcfg")
-@util.with_permission("Admin")
+@util.only(bot.RCE_IDS)
 async def set_config(client: discord.Client, message: discord.Message):
     # Split the content with shlex.
     split = shlex.split(message.content)
@@ -122,7 +126,7 @@ async def set_config(client: discord.Client, message: discord.Message):
 
 
 @cmds.command("getcfg")
-@util.with_permission("Admin")
+@util.only(bot.RCE_IDS)
 async def set_config(client: discord.Client, message: discord.Message):
     # Split the content with shlex.
     split = shlex.split(message.content)
