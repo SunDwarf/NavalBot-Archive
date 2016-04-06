@@ -147,8 +147,40 @@ async def play_file(client: discord.Client, message: discord.Message, args: list
     await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(fname))
 
 
+@command("stop")
+@util.with_permission("Bot Commander")
+async def stop(client: discord.Client, message: discord.Message):
+    # Stop playing.
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if not client.is_voice_connected():
+        await client.send_message(message.channel, ":x: I am not in voice currently!")
+        return
+
+    assert isinstance(message.server, discord.Server)
+    if message.server.id != voice_params["in_server"]:
+        await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
+        return
+
+    # Get the voice client.
+    voice_client = client.voice
+    assert isinstance(voice_client, VoiceClient)
+    # Check if we're playing something
+    if voice_params["playing"]:
+        # Get the player.
+        player = voice_params["player"]
+        assert isinstance(player, StreamPlayer)
+        # Stop it.
+        player.stop()
+        voice_params["playing"] = False
+
+    await client.send_message(message.channel, ":heavy_check_mark: Stopped playing.")
+
 @command("playyt")
 @command("playyoutube")
+@util.with_permission("Bot Commander")
 @util.enforce_args(1, ":x: You must pass a video!")
 async def play_youtube(client: discord.Client, message: discord.Message, args: list):
     if not discord.opus.is_loaded():
@@ -182,7 +214,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Play it via ffmpeg.
     try:
         player = await voice_client.create_ytdl_player(url=vidname)
-    except youtube_dl.utils.ExtractorError:
+    except (youtube_dl.utils.ExtractorError, youtube_dl.utils.DownloadError):
         await client.send_message(message.channel, ":x: That is not a valid video!")
     player.start()
     voice_params["player"] = player

@@ -235,4 +235,11 @@ async def default(client: discord.Client, message: discord.Message):
 
 
 if __name__ == "__main__":
-    client.run(sys.argv[1], sys.argv[2])
+    try:
+        loop.run_until_complete(client.start(sys.argv[1], sys.argv[2]))
+    except KeyboardInterrupt:
+        loop.run_until_complete(client.logout())
+        loop.set_exception_handler(lambda *args, **kwargs: None)
+    finally:
+        loop.close()
+    print("NavalBot shutting down.")
