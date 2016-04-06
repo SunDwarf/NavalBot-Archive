@@ -76,11 +76,15 @@ def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{secon
     })
 
 
-def get_config(key: str, default=None) -> str:
+def get_config(server_id: str, key: str, default=None) -> str:
     """
     Gets a config value from the DB.
     """
-    cursor.execute("""SELECT value FROM configuration WHERE name = ?""", (key,))
+    if server_id:
+        cursor.execute("""SELECT value FROM configuration WHERE name = ?
+                          AND server = ?""", (key, server_id))
+    else:
+        cursor.execute("""SELECT value FROM configuration WHERE name = ?""", (key,))
     row = cursor.fetchone()
     if row:
         return row[0]
@@ -88,10 +92,12 @@ def get_config(key: str, default=None) -> str:
         return default
 
 
-def set_config(key: str, value: str):
-    cursor.execute("INSERT OR REPLACE "
-                   "INTO configuration (id, name, value)"
-                   "VALUES ((SELECT id FROM configuration WHERE name = ?), ?, ?)", (key, key, value))
+def set_config(server_id: str, key: str, value: str):
+    cursor.execute("""INSERT OR REPLACE
+                   INTO configuration (id, name, value, server)
+                   VALUES (
+                   (SELECT id FROM configuration WHERE name = ? AND server = ?),
+                   ?, ?, ?)""", (key, server_id, key, value, server_id))
     db.commit()
 
 

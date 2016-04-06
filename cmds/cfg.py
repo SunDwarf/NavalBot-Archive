@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import shlex
 
 import discord
 
-import bot
 import cmds
 import util
 
@@ -68,3 +68,35 @@ async def lock(client: discord.Client, message: discord.Message):
     util.db.commit()
     await client.send_message(message.channel, "Factoid `{}` locked to ID `{}` ({})".format(fac, message.author.id,
                                                                                             message.author.name))
+
+
+@cmds.command("setcfg")
+@util.with_permission("Admin")
+async def set_config(client: discord.Client, message: discord.Message):
+    # Split the content with shlex.
+    split = shlex.split(message.content)
+    if len(split) != 3:
+        await client.send_message(message.channel, ":x: Config set must be in `setcfg 'key' 'value'` format, "
+                                                   "with quotation marks surrounding the spaces")
+        return
+    # Get the config values
+    name, val = split[1:3]
+    # Set them.
+    util.set_config(message.server.id, name, val)
+    await client.send_message(message.channel, ":heavy_check_mark: Config updated: `{}` -> `{}`".format(name, val))
+
+
+@cmds.command("getcfg")
+@util.with_permission("Admin")
+async def get_config(client: discord.Client, message: discord.Message):
+    # Split the content with shlex.
+    split = shlex.split(message.content)
+    if len(split) != 2:
+        await client.send_message(message.channel, ":x: Config set must be in `getcfg 'key'` format, "
+                                                   "with quotation marks surrounding the spaces")
+        return
+
+    name = split[1]
+    # Get the value
+    val = util.get_config(message.server.id, name)
+    await client.send_message(message.channel, "`{}` -> `{}`".format(name, val))

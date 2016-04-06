@@ -80,18 +80,13 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS configuration (
   id INTEGER PRIMARY KEY,
   name VARCHAR,
-  value VARCHAR
+  value VARCHAR,
+  server VARCHAR
 )
 """)
 
-# Define the command prefix.
-COMMAND_PREFIX = util.get_config("command_prefix")
-if COMMAND_PREFIX is None:
-    COMMAND_PREFIX = "?"
-    util.set_config("command_prefix", "?")
-
 # Version information.
-VERSION = "1.5.0"
+VERSION = "1.6.1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
@@ -134,7 +129,7 @@ async def on_message(message: discord.Message):
     if message.author.name == "NavalBot":
         print("--> Not processing own message")
         return
-    if message.content[0] == COMMAND_PREFIX:
+    if message.content[0] == util.get_config(message.server.id, "command_prefix", "?"):
         try:
             coro = commands[message.content[1:].split(' ')[0]](client, message)
         except KeyError as e:
@@ -227,7 +222,9 @@ async def default(client: discord.Client, message: discord.Message):
             client.loop.create_task(get_file((client, message), url=fac, name=file))
             fac = "file:{}".format(file)
         # check if locked
-        cursor.execute("SELECT locked, locker FROM factoids WHERE factoids.name = ?", (name,))
+        cursor.execute("SELECT locked, locker FROM factoids "
+                       "WHERE factoids.name = ?"
+                       "AND factoids.server = ?", (name, message.server.id))
         row = cursor.fetchone()
         if row:
             locked, locker = row
@@ -235,14 +232,18 @@ async def default(client: discord.Client, message: discord.Message):
                 await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
                                           .format(name, locker))
                 return
-        cursor.execute("INSERT OR REPLACE "
-                       "INTO factoids (id, name, content) "
-                       "VALUES ((SELECT id FROM factoids WHERE name = ?), ?, ?)", (name, name, fac))
+        cursor.execute("""INSERT OR REPLACE
+                       INTO factoids (id, name, content, server)
+                       VALUES (
+                       (SELECT id FROM factoids WHERE name = ? AND server = ?),
+                       ?, ?, ?)""", (name, message.server.id, name, fac, message.server.id))
         db.commit()
         await client.send_message(message.channel, "Factoid `{}` is now `{}`".format(name, fac))
     else:
         # Get factoid
-        cursor.execute("SELECT (content) FROM factoids WHERE factoids.name = ?", (data,))
+        cursor.execute("SELECT (content) FROM factoids "
+                       "WHERE factoids.name = ?"
+                       "AND factoids.server = ?", (data, message.server.id))
         rows = cursor.fetchone()
         if not rows:
             return
