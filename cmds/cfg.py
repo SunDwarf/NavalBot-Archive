@@ -31,26 +31,32 @@ import util
 
 
 @cmds.command("game")
+@util.with_permission("Bot Commander")
 async def game(client: discord.Client, message: discord.Message):
+    """
+    Changes the game of the bot.
+    """
     # Set my game
     game = ' '.join(message.content.split(" ")[1:])
 
-    if message.author.permissions_in(message.channel).manage_roles and len(game) < 64:
+    if len(game) < 64:
         # user has perms
         await client.change_status(game=discord.Game(name=game))
-        await client.send_message(message.channel, "Changed game to `{}`".format(game))
+        await client.send_message(message.channel, ":thumbs_up: Changed game to `{}`".format(game))
         # save it in the DB
         util.cursor.execute("""INSERT OR REPLACE INTO configuration (id, name, value)
                       VALUES ((SELECT id FROM configuration WHERE name = 'game'), 'game', ?)""", (game,))
         util.db.commit()
 
     else:
-        await client.send_message(message.channel,
-                                  "You don't have the right role for this or the entered name was too long")
+        await client.send_message(message.channel, ":no_entry: The game name entered was too long.")
 
 
 @cmds.command("lock")
 async def lock(client: discord.Client, message: discord.Message):
+    """
+    Locks a factoid, so it cannot be edited by a different user.
+    """
     # get factoid
     fac = message.content.split(' ')[1]
     # check if it's locked
@@ -75,6 +81,9 @@ async def lock(client: discord.Client, message: discord.Message):
 @cmds.command("setcfg")
 @util.with_permission("Admin")
 async def set_config(client: discord.Client, message: discord.Message):
+    """
+    Sets a server-specific configuration value.
+    """
     # Split the content with shlex.
     split = shlex.split(message.content)
     if len(split) != 3:
@@ -91,6 +100,9 @@ async def set_config(client: discord.Client, message: discord.Message):
 @cmds.command("getcfg")
 @util.with_permission("Admin")
 async def get_config(client: discord.Client, message: discord.Message):
+    """
+    Gets a server-specific configuration value.
+    """
     # Split the content with shlex.
     split = shlex.split(message.content)
     if len(split) != 2:
@@ -114,6 +126,9 @@ async def get_stdout_and_return_code(cmd: str):
 @cmds.command("update")
 @util.only(bot.RCE_IDS)
 async def update(client: discord.Client, message: discord.Message):
+    """
+    Updates the bot. If you're curious if you have access to this function, you don't.
+    """
     await client.send_message(message.channel, "First, fetching the new data from GitHub.")
     stdout, stderr, ret = await get_stdout_and_return_code("git fetch")
     if ret != 0:

@@ -213,7 +213,7 @@ def sanitize(param):
 @util.enforce_args(1, error_msg=":x: You must provide a command for help!")
 async def help(client: discord.Client, message: discord.Message, args: list):
     """
-    Provides help for a command.
+    ಠ_ಠ
     """
     # Get the function
     func = cmds.commands.get(args[0])
