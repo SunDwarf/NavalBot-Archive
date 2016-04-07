@@ -31,6 +31,10 @@ from exceptions import CommandError
 @cmds.command("mute")
 @util.with_permission("Admin", "Bot Commander")
 async def mute(client: discord.Client, message: discord.Message):
+    """
+    Mutes a user. This user must be @mentioned.
+    You must a have `Muted` role installed on the server.
+    """
     muterole = discord.utils.get(message.server.roles, name='Muted')
 
     if not muterole:
@@ -52,6 +56,10 @@ async def mute(client: discord.Client, message: discord.Message):
 @cmds.command("unmute")
 @util.with_permission("Admin", "Bot Commander")
 async def unmute(client: discord.Client, message: discord.Message):
+    """
+    Unmutes a user. This user must be @mentioned.
+    You must a have `Muted` role installed on the server.
+    """
     muterole = discord.utils.get(message.server.roles, name='Muted')
 
     if not muterole:
@@ -72,6 +80,9 @@ async def unmute(client: discord.Client, message: discord.Message):
 @cmds.command("ban")
 @util.with_permission("Admin", "Bot Commander")
 async def ban(client: discord.Client, message: discord.Message):
+    """
+    Bans a user from the server.
+    """
     try:
         await client.ban(member=message.mentions[0]) \
             if len(message.mentions) > 0 \
@@ -85,12 +96,17 @@ async def ban(client: discord.Client, message: discord.Message):
 @cmds.command("unban")
 @util.with_permission("Admin", "Bot Commander")
 async def unban(client: discord.Client, message: discord.Message):
-    await client.send_message(message.channel, 'Lol, unbans')
+    """
+    nah
+    """
 
 
 @cmds.command("kick")
 @util.with_permission("Admin", "Bot Commander")
 async def kick(client: discord.Client, message: discord.Message):
+    """
+    Kicks a user from the server.
+    """
     try:
         await client.kick(member=message.mentions[0])
         await client.send_message(message.channel,
@@ -102,6 +118,9 @@ async def kick(client: discord.Client, message: discord.Message):
 @cmds.command("delete")
 @util.with_permission("Admin", "Bot Commander")
 async def delete(client: discord.Client, message: discord.Message, count=None):
+    """
+    Prunes a certain number of messages from the server.
+    """
     try:
         count = int(' '.join(message.content.split(" ")[1:]))
     except ValueError:
@@ -116,6 +135,9 @@ async def delete(client: discord.Client, message: discord.Message, count=None):
 
 @cmds.command("invite")
 async def invite(client: discord.Client, message: discord.Message):
+    """
+    Accepts an invite to another server.
+    """
     try:
         invite = message.content.split(" ")[1]
     except IndexError:
