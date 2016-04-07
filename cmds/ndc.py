@@ -26,25 +26,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import discord
 import subprocess
 
-from valve.source import a2s
-
 import bot
 
 # RCE ids
 import cmds
 import util
-
-# Servers for fetching
-SERVERS = [
-    ("yamato.tf.naval.tf", 27015),
-    ("musashi.tf.naval.tf", 27015),
-    ("gorch.tf.naval.tf", 27015),
-    ("gorch.tf.naval.tf", 27016),
-    ("gorch.tf.naval.tf", 27017),
-    ("prinzeugen.tf.naval.tf", 27015),
-    ("prinzeugen.tf.naval.tf", 27016),
-    ("prinzeugen.tf.naval.tf", 27017)
-]
 
 
 @cmds.command("sql")
@@ -74,22 +60,3 @@ async def py(client: discord.Client, message: discord.Message):
             smsg(data)
 
         exec(cmd)
-
-
-@cmds.command("servers")
-async def servers(client: discord.Client, message: discord.Message):
-    await client.send_message(message.channel, "**Servers:**")
-    for num, serv in enumerate(SERVERS):
-        querier = a2s.ServerQuerier(serv, timeout=0.5)
-        try:
-            info = bot.attrdict(querier.info())
-        except a2s.NoResponseError:
-            await client.send_message(
-                message.channel,
-                content="**Server {num}:** `({t[0]}:{t[1]})` - not responding\n".format(t=serv, num=num + 1)
-            )
-        else:
-            await client.send_message(
-                message.channel,
-                content="**Server {num}:** {q.server_name} - `{q.map}` - `{q.player_count}/{q.max_players}`"
-                            .format(q=info, num=num + 1) + " - steam://connect/{t[0]}:{t[1]}".format(t=serv))
