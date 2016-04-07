@@ -130,6 +130,8 @@ def with_permission(*role: str):
                 await client.send_message(message.channel,
                                           ":no_entry: You do not have any of the required roles: `{}`!".format(role))
 
+        __fake_func.__doc__ = func.__doc__
+
         return __fake_func
 
     return __decorator
@@ -160,6 +162,8 @@ def enforce_args(count: int, error_msg: str = None):
             else:
                 # Await the function.
                 await func(client, message, split)
+
+        __fake_enforcing_func.__doc__ = func.__doc__
 
         return __fake_enforcing_func
 

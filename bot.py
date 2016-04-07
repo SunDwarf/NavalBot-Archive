@@ -209,6 +209,28 @@ def sanitize(param):
     return param
 
 
+@cmds.command("help")
+@util.enforce_args(1, error_msg=":x: You must provide a command for help!")
+async def help(client: discord.Client, message: discord.Message, args: list):
+    """
+    Provides help for a command.
+    """
+    # Get the function
+    func = cmds.commands.get(args[0])
+    if not func:
+        await client.send_message(message.channel, ":no_entry: That function does not exist!")
+        return
+
+    # Format __doc__
+    if not func.__doc__:
+        await client.send_message(message.channel, ":x: This function doesn't have help.")
+        return
+    doc = func.__doc__.split("\n")
+    doc = [d.lstrip() for d in doc if d.lstrip()]
+    doc = '\n'.join(doc)
+    await client.send_message(message.channel, doc)
+
+
 async def default(client: discord.Client, message: discord.Message):
     data = message.content[1:]
     # Check if it matches a factoid creation

@@ -41,6 +41,11 @@ loop = asyncio.get_event_loop()
 @util.with_permission("Bot Commander", "Voice")
 @util.enforce_args(1, ":x: You must provide a channel!")
 async def join_voice_channel(client: discord.Client, message: discord.Message, args: list):
+    """
+    Joins a new voice channel.
+    This will not work if the bot is currently in a voice channel on a different server.
+    You must have the Voice or Bot Commander role to use this command.
+    """
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
@@ -80,6 +85,11 @@ async def join_voice_channel(client: discord.Client, message: discord.Message, a
 @command("leavevoice")
 @util.with_permission("Bot Commander", "Voice")
 async def leave_voice_channels(client: discord.Client, message: discord.Message):
+    """
+    Leaves the voice channel the bot is currently in.
+    This will not work across servers.
+    You must have the Voice or Bot Commander role to use this command.
+    """
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
@@ -106,6 +116,9 @@ async def leave_voice_channels(client: discord.Client, message: discord.Message)
 @command("nowplaying")
 @command("np")
 async def nowplaying(client: discord.Client, message: discord.Message):
+    """
+    Displays the currently playing audio.
+    """
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
@@ -131,6 +144,10 @@ async def nowplaying(client: discord.Client, message: discord.Message):
 @util.with_permission("Bot Commander", "Voice")
 @util.enforce_args(1, ":x: You must pass a file parameter!")
 async def play_file(client: discord.Client, message: discord.Message, args: list):
+    """
+    Plays a downloaded file from `files/`.
+    You must have the Voice or Bot Commander role to use this command.
+    """
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
@@ -170,8 +187,12 @@ async def play_file(client: discord.Client, message: discord.Message, args: list
 
 
 @command("stop")
-@util.with_permission("Bot Commander")
+@util.with_permission("Bot Commander", "Voice")
 async def stop(client: discord.Client, message: discord.Message):
+    """
+    Stops the currently playing audio.
+    You must have the Voice or Bot Commander role to use this command.
+    """
     # Stop playing.
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
@@ -203,9 +224,15 @@ async def stop(client: discord.Client, message: discord.Message):
 
 @command("playyt")
 @command("playyoutube")
-@util.with_permission("Bot Commander")
+@util.with_permission("Bot Commander", "Voice")
 @util.enforce_args(1, ":x: You must pass a video!")
 async def play_youtube(client: discord.Client, message: discord.Message, args: list):
+    """
+    Plays a video from any valid streaming source that `youtube-dl` can download from.
+    This included things such as YouTube (obviously) and SoundCloud.
+    You must have the Voice or Bot Commander role to use this command.
+    """
+
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return

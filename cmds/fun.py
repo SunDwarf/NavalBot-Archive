@@ -171,3 +171,12 @@ async def search_youtube(client: discord.Client, message: discord.Message, args:
     title = video_data["snippet"]["title"]
     link = "https://youtube.com/watch?v=" + video_data["id"]["videoId"]
     await client.send_message(message.channel, "**{}**\n{}".format(title, link))
+
+
+@cmds.command("coin")
+async def coin(client: discord.Client, message: discord.Message):
+    """
+    Flip a coin!
+    """
+    random_choice = (["Heads!"] * 49) + (["Tails!"] * 49) + ["On the side!"]
+    await client.send_message(message.channel, random.choice(random_choice))
