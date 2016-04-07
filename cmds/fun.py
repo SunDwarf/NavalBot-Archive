@@ -39,6 +39,9 @@ import util
 @cmds.command("choice")
 @util.enforce_args(2)
 async def choice(client: discord.Client, message: discord.Message, args: list):
+    """
+    Makes that hard choice for you.
+    """
     # Choose a random argument from the list.
     chosen = random.choice(args)
     await client.send_message(message.channel, "My choice was: `{}`".format(chosen))
@@ -46,12 +49,18 @@ async def choice(client: discord.Client, message: discord.Message, args: list):
 
 @cmds.command("info")
 async def info(client: discord.Client, message: discord.Message):
+    """
+    Sends a PM with information about the bot.
+    """
     await client.send_message(message.channel, "{} `Ok, check your private messages` 👍".format(message.author.mention))
     await client.send_message(message.author, 'TODO: ADD SOMETHING HERE')
 
 
 @cmds.command("google")
 async def google(client: discord.Client, message: discord.Message):
+    """
+    Searches google for the top two results for the search.
+    """
     userinput = ' '.join(message.content.split(" ")[1:])
     await client.send_message(message.channel, "The links have been sent to you {}".format(message.author))
     for url in search(userinput, stop=2):
@@ -59,7 +68,11 @@ async def google(client: discord.Client, message: discord.Message):
 
 
 @cmds.command("weather")
-async def weather(client: discord.Client, message: discord.Message):
+@util.enforce_args(1, ":x: You must specify a village/town/city/settlement to query!")
+async def weather(client: discord.Client, message: discord.Message, args: list):
+    """
+    Displays the weather of a specified place.
+    """
     api_key = util.get_config(message.server.id, "owm_api_key")
     if not api_key:
         await client.send_message(message.channel, ":exclamation: You have not set the API key. Set it with `setcfg "
@@ -86,6 +99,9 @@ async def weather(client: discord.Client, message: discord.Message):
 
 @cmds.command("commands")
 async def commands(client: discord.Client, message: discord.Message):
+    """
+    Lists the commands for the bot.
+    """
     com = ['-lock', '-guess', '-reddit', '-info', '-servers', '-version', '-weather', '-whois', '-uptime', '-google',
            '-invite''\n**Admins only:**', '-game', '-kick', '-ban', '-unban', '-mute', '-unmute', '-delete', '-getcfg',
            '-setcfg', '-py', '-sql']
@@ -94,6 +110,9 @@ async def commands(client: discord.Client, message: discord.Message):
 
 @cmds.command("reddit")
 async def reddit(client: discord.Client, message: discord.Message):
+    """
+    Fetches the currently front page from the specified subreddit.
+    """
     try:
         choice = ' '.join(message.content.split(" ")[1:]).lower()
         if choice in nsfw.PURITAN_VALUES:
@@ -109,6 +128,9 @@ async def reddit(client: discord.Client, message: discord.Message):
 
 @cmds.command("whois")
 async def whois(client: discord.Client, message: discord.Message):
+    """
+    Displays information about the user specified.
+    """
     try:
         await client.send_message(message.channel,
                                   '**Name:** {}\n**ID:** `{}`\n**Created at:** {}\n**Avatar:** {}'.format(
@@ -123,6 +145,9 @@ async def whois(client: discord.Client, message: discord.Message):
 
 @cmds.command("uptime")
 async def uptime(client: discord.Client, message: discord.Message):
+    """
+    Gives the uptime of the bot.
+    """
     upt = datetime.datetime.now() - util.startup
     s = upt.total_seconds()
     formatted = util.format_timedelta(s, "`{hours_total} hours, {minutes} minutes, {seconds} seconds`")
@@ -132,6 +157,9 @@ async def uptime(client: discord.Client, message: discord.Message):
 
 @cmds.command("stats")
 async def stats(client: discord.Client, message: discord.Message):
+    """
+    Displays statistics about the currently running bot.
+    """
     server_count = len(client.servers)
     msgcount = util.msgcount
     await client.send_message(message.channel, "Currently running on `{}` server(s). Processed `{}` messages since "
@@ -141,6 +169,9 @@ async def stats(client: discord.Client, message: discord.Message):
 @cmds.command("searchyt")
 @util.enforce_args(1, ":x: You must enter something to search for!")
 async def search_youtube(client: discord.Client, message: discord.Message, args: list):
+    """
+    Searches YouTube for the specified tags.
+    """
     # Join up the args
     to_search = " ".join(args)
     # Get the API key
