@@ -7,18 +7,18 @@ A bot for discord servers using [discord.py] (https://github.com/Rapptz/discord.
 
 ## Download and Installation
 
-Download the latest release from [the releases page] (https://github.com/sundwarf/navalbot/releases/latest)
-Put the files (unzipped if you downloaded the .zip) in a new folder on your computer.
-Open up `bot.py` and change `RCE_IDS` to match your Discord user id.
+1. Download the latest release from [the releases page] (https://github.com/sundwarf/navalbot/releases/latest)  
+2. Put the files (unzipped if you downloaded the .zip) in a new folder on your computer.  
+3. Open up `bot.py` and change `RCE_IDS` to match your Discord user id.  
 
-Next, open your command line and launch `bot.py` with the login credentials for your bot.
+Next, open your command line and launch `bot.py` with the login credentials for your bot.  
 E.g: `>> python35 bot.py youremail@address.com yourpassword`
 
 ## Configuration
 
-Make sure to create a `Bot Commander` role and assign it to your Discord moderators/admins.
-Members with the `Bot Commander` role can execute specifc commands that are inaccessible for regular members.
-Your bot needs the `Admin` flag in order for moderation commands like `?kick` or `?ban` to work.
+Make sure to create a `Bot Commander` role and assign it to your Discord moderators/admins.  
+Members with the `Bot Commander` role can execute specifc commands that are inaccessible for regular members.  
+Your bot needs the `Admin` flag in order for moderation commands like `?kick` or `?ban` to work.  
 
 ## Available commands
 ### Commands
@@ -82,13 +82,17 @@ If you'd like to contribute to Navalbot, you can:
 
 ## License
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/
+```
+This program is free software: you can redistribute it and/or modify  
+it under the terms of the GNU General Public License as published by  
+the Free Software Foundation, either version 3 of the License, or  
+(at your option) any later version.  
+
+This program is distributed in the hope that it will be useful,  
+but WITHOUT ANY WARRANTY; without even the implied warranty of  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+GNU General Public License for more details.  
+
+You should have received a copy of the GNU General Public License  
+along with this program.  If not, see <http://www.gnu.org/licenses/>.  
+```
