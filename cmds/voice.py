@@ -38,8 +38,9 @@ loop = asyncio.get_event_loop()
 
 
 @command("joinvoice")
-@util.with_permission("Bot Commander")
-async def join_voice_channel(client: discord.Client, message: discord.Message):
+@util.with_permission("Bot Commander", "Voice")
+@util.enforce_args(1, ":x: You must provide a channel!")
+async def join_voice_channel(client: discord.Client, message: discord.Message, args: list):
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
@@ -61,12 +62,7 @@ async def join_voice_channel(client: discord.Client, message: discord.Message):
     # Get the server.
     server = message.server
     # Get the voice channel.
-    split = message.content.split(" ")
-    if len(split) < 2:
-        await client.send_message(message.channel, ":x: You must provide a channel!")
-        return
-    else:
-        to_join = ' '.join(split[1:])
+    to_join = ' '.join(args[0:])
     # Try and find the voice channel.
     channel = discord.utils.get(server.channels, name=to_join, type=discord.ChannelType.voice)
     if not channel:
@@ -82,7 +78,7 @@ async def join_voice_channel(client: discord.Client, message: discord.Message):
 
 
 @command("leavevoice")
-@util.with_permission("Bot Commander")
+@util.with_permission("Bot Commander", "Voice")
 async def leave_voice_channels(client: discord.Client, message: discord.Message):
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
@@ -132,7 +128,7 @@ async def nowplaying(client: discord.Client, message: discord.Message):
 
 
 @command("playfile")
-@util.with_permission("Bot Commander")
+@util.with_permission("Bot Commander", "Voice")
 @util.enforce_args(1, ":x: You must pass a file parameter!")
 async def play_file(client: discord.Client, message: discord.Message, args: list):
     if not discord.opus.is_loaded():
