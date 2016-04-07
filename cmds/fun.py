@@ -28,6 +28,7 @@ import random
 import discord
 import pyowm
 from google import search
+from googleapiclient.discovery import build
 
 import cmds
 import nsfw
@@ -135,3 +136,38 @@ async def stats(client: discord.Client, message: discord.Message):
     msgcount = util.msgcount
     await client.send_message(message.channel, "Currently running on `{}` server(s). Processed `{}` messages since "
                                                "startup.".format(server_count, msgcount))
+
+
+@cmds.command("searchyt")
+@util.enforce_args(1, ":x: You must enter something to search for!")
+async def search_youtube(client: discord.Client, message: discord.Message, args: list):
+    # Join up the args
+    to_search = " ".join(args)
+    # Get the API key
+    api_key = util.get_config(None, "youtube_api_key")
+    if not api_key:
+        await client.send_message(message.channel, ":x: The YouTube Data API v3 key has not been set!")
+        return
+
+    # Create a new isntance of the APIClient
+    yt_api_client = build("youtube", "v3", developerKey=api_key)
+    search_response = yt_api_client.search().list(
+        q=to_search,
+        part="id,snippet",
+        maxResults=1
+    ).execute()
+
+    items = search_response.get("items", [])
+    if not items:
+        await client.send_message(message.channel, ":no_entry: No results found for your search.")
+        return
+
+    # Load the video data
+    video_data = items[0]
+    if video_data["id"]["kind"] != "youtube#video":
+        await client.send_message(message.channel, ":no_entry: No relevant videos found for your search.")
+        return
+
+    title = video_data["snippet"]["title"]
+    link = "https://youtube.com/watch?v=" + video_data["id"]["videoId"]
+    await client.send_message(message.channel, "**{}**\n{}".format(title, link))
