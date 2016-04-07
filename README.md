@@ -24,10 +24,10 @@ Your bot needs the `Admin` flag in order for moderation commands like `?kick` or
 ### Commands
 - [Regular commands] (#regular-commands)
 - [Music commands] (#music-commands)
-- [Moderation commands] (#mod-commands)
+- [Moderation commands] (#moderation-commands)
 - [Admin/Configuration commands] (#admin-commands)
 
-#### [Regular commands: ] (#regular-commands)
+#### Regular commands:
 
 - ?commands
 - ?help
@@ -45,7 +45,7 @@ Your bot needs the `Admin` flag in order for moderation commands like `?kick` or
 - ?reddit
 - ?searchyt
 
-#### [Music commands: ] (#music-commands)
+#### Music commands:
 - ?joinvoice
 - ?leavevoice
 - ?nowplaying
@@ -55,7 +55,7 @@ Your bot needs the `Admin` flag in order for moderation commands like `?kick` or
 - ?playyt
 - ?stop
 
-#### [Moderation commands] (#mod-commands)
+#### Moderation commands
 - ?mute
 - ?unmute
 - ?kick
@@ -64,7 +64,7 @@ Your bot needs the `Admin` flag in order for moderation commands like `?kick` or
 - ?game
 - ?delete
 
-#### [Admin/Configuration commands: ] (#admin-commands)
+#### Admin commands:
 - ?setcfg
 - ?getcfg
 - ?sql
