@@ -21,11 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-import shlex
-
 import discord
 
-import bot
 import cmds
 import util
 from exceptions import CommandError
