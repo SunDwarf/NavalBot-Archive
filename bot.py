@@ -180,7 +180,7 @@ async def version(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, ":exclamation: *New version available:* **{}**".format(version))
     elif tuple(int(i) for i in version.split(".")) < VERSIONT:
         await client.send_message(message.channel, ":grey_exclamation: *You are running a newer version than the one "
-                                                   "available online ({}).".format(version))
+                                                   "available online ({}).*".format(version))
     else:
         await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
 
