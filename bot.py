@@ -67,6 +67,7 @@ def init_logging():
     root.addHandler(consoleHandler)
 
 logger = logging.getLogger("NavalBot")
+logger.setLevel(logging.DEBUG)
 
 # Load opus
 found = find_library("opus")
@@ -312,4 +313,4 @@ if __name__ == "__main__":
         loop.set_exception_handler(lambda *args, **kwargs: None)
     finally:
         loop.close()
-    print("NavalBot shutting down.")
+    logger.info("NavalBot shutting down.")

@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 import os
+import logging
 import asyncio
 
 import discord
@@ -40,6 +41,7 @@ loop = asyncio.get_event_loop()
 # Create a song queue.
 queue = asyncio.Queue(maxsize=100)
 
+logger = logging.getLogger("NavalBot::Voice")
 
 async def find_voice_channel(server: discord.Server):
     # Search for a voice channel called 'Music' or 'NavalBot'.
@@ -167,6 +169,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Play it via ffmpeg.
 
     async def _coro_play_youtube():
+        logger.debug("YouTube player loading from queue.")
         # Coroutine to place on the voice queue.
         # Join the channel.
         await client.join_voice_channel(channel=voice_channel)
@@ -177,6 +180,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         except (youtube_dl.utils.ExtractorError, youtube_dl.utils.DownloadError):
             await client.send_message(message.channel, ":x: That is not a valid video!")
             return
+        logger.debug("Now playing: '{}'".format(player.title))
         player.start()
         voice_params["player"] = player
         voice_params["playing"] = True
@@ -193,6 +197,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 await asyncio.sleep(0.5)
         # Leave the voice channel, for the next coroutine to use.
         await client.voice.disconnect()
+        voice_params["player"] = None
+        voice_params["playing"] = False
+        voice_params["file"] = ""
+        voice_params["in_server"] = None
         # End game.
         await client.change_status(None)
 
