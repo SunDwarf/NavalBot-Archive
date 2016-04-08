@@ -25,7 +25,6 @@ import shlex
 import asyncio
 import discord
 
-import bot
 import cmds
 import util
 
@@ -124,7 +123,7 @@ async def get_stdout_and_return_code(cmd: str):
 
 
 @cmds.command("update")
-@util.only(bot.RCE_IDS)
+@util.only(cmds.RCE_IDS)
 async def update(client: discord.Client, message: discord.Message):
     """
     Updates the bot. If you're curious if you have access to this function, you don't.

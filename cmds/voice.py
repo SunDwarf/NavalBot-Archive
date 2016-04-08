@@ -21,16 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-import asyncio
 import os
+import asyncio
 
 import discord
 import youtube_dl
 from discord.voice_client import StreamPlayer, VoiceClient
 
 import util
+
 from cmds import command
-from util import cursor
 
 voice_params = {"playing": False, "player": None, "file": "", "in_server": None}
 
@@ -58,7 +58,11 @@ async def find_voice_channel(server: discord.Server):
 async def play_music_from_queue():
     # Loads music from the queue and plays it.
     while True:
-        music_coro = await queue.get()
+        try:
+            music_coro = await queue.get()
+        except RuntimeError:
+            # FUcking asyncio
+            return
         # Await the coroutine
         await music_coro
 
@@ -89,52 +93,6 @@ async def nowplaying(client: discord.Client, message: discord.Message):
     # Return the currently playing song.
     await client.send_message(message.channel, "Currently playing: `{}` in server `{}`."
                               .format(voice_params["file"], client.servers.get(voice_params["in_server"], "Unknown")))
-
-
-@command("playfile")
-@util.with_permission("Bot Commander", "Voice")
-@util.enforce_args(1, ":x: You must pass a file parameter!")
-async def play_file(client: discord.Client, message: discord.Message, args: list):
-    """
-    Plays a downloaded file from `files/`.
-    You must have the Voice or Bot Commander role to use this command.
-    """
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if not client.is_voice_connected():
-        await client.send_message(message.channel, ":x: I am not in voice currently!")
-        return
-
-    assert isinstance(message.server, discord.Server)
-    if message.server.id != voice_params["in_server"]:
-        await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
-        return
-
-    # Get the voice client.
-    voice_client = client.voice
-    assert isinstance(voice_client, VoiceClient)
-    # Check if we're playing something
-    if voice_params["playing"]:
-        # Get the player.
-        player = voice_params["player"]
-        assert isinstance(player, StreamPlayer)
-        # Stop it.
-        player.stop()
-        voice_params["playing"] = False
-    fname = ' '.join(args[0:])
-    # Check to see if the file exists.
-    if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
-        await client.send_message(message.channel, ":x: That file does not exist!")
-        return
-    # Play it via ffmpeg.
-    player = voice_client.create_ffmpeg_player(filename=os.path.join(os.getcwd(), 'files', fname))
-    player.start()
-    voice_params["player"] = player
-    voice_params["playing"] = True
-    voice_params["file"] = fname
-    await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(fname))
 
 
 @command("stop")
@@ -169,14 +127,6 @@ async def stop(client: discord.Client, message: discord.Message):
         # Stop it.
         player.stop()
         voice_params["playing"] = False
-        cursor.execute("SELECT (value) FROM configuration WHERE configuration.name = 'game'")
-        result = cursor.fetchone()
-        if not result:
-            # Ignore.
-            return
-        else:
-            game = result[0]
-            await client.change_status(game=discord.Game(name=game))
 
     await client.send_message(message.channel, ":heavy_check_mark: Stopped playing.")
 
