@@ -36,81 +36,31 @@ voice_params = {"playing": False, "player": None, "file": "", "in_server": None}
 
 loop = asyncio.get_event_loop()
 
-
-@command("joinvoice")
-@util.with_permission("Bot Commander", "Voice")
-@util.enforce_args(1, ":x: You must provide a channel!")
-async def join_voice_channel(client: discord.Client, message: discord.Message, args: list):
-    """
-    Joins a new voice channel.
-    This will not work if the bot is currently in a voice channel on a different server.
-    You must have the Voice or Bot Commander role to use this command.
-    """
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if client.is_voice_connected():
-        assert isinstance(message.server, discord.Server)
-        if message.server.id == voice_params["in_server"]:
-            await client.voice.disconnect()
-            if voice_params["playing"]:
-                # Get the player.
-                player = voice_params["player"]
-                assert isinstance(player, StreamPlayer)
-                # Stop it.
-                player.stop()
-                voice_params["playing"] = False
-        else:
-            await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
-            return
-    # Get the server.
-    server = message.server
-    # Get the voice channel.
-    to_join = ' '.join(args[0:])
-    # Try and find the voice channel.
-    channel = discord.utils.get(server.channels, name=to_join, type=discord.ChannelType.voice)
-    if not channel:
-        await client.send_message(
-            message.channel,
-            ":x: The channel `{}` does not exist on this server!".format(to_join))
-        return
-    # Join the channel.
-    await client.join_voice_channel(channel)
-    # Set the server ID.
-    voice_params["in_server"] = message.server.id
-    await client.send_message(message.channel, ":heavy_check_mark: Joined voice channel!")
+# Create a song queue.
+queue = asyncio.Queue(maxsize=100)
 
 
-@command("leavevoice")
-@util.with_permission("Bot Commander", "Voice")
-async def leave_voice_channels(client: discord.Client, message: discord.Message):
-    """
-    Leaves the voice channel the bot is currently in.
-    This will not work across servers.
-    You must have the Voice or Bot Commander role to use this command.
-    """
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if not client.is_voice_connected():
-        await client.send_message(message.channel, ":x: I am not in voice currently!")
+async def find_voice_channel(server: discord.Server):
+    # Search for a voice channel called 'Music' or 'NavalBot'.
+    for channel in server.channels:
+        assert isinstance(channel, discord.Channel)
+        if not channel.type == discord.ChannelType.voice:
+            continue
+        # Check the name.
+        if channel.name.lower() in ['music', 'navalbot']:
+            chan = channel
+            break
     else:
-        assert isinstance(message.server, discord.Server)
-        if message.server.id == voice_params["in_server"]:
-            await client.voice.disconnect()
-            voice_params["in_server"] = None
-        else:
-            await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
-            return
-        if voice_params["playing"]:
-            # Get the player.
-            player = voice_params["player"]
-            assert isinstance(player, StreamPlayer)
-            # Stop it.
-            player.stop()
-            voice_params["playing"] = False
+        return None
+    return chan
+
+
+async def play_music_from_queue():
+    # Loads music from the queue and plays it.
+    while True:
+        music_coro = await queue.get()
+        # Await the coroutine
+        await music_coro
 
 
 @command("nowplaying")
@@ -237,38 +187,57 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
 
-    # Standard checks.
-    if not client.is_voice_connected():
-        await client.send_message(message.channel, ":x: I am not in voice currently!")
+    voice_channel = await find_voice_channel(message.server)
+    if not voice_channel:
+        await client.send_message(message.channel, content=":x: Cannot find voice channel for playing music! (channel "
+                                                           "must be named `Music` or `NavalBot`.)")
         return
-
-    assert isinstance(message.server, discord.Server)
-    if message.server.id != voice_params["in_server"]:
-        await client.send_message(message.channel, content=":x: Cannot cancel playing from different server!")
-        return
-
-    # Get the voice client.
-    voice_client = client.voice
-    assert isinstance(voice_client, VoiceClient)
-    # Check if we're playing something
-    if voice_params["playing"]:
-        # Get the player.
-        player = voice_params["player"]
-        assert isinstance(player, StreamPlayer)
-        # Stop it.
-        player.stop()
-        voice_params["playing"] = False
 
     vidname = args[0]
+
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
+
+    async def _coro_play_youtube():
+        # Coroutine to place on the voice queue.
+        # Join the channel.
+        await client.join_voice_channel(channel=voice_channel)
+        # Get the voice client.
+        voice_client = client.voice
+        try:
+            player = await voice_client.create_ytdl_player(url=vidname)
+        except (youtube_dl.utils.ExtractorError, youtube_dl.utils.DownloadError):
+            await client.send_message(message.channel, ":x: That is not a valid video!")
+            return
+        player.start()
+        voice_params["player"] = player
+        voice_params["playing"] = True
+        voice_params["file"] = player.title
+        voice_params["in_server"] = message.server.id
+        await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(player.title))
+        # Constantly loop every 0.5s to check if the music has finished.
+        while True:
+            if player.is_done():
+                break
+            else:
+                await asyncio.sleep(0.5)
+        # Leave the voice channel, for the next coroutine to use.
+        await client.voice.disconnect()
+
+    # Get the number of songs on the queue.
+    items = queue.qsize()
+
+    # Put the coroutine on the queue.
     try:
-        player = await voice_client.create_ytdl_player(url=vidname)
-    except (youtube_dl.utils.ExtractorError, youtube_dl.utils.DownloadError):
-        await client.send_message(message.channel, ":x: That is not a valid video!")
+        queue.put_nowait(_coro_play_youtube())
+    except asyncio.QueueFull:
+        await client.send_message(message.channel, ":no_entry: There are too many songs on the queue. Cannot start "
+                                                   "playing.")
         return
-    player.start()
-    voice_params["player"] = player
-    voice_params["playing"] = True
-    voice_params["file"] = player.title
-    await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(player.title))
+    # We're done! Now we can wait for the player coroutine to await our coro.
+    # Send a message to the channel telling them what position they are on.
+    if items != 0:
+        await client.send_message(message.channel,
+                                  ":heavy_check_mark: You are number {} in the queue.".format(items + 1))
+    else:
+        await client.send_message(message.channel, ":heavy_check_mark: You are next in the queue.")

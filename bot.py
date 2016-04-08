@@ -52,8 +52,8 @@ importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
-importlib.import_module("cmds.voice")
-commits = importlib.import_module("cmds.commits")
+from cmds import voice
+from cmds import commits
 
 # =============== End commands
 
@@ -118,6 +118,8 @@ async def on_ready():
         await client.change_status(game=discord.Game(name=game))
     # boot up the github handler
     loop.create_task(commits.check_for_commits(client))
+    # load the voice handler
+    loop.create_task(voice.play_music_from_queue())
 
 
 @client.event
