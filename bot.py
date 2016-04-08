@@ -66,8 +66,6 @@ def init_logging():
     consoleHandler.setFormatter(formatter)
     root.addHandler(consoleHandler)
 
-init_logging()
-
 logger = logging.getLogger("NavalBot")
 
 # Load opus
@@ -307,6 +305,7 @@ async def default(client: discord.Client, message: discord.Message):
 
 
 if __name__ == "__main__":
+    init_logging()
     try:
         loop.run_until_complete(client.start(sys.argv[1], sys.argv[2]))
     except KeyboardInterrupt:
