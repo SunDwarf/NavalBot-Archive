@@ -82,7 +82,7 @@ async def weather(client: discord.Client, message: discord.Message, args: list):
         return
     owm = pyowm.OWM(api_key)
     try:
-        userinput = ' '.join(args[1:])
+        userinput = ' '.join(args[0:])
         # Get it from the place
         observation = owm.weather_at_place(userinput)
         # Get the weather and stuff.
@@ -92,7 +92,7 @@ async def weather(client: discord.Client, message: discord.Message, args: list):
         temp = w.get_temperature('celsius')['temp']
         await client.send_message(
             message.channel,
-            '☁__Weather for {}:__\n** Temperature:** {} °C **Humidity:** {} % **Wind:** {} m/s'
+            '☁_Weather for {}:_\n** Temperature:** {} °C **Humidity:** {} % **Wind:** {} m/s'
                 .format(userinput, temp, humidity, wind)
         )
     except AttributeError:
