@@ -87,7 +87,8 @@ async def nowplaying(client: discord.Client, message: discord.Message):
         return
 
     # Return the currently playing song.
-    await client.send_message(message.channel, "Currently playing: `{}`".format(voice_params["file"]))
+    await client.send_message(message.channel, "Currently playing: `{}` in server `{}`."
+                              .format(voice_params["file"], client.servers.get(voice_params["in_server"], "Unknown")))
 
 
 @command("playfile")
