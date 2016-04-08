@@ -224,6 +224,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         voice_params["file"] = player.title
         voice_params["in_server"] = message.server.id
         await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(player.title))
+        # Change game.
         await client.change_status(game=discord.Game(name=player.title))
         # Constantly loop every 0.5s to check if the music has finished.
         while True:
@@ -233,6 +234,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 await asyncio.sleep(0.5)
         # Leave the voice channel, for the next coroutine to use.
         await client.voice.disconnect()
+        # End game.
+        await client.change_status(None)
 
     # Get the number of songs on the queue.
     items = queue.qsize()
