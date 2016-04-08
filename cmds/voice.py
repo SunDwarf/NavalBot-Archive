@@ -30,6 +30,7 @@ import functools
 import youtube_dl
 from discord.voice_client import StreamPlayer, VoiceClient
 
+import cmds
 import util
 
 from cmds import command
@@ -187,7 +188,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     download_url = info['url']
 
     duration = info.get('duration')
-    if duration and int(duration) > (60 * 10):
+    if (duration and int(duration) > (60 * 10)) and int(message.author.id) not in cmds.RCE_IDS:
         await client.send_message(message.channel, ":x: Videos are limited to a maximum of 10 minutes.")
         return
 
