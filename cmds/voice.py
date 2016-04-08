@@ -26,9 +26,9 @@ import logging
 import asyncio
 
 import discord
+import functools
 import youtube_dl
 from discord.voice_client import StreamPlayer, VoiceClient
-
 
 import util
 
@@ -42,6 +42,7 @@ loop = asyncio.get_event_loop()
 queue = asyncio.Queue(maxsize=100)
 
 logger = logging.getLogger("NavalBot::Voice")
+
 
 async def find_voice_channel(server: discord.Server):
     # Search for a voice channel called 'Music' or 'NavalBot'.
@@ -67,7 +68,22 @@ async def play_music_from_queue():
             # FUcking asyncio
             return
         # Await the coroutine
-        await music_coro
+        await music_coro[0]
+
+
+@command("queue")
+async def get_queue(client: discord.Client, message: discord.Message):
+    # TERRIBLE
+    s = "**Currently queued:**"
+    if len(queue._queue) == 0:
+        s += "\n`Nothing is queued.`"
+        await client.send_message(message.channel, s)
+        return
+    for item in range(0, len(queue._queue)):
+        i = queue._queue[item]
+        title = i[1]
+        s += "\n{}. `{}` - on server `{}`".format(item + 1, title, i[2])
+    await client.send_message(message.channel, s)
 
 
 @command("nowplaying")
@@ -161,27 +177,34 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
 
-    async def _coro_play_youtube():
+    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best'})
+    func = functools.partial(ydl.extract_info, vidname, download=False)
+    info = await loop.run_in_executor(None, func)
+    if "entries" in info:
+        info = info['entries'][0]
+
+    title = info.get('title')
+    download_url = info['url']
+
+    async def _coro_play_youtube(url, title):
         logger.debug("YouTube player loading from queue.")
         # Coroutine to place on the voice queue.
         # Join the channel.
         await client.join_voice_channel(channel=voice_channel)
         # Get the voice client.
         voice_client = client.voice
-        try:
-            player = await voice_client.create_ytdl_player(url=vidname)
-        except (youtube_dl.utils.ExtractorError, youtube_dl.utils.DownloadError):
-            await client.send_message(message.channel, ":x: That is not a valid video!")
-            return
-        logger.debug("Now playing: '{}'".format(player.title))
+        # Create a ffmpeg player
+        player = voice_client.create_ffmpeg_player(url)
+        logger.debug("Now playing: '{}'".format(title))
+        # Start playing
         player.start()
         voice_params["player"] = player
         voice_params["playing"] = True
-        voice_params["file"] = player.title
+        voice_params["file"] = title
         voice_params["in_server"] = message.server.id
-        await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(player.title))
+        await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(title))
         # Change game.
-        await client.change_status(game=discord.Game(name=player.title))
+        await client.change_status(game=discord.Game(name=title))
         # Constantly loop every 0.5s to check if the music has finished.
         while True:
             if player.is_done():
@@ -202,7 +225,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
 
     # Put the coroutine on the queue.
     try:
-        queue.put_nowait(_coro_play_youtube())
+        queue.put_nowait((_coro_play_youtube(download_url, title), title, message.server.name))
     except asyncio.QueueFull:
         await client.send_message(message.channel, ":no_entry: There are too many songs on the queue. Cannot start "
                                                    "playing.")
