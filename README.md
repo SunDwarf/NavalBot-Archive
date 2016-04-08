@@ -17,7 +17,7 @@ E.g: `>> python35 bot.py youremail@address.com yourpassword`
 
 Make sure to create a `Bot Commander` role and assign it to your Discord moderators/admins.  
 Members with the `Bot Commander` role can execute specifc commands that are inaccessible for regular members.  
-Your bot needs the `Admin` flag in order for moderation commands like `?kick` or `?ban` to work.  
+Your bot needs the `Admin` flag in order for moderation commands like `?kick` or `?ban` to work. 
 
 ## Available commands
 ### Commands
