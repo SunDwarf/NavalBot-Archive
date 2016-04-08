@@ -118,15 +118,6 @@ async def on_ready():
         os.makedirs(os.path.join(os.getcwd(), "files"))
     except FileExistsError:
         pass
-    # Set the current game, as saved.
-    cursor.execute("SELECT (value) FROM configuration WHERE configuration.name = 'game'")
-    result = cursor.fetchone()
-    if not result:
-        # Ignore.
-        return
-    else:
-        game = result[0]
-        await client.change_status(game=discord.Game(name=game))
     # load the voice handler
     loop.create_task(voice.play_music_from_queue())
 

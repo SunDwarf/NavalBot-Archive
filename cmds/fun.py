@@ -75,14 +75,14 @@ async def weather(client: discord.Client, message: discord.Message, args: list):
     """
     Displays the weather of a specified place.
     """
-    api_key = util.get_config(message.server.id, "owm_api_key")
+    api_key = util.get_config(None, "owm_api_key")
     if not api_key:
         await client.send_message(message.channel, ":exclamation: You have not set the API key. Set it with `setcfg "
                                                    "owm_api_key <your_api_key>`.")
         return
     owm = pyowm.OWM(api_key)
     try:
-        userinput = ' '.join(message.content.split(" ")[1:])
+        userinput = ' '.join(args[1:])
         # Get it from the place
         observation = owm.weather_at_place(userinput)
         # Get the weather and stuff.

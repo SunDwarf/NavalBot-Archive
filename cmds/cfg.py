@@ -29,28 +29,6 @@ import cmds
 import util
 
 
-@cmds.command("game")
-@util.with_permission("Bot Commander")
-async def game(client: discord.Client, message: discord.Message):
-    """
-    Changes the game of the bot.
-    """
-    # Set my game
-    game = ' '.join(message.content.split(" ")[1:])
-
-    if len(game) < 64:
-        # user has perms
-        await client.change_status(game=discord.Game(name=game))
-        await client.send_message(message.channel, ":thumbsup: Changed game to `{}`".format(game))
-        # save it in the DB
-        util.cursor.execute("""INSERT OR REPLACE INTO configuration (id, name, value)
-                      VALUES ((SELECT id FROM configuration WHERE name = 'game'), 'game', ?)""", (game,))
-        util.db.commit()
-
-    else:
-        await client.send_message(message.channel, ":no_entry: The game name entered was too long.")
-
-
 @cmds.command("lock")
 async def lock(client: discord.Client, message: discord.Message):
     """
