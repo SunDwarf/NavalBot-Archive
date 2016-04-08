@@ -186,6 +186,11 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     title = info.get('title')
     download_url = info['url']
 
+    duration = info.get('duration')
+    if duration and int(duration) > (60 * 10):
+        await client.send_message(message.channel, ":x: Videos are limited to a maximum of 10 minutes.")
+        return
+
     async def _coro_play_youtube(url, title):
         logger.debug("YouTube player loading from queue.")
         # Coroutine to place on the voice queue.
