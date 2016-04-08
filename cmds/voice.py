@@ -58,7 +58,11 @@ async def find_voice_channel(server: discord.Server):
 async def play_music_from_queue():
     # Loads music from the queue and plays it.
     while True:
-        music_coro = await queue.get()
+        try:
+            music_coro = await queue.get()
+        except RuntimeError:
+            # FUcking asyncio
+            return
         # Await the coroutine
         await music_coro
 

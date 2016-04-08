@@ -25,17 +25,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import discord
 import subprocess
-
-import bot
+import asyncio
 
 # RCE ids
 import cmds
 import util
 
+loop = asyncio.get_event_loop()
+
 
 @cmds.command("sql")
 async def sql(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) in bot.RCE_IDS:
+    if not int(message.author.id) in cmds.RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")
         return
     else:
@@ -45,14 +46,14 @@ async def sql(client: discord.Client, message: discord.Message):
 
 @cmds.command("py")
 async def py(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) in bot.RCE_IDS:
+    if not int(message.author.id) in cmds.RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")
         return
     else:
         cmd = ' '.join(message.content.split(' ')[1:])
 
         def smsg(content):
-            bot.loop.create_task(client.send_message(message.channel, '`' + content + '`'))
+            loop.create_task(client.send_message(message.channel, '`' + content + '`'))
 
         def ec(cmd):
             data = subprocess.check_output(cmd, shell=True)

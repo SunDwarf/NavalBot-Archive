@@ -29,6 +29,7 @@ import re
 import sys
 import traceback
 from ctypes.util import find_library
+import logging
 
 import aiohttp
 import discord
@@ -43,10 +44,6 @@ import importlib
 
 from util import db, cursor
 
-# Define the admins.
-RCE_IDS = [
-    141545699442425856
-]
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -54,8 +51,24 @@ importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
 from cmds import voice
 
+
 # =============== End commands
 
+# Define logging.
+
+def init_logging():
+    logging.basicConfig(filename='/dev/null', level=logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(name)s -> %(message)s')
+    root = logging.getLogger()
+
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setFormatter(formatter)
+    root.addHandler(consoleHandler)
+
+init_logging()
+
+logger = logging.getLogger("NavalBot")
 
 # Load opus
 found = find_library("opus")
@@ -99,8 +112,9 @@ attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setatt
 # Events.
 @client.event
 async def on_ready():
+    init_logging()
     # print ready msg
-    print("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
+    logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
     # make file dir
     try:
         os.makedirs(os.path.join(os.getcwd(), "files"))
@@ -123,12 +137,14 @@ async def on_ready():
 async def on_message(message: discord.Message):
     # Increment the message count.
     util.msgcount += 1
-    print("-> Recieved message:", message.content, "from", message.author.name)
+    # print("-> Recieved message:", message.content, "from", message.author.name)
+    logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
     if not isinstance(message.channel, discord.PrivateChannel):
-        print("--> On channel: #" + message.channel.name)
+        # print("--> On channel: #" + message.channel.name)
+        logger.info(" On channel: #{message.channel.name}".format(message=message))
     # Check if it matches the command prefix.
     if message.author.name == "NavalBot":
-        print("--> Not processing own message")
+        logger.info("Not processing own message.")
         return
     if message.server is not None:
         prefix = util.get_config(message.server.id, "command_prefix", "?")
@@ -138,7 +154,7 @@ async def on_message(message: discord.Message):
         try:
             coro = commands[message.content[1:].split(' ')[0]](client, message)
         except KeyError as e:
-            print("-> No such command:", e)
+            logger.warning("-> No such command: " + e)
             coro = default(client=client, message=message)
         try:
             await coro
