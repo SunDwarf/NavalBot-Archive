@@ -133,7 +133,11 @@ async def on_message(message: discord.Message):
     if message.author.name == "NavalBot":
         print("--> Not processing own message")
         return
-    if message.content[0] == util.get_config(message.server.id, "command_prefix", "?"):
+    if message.server is not None:
+        prefix = util.get_config(message.server.id, "command_prefix", "?")
+    else:
+        prefix = "?"
+    if message.content[0] == prefix:
         try:
             coro = commands[message.content[1:].split(' ')[0]](client, message)
         except KeyError as e:
