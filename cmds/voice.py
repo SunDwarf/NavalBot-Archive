@@ -21,16 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-import os
 import asyncio
+import os
 
 import discord
 import youtube_dl
 from discord.voice_client import StreamPlayer, VoiceClient
 
 import util
-
 from cmds import command
+from util import cursor
 
 voice_params = {"playing": False, "player": None, "file": "", "in_server": None}
 
@@ -169,6 +169,14 @@ async def stop(client: discord.Client, message: discord.Message):
         # Stop it.
         player.stop()
         voice_params["playing"] = False
+        cursor.execute("SELECT (value) FROM configuration WHERE configuration.name = 'game'")
+        result = cursor.fetchone()
+        if not result:
+            # Ignore.
+            return
+        else:
+            game = result[0]
+            await client.change_status(game=discord.Game(name=game))
 
     await client.send_message(message.channel, ":heavy_check_mark: Stopped playing.")
 
