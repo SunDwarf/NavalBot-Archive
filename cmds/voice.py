@@ -28,6 +28,7 @@ import discord
 import youtube_dl
 from discord.voice_client import StreamPlayer, VoiceClient
 
+
 import util
 
 from cmds import command
@@ -127,6 +128,14 @@ async def stop(client: discord.Client, message: discord.Message):
         # Stop it.
         player.stop()
         voice_params["playing"] = False
+        util.cursor.execute("SELECT (value) FROM configuration WHERE configuration.name = 'game'")
+        result = util.cursor.fetchone()
+        if not result:
+            # Ignore.
+            return
+        else:
+            game = result[0]
+            await client.change_status(game=discord.Game(name=game))
 
     await client.send_message(message.channel, ":heavy_check_mark: Stopped playing.")
 
