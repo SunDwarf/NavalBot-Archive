@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-
 import asyncio
 import os
 import re
@@ -44,6 +43,10 @@ import importlib
 
 from util import db, cursor
 
+__zipdep_zipmodules = ['youtube_dl', 'aiohttp', 'blessings', 'chardet', 'curtsies', 'decorator',
+                       'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'praw', 'pygments', 'pyowm',
+                       'requests', 'six', 'wcwidth', 'websockets', 'ws4py', 'googleapiclient', 'bs4', 'httplib2',
+                       'uritemplate', 'oauth2client', 'update_checker']
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -143,7 +146,7 @@ async def on_message(message: discord.Message):
         try:
             coro = commands[message.content[1:].split(' ')[0]](client, message)
         except KeyError as e:
-            logger.warning("-> No such command: " + e)
+            logger.warning("-> No such command: " + str(e))
             coro = default(client=client, message=message)
         try:
             await coro
