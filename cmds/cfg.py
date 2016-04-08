@@ -41,7 +41,7 @@ async def game(client: discord.Client, message: discord.Message):
     if len(game) < 64:
         # user has perms
         await client.change_status(game=discord.Game(name=game))
-        await client.send_message(message.channel, ":thumbs_up: Changed game to `{}`".format(game))
+        await client.send_message(message.channel, ":thumbsup: Changed game to `{}`".format(game))
         # save it in the DB
         util.cursor.execute("""INSERT OR REPLACE INTO configuration (id, name, value)
                       VALUES ((SELECT id FROM configuration WHERE name = 'game'), 'game', ?)""", (game,))
