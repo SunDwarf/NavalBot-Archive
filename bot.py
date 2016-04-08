@@ -135,7 +135,7 @@ async def on_message(message: discord.Message):
         # print("--> On channel: #" + message.channel.name)
         logger.info(" On channel: #{message.channel.name}".format(message=message))
     # Check if it matches the command prefix.
-    if message.author.name == "NavalBot":
+    if message.author.name == client.user.name:
         logger.info("Not processing own message.")
         return
     if message.server is not None:
