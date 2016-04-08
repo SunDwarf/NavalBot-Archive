@@ -45,7 +45,7 @@ from util import db, cursor
 
 # Define the admins.
 RCE_IDS = [
-    141545699442425856
+    141545699442425856, 151196442986414080
 ]
 
 importlib.import_module("cmds.cfg")

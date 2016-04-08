@@ -216,6 +216,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         voice_params["file"] = player.title
         voice_params["in_server"] = message.server.id
         await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(player.title))
+        await client.change_status(game=discord.Game(name=player.title))
         # Constantly loop every 0.5s to check if the music has finished.
         while True:
             if player.is_done():
