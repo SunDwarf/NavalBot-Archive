@@ -2,8 +2,7 @@
 
 A bot for discord servers using [discord.py] (https://github.com/Rapptz/discord.py)
 
-[Discord Server] (https://discord.gg/0qK6XyI2Fpoo2jgN)
-[Requirements] (https://github.com/SunDwarf/NavalBot/blob/develop/requirements.txt)
+[Discord Server Requirements] (https://github.com/SunDwarf/NavalBot/blob/develop/requirements.txt)
 
 ## Download and Installation
 
