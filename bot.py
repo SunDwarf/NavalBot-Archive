@@ -110,7 +110,6 @@ attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setatt
 # Events.
 @client.event
 async def on_ready():
-    init_logging()
     # print ready msg
     logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
     # make file dir
