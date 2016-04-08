@@ -52,8 +52,7 @@ importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
-importlib.import_module("cmds.voice")
-commits = importlib.import_module("cmds.commits")
+from cmds import voice
 
 # =============== End commands
 
@@ -86,7 +85,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "1.8.0"
+VERSION = "1.9.1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
@@ -116,8 +115,8 @@ async def on_ready():
     else:
         game = result[0]
         await client.change_status(game=discord.Game(name=game))
-    # boot up the github handler
-    loop.create_task(commits.check_for_commits(client))
+    # load the voice handler
+    loop.create_task(voice.play_music_from_queue())
 
 
 @client.event
@@ -131,7 +130,11 @@ async def on_message(message: discord.Message):
     if message.author.name == "NavalBot":
         print("--> Not processing own message")
         return
-    if message.content[0] == util.get_config(message.server.id, "command_prefix", "?"):
+    if message.server is not None:
+        prefix = util.get_config(message.server.id, "command_prefix", "?")
+    else:
+        prefix = "?"
+    if message.content[0] == prefix:
         try:
             coro = commands[message.content[1:].split(' ')[0]](client, message)
         except KeyError as e:

@@ -53,7 +53,9 @@ async def info(client: discord.Client, message: discord.Message):
     Sends a PM with information about the bot.
     """
     await client.send_message(message.channel, "{} `Ok, check your private messages` 👍".format(message.author.mention))
-    await client.send_message(message.author, 'TODO: ADD SOMETHING HERE')
+    await client.send_message(message.author,
+                              "Here's a link with some information:"
+                              " https://github.com/SunDwarf/NavalBot/blob/stable/README.md")
 
 
 @cmds.command("google")
