@@ -126,7 +126,7 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
 
 
 @command("stop")
-@util.with_permission("Bot Commander", "Voice")
+@util.with_permission("Bot Commander", "Voice", "Admin")
 async def stop_vid(client: discord.Client, message: discord.Message):
     """
     Stops the current track being played on the server.

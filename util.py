@@ -124,7 +124,7 @@ def with_permission(*role: str):
                 await client.send_message(message.channel, ":no_entry: Cannot determine your role!")
                 return
             roles = set([r.name for r in message.author.roles])
-            if roles.intersection(role):
+            if roles.intersection(role) or message.author == message.server.owner:
                 await func(client, message)
             else:
                 await client.send_message(message.channel,

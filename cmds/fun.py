@@ -26,6 +26,9 @@ import os
 import random
 
 import asyncio
+
+import functools
+
 import discord
 import pyowm
 from google import search
@@ -68,8 +71,8 @@ async def google(client: discord.Client, message: discord.Message):
     """
     userinput = ' '.join(message.content.split(" ")[1:])
     await client.send_message(message.channel, "The links have been sent to you {}".format(message.author))
-    for url in search(userinput, stop=2):
-        await client.send_message(message.author, url)
+    for url in search(userinput, stop=1):
+        await client.send_message(message.channel, url)
 
 
 @cmds.command("weather")
@@ -107,13 +110,13 @@ async def commands(client: discord.Client, message: discord.Message):
     """
     Lists the commands for the bot.
     """
-    com = ['lock', 'guess', 'reddit', 'info', 'servers', 'version', 'weather', 'whois', 'uptime', 'google',
-           'invite', 'playyt', 'stop',
+    com = ['lock', 'reddit', 'info', 'servers', 'version', 'weather', 'whois', 'uptime', 'google',
+           'playyt', 'stop'
            '\n**Admins only:**\n', 'game', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg',
            'setcfg', 'py', 'sql']
     await client.send_message(message.channel, "**These commands are available:**\n{}".format(
-        '\n'.join([util.get_config(message.server.id, "command_prefix", "?") + c if ' ' not in c else c for c in com
-                   ])))
+        '\n'.join(
+            [util.get_config(message.server.id, "command_prefix", "?") + c if ' ' not in c else c for c in com])))
 
 
 @cmds.command("reddit")
@@ -127,8 +130,9 @@ async def reddit(client: discord.Client, message: discord.Message):
             await client.send_message(message.channel, 'You´re not supposed to search for this ಠ_ಠ')
         else:
             await client.send_message(message.channel, 'The top posts from {} have been sent to you'.format(choice))
-            red_fetched = red.main(userchoice=choice)
-            for link in red_fetched:
+            func = functools.partial(red.main, choice)
+            info = await loop.run_in_executor(None, func)
+            for link in info:
                 await client.send_message(message.author, content=link)
     except TypeError as f:
         print('[ERROR]', f)
