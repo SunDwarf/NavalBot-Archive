@@ -59,7 +59,10 @@ importlib.import_module("cmds.ndc")
 # Define logging.
 
 def init_logging():
-    logging.basicConfig(filename='/dev/null', level=logging.INFO)
+    if sys.platform == "windows":
+        logging.basicConfig(filename='nul', level=logging.INFO)
+    else:
+        logging.basicConfig(filename='/dev/null', level=logging.INFO)
 
     formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(name)s -> %(message)s')
     root = logging.getLogger()
