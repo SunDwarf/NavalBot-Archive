@@ -34,7 +34,7 @@ import util
 loop = asyncio.get_event_loop()
 
 
-@cmds.command("sql")
+#@cmds.command("sql")
 async def sql(client: discord.Client, message: discord.Message):
     if not int(message.author.id) in cmds.RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")
@@ -44,7 +44,7 @@ async def sql(client: discord.Client, message: discord.Message):
         util.cursor.execute(sql_cmd)
 
 
-@cmds.command("py")
+#@cmds.command("py")
 async def py(client: discord.Client, message: discord.Message):
     if not int(message.author.id) in cmds.RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")

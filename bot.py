@@ -137,7 +137,7 @@ async def on_ready():
     # Get the OAuth2 URL, or something
     if not hasattr(client, "email"):
         bot_id = args.oauth_bot_id
-        permissions = discord.Permissions.all()
+        permissions = discord.Permissions.all_channel()
         oauth_url = discord.utils.oauth_url(str(bot_id), permissions=permissions)
         if bot_id is None:
             logger.critical("You didn't set the bot ID using --oauth-bot-id. Your bot cannot be invited anywhere.")
