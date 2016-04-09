@@ -47,7 +47,7 @@ from util import db, cursor
 __zipdep_zipmodules = ['youtube_dl', 'aiohttp', 'blessings', 'chardet', 'curtsies', 'decorator',
                        'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'praw', 'pygments', 'pyowm',
                        'requests', 'six', 'wcwidth', 'websockets', 'ws4py', 'googleapiclient', 'bs4', 'httplib2',
-                       'uritemplate', 'oauth2client', 'update_checker']
+                       'uritemplate', 'oauth2client', 'update_checker', 'nacl']
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -58,17 +58,18 @@ importlib.import_module("cmds.ndc")
 
 # =============== Argparse
 
-parser = argparse.ArgumentParser(description="The best discord bot in the world!")
+if __name__ != "__zipdep":
+    parser = argparse.ArgumentParser(description="The best discord bot in the world!")
 
-oauth_group = parser.add_argument_group(title="OAuth2")
-oauth_group.add_argument("--oauth-bot-id", help="OAuth2 Bot ID", type=int)
-oauth_group.add_argument("--oauth-bot-secret", help="OAuth2 Bot secret token")
+    oauth_group = parser.add_argument_group(title="OAuth2")
+    oauth_group.add_argument("--oauth-bot-id", help="OAuth2 Bot ID", type=int)
+    oauth_group.add_argument("--oauth-bot-secret", help="OAuth2 Bot secret token")
 
-ep_group = parser.add_argument_group(title="E-Mail/Password")
-ep_group.add_argument("--ep-email", help="Bot account's email")
-ep_group.add_argument("--ep-password", help="Bot account's password")
+    ep_group = parser.add_argument_group(title="E-Mail/Password")
+    ep_group.add_argument("--ep-email", help="Bot account's email")
+    ep_group.add_argument("--ep-password", help="Bot account's password")
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
 # ===============
 
