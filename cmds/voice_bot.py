@@ -159,7 +159,6 @@ async def stop_vid(client: discord.Client, message: discord.Message):
 @command("play")
 @command("playyt")
 @command("playyoutube")
-@util.with_permission("Bot Commander", "Voice")
 @util.enforce_args(1, ":x: You must pass a video!")
 async def play_youtube(client: discord.Client, message: discord.Message, args: list):
     """
