@@ -353,9 +353,9 @@ def main():
     except KeyboardInterrupt:
         loop.run_until_complete(client.logout())
         loop.set_exception_handler(lambda *args, **kwargs: None)
-    except AttributeError:
-        logger.error("I don't know what happened, but we're starting again.")
-        main()
+    except Exception:
+        logger.error("Crashed. Don't know how, don't care. Exiting.")
+        sys.exit(1)
     finally:
         loop.close()
     logger.info("NavalBot shutting down.")
