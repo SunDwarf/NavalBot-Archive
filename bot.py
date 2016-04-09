@@ -54,12 +54,21 @@ importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
 
-
 # =============== End commands
 
 # =============== Argparse
 
+parser = argparse.ArgumentParser(description="The best discord bot in the world!")
 
+oauth_group = parser.add_argument_group(title="OAuth2")
+oauth_group.add_argument("--oauth-bot-id", help="OAuth2 Bot ID", type=int)
+oauth_group.add_argument("--oauth-bot-secret", help="OAuth2 Bot secret token")
+
+ep_group = parser.add_argument_group(title="E-Mail/Password")
+ep_group.add_argument("--ep-email", help="Bot account's email")
+ep_group.add_argument("--ep-password", help="Bot account's password")
+
+args = parser.parse_args()
 
 # ===============
 
@@ -77,6 +86,7 @@ def init_logging():
     consoleHandler = logging.StreamHandler()
     consoleHandler.setFormatter(formatter)
     root.addHandler(consoleHandler)
+
 
 logger = logging.getLogger("NavalBot")
 logger.setLevel(logging.DEBUG)
@@ -125,8 +135,12 @@ attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setatt
 async def on_ready():
     # Get the OAuth2 URL, or something
     if not hasattr(client, "email"):
+        bot_id = args.oauth_bot_id
         permissions = discord.Permissions.all()
-        oauth_url = discord.utils.oauth_url("168360799629344768", permissions=permissions)
+        oauth_url = discord.utils.oauth_url(str(bot_id), permissions=permissions)
+        if bot_id is None:
+            logger.critical("You didn't set the bot ID using --oauth-bot-id. Your bot cannot be invited anywhere.")
+            sys.exit(1)
         logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
         from cmds import voice_bot as voice
     else:
@@ -320,12 +334,17 @@ async def default(client: discord.Client, message: discord.Message):
 
 if __name__ == "__main__":
     init_logging()
-    if len(sys.argv) == 2:
-        login = (sys.argv[1],)
-        logger.info("Attempting login using OAuth2.")
+    # Switch login method based on args.
+    login = None
+    if args.oauth_bot_id is not None:
+        login = (args.oauth_bot_secret,)
+    elif args.ep_email is not None:
+        login = (args.ep_email, args.ep_password)
     else:
-        login = (sys.argv[1], sys.argv[2])
-        logger.warning("Attempting login using old system!")
+        logger.error("You must use one login method!")
+        loop.set_exception_handler(lambda *args, **kwargs: None)
+        sys.exit(1)
+
     try:
         loop.run_until_complete(client.start(*login))
     except KeyboardInterrupt:
