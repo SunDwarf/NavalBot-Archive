@@ -176,6 +176,9 @@ async def on_message(message: discord.Message):
         prefix = util.get_config(message.server.id, "command_prefix", "?")
     else:
         prefix = "?"
+    if len(message.content) == 0:
+        logger.info("Ignoring (presumably) image-only message.")
+        return
     if message.content[0] == prefix:
         try:
             coro = commands[message.content[1:].split(' ')[0]](client, message)

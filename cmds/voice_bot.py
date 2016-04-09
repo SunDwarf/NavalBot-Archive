@@ -66,6 +66,7 @@ async def _await_queue(server_id: str):
         # Await the playing coroutine.
         await items[0]
 
+
 @command("np")
 @command("nowplaying")
 async def np(client: discord.Client, message: discord.Message):
@@ -91,6 +92,37 @@ async def np(client: discord.Client, message: discord.Message):
 
     title = voice_params[message.server.id].get("title", "??? Internal error")
     await client.send_message(message.channel, content="Currently playing: `{}`".format(title))
+
+
+@command("queued")
+async def get_queued_vids(client: discord.Client, message: discord.Message):
+    # STILL HORRIBLE
+
+    # Get the current player instance.
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if message.server.id not in voice_params:
+        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+        return
+
+    queue = voice_params[message.server.id].get('queue', [])
+    if queue:
+        queue = queue._queue
+
+    s = "**Currently queued:**"
+    if len(queue) == 0:
+        s += "\n`Nothing is queued.`"
+        await client.send_message(message.channel, s)
+        return
+
+    for item in range(0, len(queue)):
+        i = queue[item]
+        title = i[1].get('title')
+        s += "\n{}. `{}`".format(item + 1, title)
+    await client.send_message(message.channel, s)
+
 
 @command("stop")
 @util.with_permission("Bot Commander", "Voice")
