@@ -176,7 +176,8 @@ async def on_message(message: discord.Message):
     if message.server is not None:
         prefix = util.get_config(message.server.id, "command_prefix", "?")
     else:
-        prefix = "?"
+        await client.send_message(message.channel, "I don't accept private messages.")
+        return
     if len(message.content) == 0:
         logger.info("Ignoring (presumably) image-only message.")
         return
