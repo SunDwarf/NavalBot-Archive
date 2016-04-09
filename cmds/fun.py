@@ -111,7 +111,8 @@ async def commands(client: discord.Client, message: discord.Message):
            'invite', '\n**Admins only:**\n', 'game', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg',
            'setcfg', 'py', 'sql']
     await client.send_message(message.channel, "**These commands are available:**\n{}".format(
-        '\n'.join([util.get_config(message.server.id, "command_prefix") + c if ' ' not in c else c for c in com ])))
+        '\n'.join([util.get_config(message.server.id, "command_prefix", "?") + c if ' ' not in c else c for c in com
+                   ])))
 
 
 @cmds.command("reddit")
