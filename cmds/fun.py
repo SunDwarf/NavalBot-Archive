@@ -38,6 +38,7 @@ import util
 
 loop = asyncio.get_event_loop()
 
+
 @cmds.command("choice")
 @util.enforce_args(2)
 async def choice(client: discord.Client, message: discord.Message, args: list):
@@ -106,10 +107,11 @@ async def commands(client: discord.Client, message: discord.Message):
     """
     Lists the commands for the bot.
     """
-    com = ['-lock', '-guess', '-reddit', '-info', '-servers', '-version', '-weather', '-whois', '-uptime', '-google',
-           '-invite''\n**Admins only:**', '-game', '-kick', '-ban', '-unban', '-mute', '-unmute', '-delete', '-getcfg',
-           '-setcfg', '-py', '-sql']
-    await client.send_message(message.channel, "**These commands are available:**\n{}".format('\n'.join(com)))
+    com = ['lock', 'guess', 'reddit', 'info', 'servers', 'version', 'weather', 'whois', 'uptime', 'google',
+           'invite', '\n**Admins only:**\n', 'game', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg',
+           'setcfg', 'py', 'sql']
+    await client.send_message(message.channel, "**These commands are available:**\n{}".format(
+        '\n'.join([util.get_config(message.server.id, "command_prefix") + c if ' ' not in c else c for c in com ])))
 
 
 @cmds.command("reddit")

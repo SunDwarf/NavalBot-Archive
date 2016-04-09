@@ -1,9 +1,24 @@
 # NavalBot 2.x
 
+[![Requirements Status](https://requires.io/github/SunDwarf/NavalBot/requirements.svg?branch=develop)](https://requires.io/github/SunDwarf/NavalBot/requirements/?branch=develop)
+
 A bot for discord servers using [discord.py] (https://github.com/Rapptz/discord.py)
 
 [Join our test server!](https://discord.gg/0tfUHkzxPbHCAel9)  
 [Discord Server Requirements] (https://github.com/SunDwarf/NavalBot/blob/develop/requirements.txt)
+
+## Why use NavalBot?
+
+NavalBot is the best multi purpose bot available.  
+
+It currently supports:
+
+ - Custom factoids
+ - Music playing, even in multiple servers
+ - Moderation abilities
+ - Other fun commands
+ 
+Unlike many other bots, it's also fast due to the asyncio-based back end.
 
 ## Download and Installation
 
@@ -46,11 +61,8 @@ Your bot needs the `Admin` flag in order for moderation commands like `?kick` or
 - ?searchyt
 
 #### Music commands:
-- ?joinvoice
-- ?leavevoice
 - ?nowplaying
 - ?np
-- ?playfile
 - ?playyoutube
 - ?playyt
 - ?stop
