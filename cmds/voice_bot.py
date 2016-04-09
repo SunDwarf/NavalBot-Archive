@@ -95,6 +95,7 @@ async def np(client: discord.Client, message: discord.Message):
 
 
 @command("queued")
+@command("queue")
 async def get_queued_vids(client: discord.Client, message: discord.Message):
     # STILL HORRIBLE
 
