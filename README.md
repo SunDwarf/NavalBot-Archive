@@ -1,8 +1,8 @@
-# NavalBot 1.x
+# NavalBot 2.x
 
 A bot for discord servers using [discord.py] (https://github.com/Rapptz/discord.py)
 
-[Join our test server!](https://discord.gg/0tfUHkzxPbHCAel9)
+[Join our test server!](https://discord.gg/0tfUHkzxPbHCAel9)  
 [Discord Server Requirements] (https://github.com/SunDwarf/NavalBot/blob/develop/requirements.txt)
 
 ## Download and Installation
