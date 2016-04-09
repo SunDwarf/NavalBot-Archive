@@ -335,10 +335,9 @@ async def default(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, content)
 
 
-if __name__ == "__main__":
+def main():
     init_logging()
     # Switch login method based on args.
-    login = None
     if args.oauth_bot_id is not None:
         login = (args.oauth_bot_secret,)
     elif args.ep_email is not None:
@@ -347,7 +346,6 @@ if __name__ == "__main__":
         logger.error("You must use one login method!")
         loop.set_exception_handler(lambda *args, **kwargs: None)
         sys.exit(1)
-
     try:
         loop.run_until_complete(client.start(*login))
     except KeyboardInterrupt:
@@ -356,3 +354,6 @@ if __name__ == "__main__":
     finally:
         loop.close()
     logger.info("NavalBot shutting down.")
+
+if __name__ == "__main__":
+    main()
