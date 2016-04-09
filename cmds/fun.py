@@ -70,9 +70,8 @@ async def google(client: discord.Client, message: discord.Message):
     Searches google for the top two results for the search.
     """
     userinput = ' '.join(message.content.split(" ")[1:])
-    await client.send_message(message.channel, "The links have been sent to you {}".format(message.author))
-    for url in search(userinput, stop=1):
-        await client.send_message(message.channel, url)
+    l = list(search(userinput, stop=1))[0]
+    await client.send_message(message.channel, l)
 
 
 @cmds.command("weather")
