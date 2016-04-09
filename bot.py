@@ -59,7 +59,7 @@ importlib.import_module("cmds.ndc")
 # Define logging.
 
 def init_logging():
-    if sys.platform == "windows":
+    if sys.platform == "win32":
         logging.basicConfig(filename='nul', level=logging.INFO)
     else:
         logging.basicConfig(filename='/dev/null', level=logging.INFO)
