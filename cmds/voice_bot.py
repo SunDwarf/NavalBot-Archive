@@ -188,6 +188,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         info = await loop.run_in_executor(None, func)
     except Exception as e:
         await client.send_message(message.channel, ":no_entry: Something went horribly wrong. Error: {}".format(e))
+        return
 
     if "entries" in info:
         info = info['entries'][0]
