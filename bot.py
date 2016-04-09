@@ -114,6 +114,13 @@ attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setatt
 # Events.
 @client.event
 async def on_ready():
+    # Get the OAuth2 URL, or something
+    if client.token:
+        permissions = discord.Permissions.all()
+        oauth_url = discord.utils.oauth_url("168360799629344768", permissions=permissions)
+        logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
+    else:
+        logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
     # print ready msg
     logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
     # make file dir
@@ -300,8 +307,12 @@ async def default(client: discord.Client, message: discord.Message):
 
 if __name__ == "__main__":
     init_logging()
+    if len(sys.argv) == 2:
+        login = (sys.argv[1],)
+    else:
+        login = (sys.argv[1], sys.argv[2])
     try:
-        loop.run_until_complete(client.start(sys.argv[1], sys.argv[2]))
+        loop.run_until_complete(client.start(*login))
     except KeyboardInterrupt:
         loop.run_until_complete(client.logout())
         loop.set_exception_handler(lambda *args, **kwargs: None)
