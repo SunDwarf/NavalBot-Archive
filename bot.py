@@ -114,7 +114,7 @@ attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setatt
 @client.event
 async def on_ready():
     # Get the OAuth2 URL, or something
-    if not client.email:
+    if not hasattr(client, "email"):
         permissions = discord.Permissions.all()
         oauth_url = discord.utils.oauth_url("168360799629344768", permissions=permissions)
         logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
