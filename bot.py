@@ -29,6 +29,7 @@ import sys
 import traceback
 from ctypes.util import find_library
 import logging
+import argparse
 
 import aiohttp
 import discord
@@ -55,6 +56,12 @@ importlib.import_module("cmds.ndc")
 
 
 # =============== End commands
+
+# =============== Argparse
+
+
+
+# ===============
 
 # Define logging.
 
@@ -124,7 +131,7 @@ async def on_ready():
         from cmds import voice_bot as voice
     else:
         logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
-        from cmds import voice_queues as voice
+        from cmds import voice_queue as voice
     # print ready msg
     logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
     # make file dir
