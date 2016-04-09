@@ -25,6 +25,7 @@ import datetime
 import os
 import random
 
+import asyncio
 import discord
 import pyowm
 from google import search
@@ -35,6 +36,7 @@ import nsfw
 import red
 import util
 
+loop = asyncio.get_event_loop()
 
 @cmds.command("choice")
 @util.enforce_args(2)
@@ -213,3 +215,29 @@ async def coin(client: discord.Client, message: discord.Message):
     """
     random_choice = (["Heads!"] * 49) + (["Tails!"] * 49) + ["On the side!"]
     await client.send_message(message.channel, random.choice(random_choice))
+
+
+@cmds.command("remindme")
+@util.enforce_args(2, error_msg=":x: You must provide a time and reason!")
+async def remind_me(client: discord.Client, message: discord.Message, args: list):
+    time = args[0]
+    try:
+        time = int(time)
+    except ValueError:
+        await client.send_message(message.channel, ":x: That is not a valid time in seconds!")
+        return
+    to_remind = ' '.join(args[1:])
+
+    async def __remind_coro():
+        await asyncio.sleep(time)
+        await client.send_message(message.channel,
+                                  "{message.author.mention} Reminder for: `{r}`".format(message=message, r=to_remind))
+        return
+
+    await client.send_message(
+        message.channel,
+        "{message.author.mention} Ok, reminding you in `{s}` seconds for `{r}`.".format(message=message, r=to_remind,
+                                                                                        s=time)
+    )
+
+    loop.create_task(__remind_coro())
