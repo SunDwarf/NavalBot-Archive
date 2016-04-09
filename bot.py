@@ -52,7 +52,6 @@ importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
-from cmds import voice
 
 
 # =============== End commands
@@ -115,12 +114,14 @@ attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setatt
 @client.event
 async def on_ready():
     # Get the OAuth2 URL, or something
-    if client.token:
+    if not client.email:
         permissions = discord.Permissions.all()
         oauth_url = discord.utils.oauth_url("168360799629344768", permissions=permissions)
         logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
+        from cmds import voice_bot as voice
     else:
         logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
+        from cmds import voice_queues as voice
     # print ready msg
     logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
     # make file dir
@@ -129,7 +130,9 @@ async def on_ready():
     except FileExistsError:
         pass
     # load the voice handler
-    loop.create_task(voice.play_music_from_queue())
+    if hasattr(voice, "play_music_from_queue"):
+        logger.warning("Using old queue-based music player!")
+        loop.create_task(voice.play_music_from_queue())
 
 
 @client.event
@@ -309,8 +312,10 @@ if __name__ == "__main__":
     init_logging()
     if len(sys.argv) == 2:
         login = (sys.argv[1],)
+        logger.info("Attempting login using OAuth2.")
     else:
         login = (sys.argv[1], sys.argv[2])
+        logger.warning("Attempting login using old system!")
     try:
         loop.run_until_complete(client.start(*login))
     except KeyboardInterrupt:
