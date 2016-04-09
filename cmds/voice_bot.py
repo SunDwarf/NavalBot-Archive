@@ -66,6 +66,31 @@ async def _await_queue(server_id: str):
         # Await the playing coroutine.
         await items[0]
 
+@command("np")
+@command("nowplaying")
+async def np(client: discord.Client, message: discord.Message):
+    # Get the current player instance.
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if message.server.id not in voice_params:
+        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+        return
+
+    playing = voice_params[message.server.id].get("playing")
+    if not playing:
+        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+        return
+
+    player = voice_params[message.server.id].get("player")
+    if not player:
+        # ???
+        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+        return
+
+    title = voice_params[message.server.id].get("title", "??? Internal error")
+    await client.send_message(message.channel, content="Currently playing: `{}`".format(title))
 
 @command("stop")
 @util.with_permission("Bot Commander", "Voice")
