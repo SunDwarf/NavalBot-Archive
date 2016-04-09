@@ -67,6 +67,39 @@ async def _await_queue(server_id: str):
         await items[0]
 
 
+@command("stop")
+@util.with_permission("Bot Commander", "Voice")
+async def stop_vid(client: discord.Client, message: discord.Message):
+    """
+    Stops the current track being played on the server.
+    You must have the Voice or Bot Commander role to use this command.
+    """
+    # Get the current player instance.
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if message.server.id not in voice_params:
+        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+        return
+
+    playing = voice_params[message.server.id].get("playing")
+    if not playing:
+        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+        return
+
+    player = voice_params[message.server.id].get("player")
+    if not player:
+        # ???
+        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+        return
+
+    # Finally, stop the player.
+    player.stop()
+    await client.send_message(message.channel, content=":heavy_check_mark: Stopped current song.")
+
+
+@command("play")
 @command("playyt")
 @command("playyoutube")
 @util.with_permission("Bot Commander", "Voice")
@@ -77,7 +110,6 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     This included things such as YouTube (obviously) and SoundCloud.
     You must have the Voice or Bot Commander role to use this command.
     """
-
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
         return
@@ -149,6 +181,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 break
             else:
                 await asyncio.sleep(0.5)
+        # Reset everything after it's done.
+        voice_params[message.server.id]["playing"] = False
+        voice_params[message.server.id]["title"] = ""
+        voice_params[message.server.id]["player"] = None
 
     # Get the number of songs on the queue.
     items = queue.qsize()
