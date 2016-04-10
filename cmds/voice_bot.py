@@ -275,6 +275,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         voice_client = await client.join_voice_channel(channel=voice_channel)
     else:
         voice_client = client.voice[message.server.id]
+        assert isinstance(voice_client, discord.VoiceClient)
+        if not voice_client.is_connected():
+            # Reconnect the voice client.
+            await voice_client.connect()
 
     async def _oauth2_play_youtube(d, t):
         # Much smaller than voice_queue, as we don't have to do fucky logic.
