@@ -24,16 +24,30 @@ Unlike many other bots, it's also fast due to the asyncio-based back end.
 
 1. Download the latest release from [the releases page] (https://github.com/sundwarf/navalbot/releases/latest)  
 2. Put the files (unzipped if you downloaded the .zip) in a new folder on your computer.  
-3. Open up `bot.py` and change `RCE_IDS` to match your Discord user id.  
+3. Open up `__init__.py` and change `RCE_IDS` to match your Discord user id.  
 
 Next, open your command line and launch `bot.py` with the login credentials for your bot.  
-E.g: `>> python35 bot.py youremail@address.com yourpassword`
+E.g: `>>  python bot.py --oauth-bot-id <client-id> --oauth-bot-secret <oauth secret>`
 
 ## Configuration
 
 Make sure to create a `Bot Commander` role and assign it to your Discord moderators/admins.  
 Members with the `Bot Commander` role can execute specifc commands that are inaccessible for regular members.  
 Your bot needs the `Admin` flag in order for moderation commands like `?kick` or `?ban` to work. 
+
+## Creating the `Muted` Role
+
+This role is needed for the ?mute and ?unmute command to work
+
+1. Create a role named 'Muted'
+2. Go into your server settings and edit the permissions for the role
+    - [Screenshot](http://i.imgur.com/0VRu2Ff.png)
+    - Make sure that only these three options are enabled
+3. Go into the channel specific permissions and make sure that none of the `@everyone` permissions are checked
+    - [Screenshot](https://i.imgur.com/3t4zmTF.png)
+4. Add the `Muted` role and remove these permissions
+    - [Screenshot](https://i.imgur.com/iuKw1i8.png)
+    - Repeat this step for every channel in which you want the `Muted` role to work
 
 ## Available commands
 ### Commands
@@ -58,14 +72,16 @@ Your bot needs the `Admin` flag in order for moderation commands like `?kick` or
 - ?stats
 - ?lock
 - ?reddit
-- ?searchyt
 
 #### Music commands:
+- ?searchyt
 - ?nowplaying
 - ?np
 - ?playyoutube
-- ?playyt
+- ?playyt / ?play
 - ?stop
+- ?skip
+- ?queue
 
 #### Moderation commands
 - ?mute
