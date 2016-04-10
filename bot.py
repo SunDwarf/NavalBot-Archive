@@ -349,7 +349,6 @@ def main():
         login = (args.ep_email, args.ep_password)
     else:
         logger.error("You must use one login method!")
-        loop.set_exception_handler(lambda *args, **kwargs: None)
         sys.exit(1)
 
     while True:
@@ -357,7 +356,6 @@ def main():
             loop.run_until_complete(client.start(*login))
         except KeyboardInterrupt:
             loop.run_until_complete(client.logout())
-            loop.set_exception_handler(lambda *args, **kwargs: None)
             return
         except Exception:
             import traceback
