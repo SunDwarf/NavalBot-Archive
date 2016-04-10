@@ -67,6 +67,34 @@ async def _await_queue(server_id: str):
         await items[0]
 
 
+@command("reset")
+@util.with_permission("Bot Commander", "Voice", "Admin")
+async def reset_voice(client: discord.Client, message: discord.Message):
+    # Load the server params.
+    if message.server.id in voice_params:
+        s_p = voice_params[message.server.id]
+        # Reset the task.
+        task = s_p.get("task")
+        if task:
+            assert isinstance(task, asyncio.Task)
+            # Cancel the task.
+            task.cancel()
+            del s_p["task"]
+        # Empty the queue.
+        if 'queue' in s_p:
+            del s_p['queue']
+        s_p['playing'] = False
+        player = s_p.get("player")
+        if player:
+            assert isinstance(player, discord.voice_client.StreamPlayer)
+            player.stop()
+            del s_p["player"]
+        # Set the dictionary again.
+        voice_params[message.server.id] = s_p
+
+    await client.send_message(message.channel, ":heavy_check_mark: ")
+
+
 @command("np")
 @command("nowplaying")
 async def np(client: discord.Client, message: discord.Message):
