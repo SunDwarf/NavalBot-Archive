@@ -91,11 +91,11 @@ async def reset_voice(client: discord.Client, message: discord.Message):
             player.stop()
             del s_p["player"]
         # Set the dictionary again.
-        voice_params[message.server.id] = s_p
-        # Disconnect from voice
-        if message.server.id in client.voice:
-            await client.voice[message.server.id].disconnect()
-            del client.voice[message.server.id]
+        del voice_params[message.server.id]
+    # Disconnect from voice
+    if message.server.id in client.voice:
+        await client.voice[message.server.id].disconnect()
+        del client.voice[message.server.id]
 
     await client.send_message(message.channel, ":heavy_check_mark: Reset voice parameters.")
 
