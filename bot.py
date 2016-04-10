@@ -218,9 +218,11 @@ async def on_message(message: discord.Message):
     if len(message.content) == 0:
         logger.info("Ignoring (presumably) image-only message.")
         return
-    if message.content[0] == prefix:
+    if message.content.startswith(prefix):
+        cmd_content = message.content[len(prefix):]
+        cmd_word = cmd_content.split(" ")[0]
         try:
-            coro = commands[message.content[1:].split(' ')[0]](client, message)
+            coro = commands[cmd_word](client, message)
         except KeyError as e:
             logger.warning("-> No such command: " + str(e))
             coro = default(client=client, message=message)
