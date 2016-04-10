@@ -70,6 +70,11 @@ async def _await_queue(server_id: str):
 @command("reset")
 @util.with_permission("Bot Commander", "Voice", "Admin")
 async def reset_voice(client: discord.Client, message: discord.Message):
+    """
+    Resets NavalBot's voice.
+
+    This stops all currently playing songs in this server, and destroys the queue.
+    """
     # Load the server params.
     if message.server.id in voice_params:
         s_p = voice_params[message.server.id]
@@ -199,6 +204,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     Plays a video from any valid streaming source that `youtube-dl` can download from.
     This included things such as YouTube (obviously) and SoundCloud.
     You must have the Voice or Bot Commander role to use this command.
+    Use ?stop or ?skip to skip a song, ?queue to see the current queue of songs, ?np to see the currently playing
+    track, and ?reset to fix the queue.
     """
     if not discord.opus.is_loaded():
         await client.send_message(message.channel, content=":x: Cannot load voice module.")
@@ -219,12 +226,17 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
 
-    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best'})
+    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True})
     func = functools.partial(ydl.extract_info, vidname, download=False)
     try:
         info = await loop.run_in_executor(None, func)
     except Exception as e:
         await client.send_message(message.channel, ":no_entry: Something went horribly wrong. Error: {}".format(e))
+        return
+
+    if not info:
+        await client.send_message(message.channel, ":no_entry: Something went horribly wrong. Could not get video "
+                                                   "information.")
         return
 
     if "entries" in info:
@@ -308,6 +320,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     else:
         # Loop over each item from the playlist.
         for num, item in enumerate(pl_data):
+            if not item:
+                continue
             if num == 99:
                 await client.send_message(
                     message.channel,
