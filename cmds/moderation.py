@@ -25,6 +25,7 @@ import discord
 
 import cmds
 import util
+from bot import get_file
 from exceptions import CommandError
 
 
@@ -147,3 +148,14 @@ async def invite(client: discord.Client, message: discord.Message):
     await client.accept_invite(invite)
     await client.send_message(message.channel, "Joined server specified.")
 
+
+@cmds.command("avatar")
+@util.with_permission("devrole")
+@util.enforce_args(1, error_msg='You need to provide a link')
+async def avatar(client: discord.Client, message: discord.Message, args: list):
+    file = args[0]
+
+    await get_file((client, message), url=file, name='avatar.jpg')
+    fp = open(r'files\avatar.jpg', 'rb')
+    await client.edit_profile(avatar=fp.read())
+    await client.send_message(message.channel, "Avater got changed!")

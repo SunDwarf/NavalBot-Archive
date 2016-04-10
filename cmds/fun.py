@@ -21,13 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
+import asyncio
 import datetime
 import os
 import random
-
-import asyncio
-
-import functools
 
 import discord
 import pyowm
@@ -35,8 +32,6 @@ from google import search
 from googleapiclient.discovery import build
 
 import cmds
-import nsfw
-import red
 import util
 
 loop = asyncio.get_event_loop()
@@ -117,8 +112,8 @@ async def commands(client: discord.Client, message: discord.Message):
             [util.get_config(message.server.id, "command_prefix", "?") + c if ' ' not in c else c for c in com])))
 
 
-#@cmds.command("reddit")
-#async def reddit(client: discord.Client, message: discord.Message):
+# @cmds.command("reddit")
+# async def reddit(client: discord.Client, message: discord.Message):
 #    """
 #    Fetches the currently front page from the specified subreddit.
 #    """
@@ -190,7 +185,7 @@ async def search_youtube(client: discord.Client, message: discord.Message, args:
         await client.send_message(message.channel, ":x: The YouTube Data API v3 key has not been set!")
         return
 
-    # Create a new isntance of the APIClient
+    # Create a new instance of the APIClient
     yt_api_client = build("youtube", "v3", developerKey=api_key)
     search_response = yt_api_client.search().list(
         q=to_search,
@@ -247,3 +242,4 @@ async def remind_me(client: discord.Client, message: discord.Message, args: list
     )
 
     loop.create_task(__remind_coro())
+

@@ -22,14 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import argparse
 import asyncio
+import logging
 import os
 import re
 import sys
 import traceback
 from ctypes.util import find_library
-import logging
-import argparse
 
 import aiohttp
 import discord
@@ -70,6 +70,7 @@ if __name__ != "__zipdep":
     ep_group.add_argument("--ep-password", help="Bot account's password")
 
     args = parser.parse_args()
+
 
 # ===============
 
@@ -120,7 +121,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "2.2.0"
+VERSION = "2.3.0"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
@@ -365,6 +366,7 @@ def main():
     finally:
         loop.close()
     logger.info("NavalBot shutting down.")
+
 
 if __name__ == "__main__":
     main()
