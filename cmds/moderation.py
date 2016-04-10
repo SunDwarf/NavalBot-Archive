@@ -150,7 +150,7 @@ async def invite(client: discord.Client, message: discord.Message):
 
 
 @cmds.command("avatar")
-@util.with_permission("devrole")
+@util.only(cmds.RCE_IDS)
 @util.enforce_args(1, error_msg='You need to provide a link')
 async def avatar(client: discord.Client, message: discord.Message, args: list):
     file = args[0]

@@ -33,7 +33,6 @@ from ctypes.util import find_library
 
 import aiohttp
 import discord
-from discord import Client
 
 # =============== Commands
 import cmds
@@ -101,6 +100,7 @@ else:
     print(">> Cannot load opus library - cannot use voice.")
     del found
 
+
 class FixedClient(discord.Client):
     @asyncio.coroutine
     def connect(self):
@@ -135,6 +135,7 @@ class FixedClient(discord.Client):
 
             # Temporary fix
             self.loop.create_task(self.received_message(msg))
+
 
 # Create a client.
 client = FixedClient()
