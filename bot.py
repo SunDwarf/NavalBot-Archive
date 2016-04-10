@@ -101,44 +101,8 @@ else:
     del found
 
 
-class FixedClient(discord.Client):
-    @asyncio.coroutine
-    def connect(self):
-        """|coro|
-
-        Creates a websocket connection and lets the websocket listen
-        to messages from discord.
-
-        Raises
-        -------
-        ClientException
-            If this is called before :meth:`login` was invoked successfully
-            or when an unexpected closure of the websocket occurs.
-        GatewayNotFound
-            If the gateway to connect to discord is not found. Usually if this
-            is thrown then there is a discord API outage.
-        """
-        self.gateway = yield from self._get_gateway()
-        yield from self._make_websocket()
-
-        while not self.is_closed:
-            msg = yield from self.ws.recv()
-            if msg is None:
-                if self.ws.close_code == 1012:
-                    yield from self.redirect_websocket(self.gateway)
-                    continue
-                elif not self._is_ready.is_set():
-                    raise discord.ClientException('Unexpected websocket closure received')
-                else:
-                    yield from self.close()
-                    break
-
-            # Temporary fix
-            self.loop.create_task(self.received_message(msg))
-
-
 # Create a client.
-client = FixedClient()
+client = discord.Client()
 
 # Get DB
 
