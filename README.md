@@ -89,7 +89,6 @@ This role is needed for the ?mute and ?unmute command to work
 - ?kick
 - ?ban
 - ?unban
-- ?game
 - ?delete
 
 #### Admin commands:
