@@ -363,9 +363,6 @@ def main():
             traceback.print_exc()
             logger.error("Crashed. Don't know how, don't care. Continuing..")
             continue
-        finally:
-            loop.close()
-        logger.info("NavalBot shutting down.")
 
 
 if __name__ == "__main__":
