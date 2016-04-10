@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-
+import json
 import os
 import logging
 import asyncio
@@ -91,6 +91,10 @@ async def reset_voice(client: discord.Client, message: discord.Message):
             del s_p["player"]
         # Set the dictionary again.
         voice_params[message.server.id] = s_p
+        # Disconnect from voice
+        if message.server.id in client.voice:
+            client.voice[message.server.id].disconnect()
+            del client.voice[message.server.id]
 
     await client.send_message(message.channel, ":heavy_check_mark: ")
 
@@ -146,7 +150,7 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, s)
         return
 
-    for item in range(0, len(queue)):
+    for item in range(0, len(queue) if len(queue) < 10 else 10):
         i = queue[item]
         title = i[1].get('title')
         s += "\n{}. `{}`".format(item + 1, title)
@@ -208,6 +212,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
 
     vidname = args[0]
 
+    if 'list' in vidname or 'playlist' in vidname:
+        await client.send_message(message.channel, ":warning: If this is a playlist, it may take a long time to "
+                                                   "download.")
+
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
 
@@ -220,15 +228,18 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         return
 
     if "entries" in info:
-        info = info['entries'][0]
+        # Playlist!
+        is_playlist = True
+        pl_data = info['entries']
+    else:
+        is_playlist = False
+        title = info.get('title')
+        download_url = info['url']
 
-    title = info.get('title')
-    download_url = info['url']
-
-    duration = info.get('duration')
-    if (duration and int(duration) > (60 * 10)) and int(message.author.id) not in cmds.RCE_IDS:
-        await client.send_message(message.channel, ":x: Videos are limited to a maximum of 10 minutes.")
-        return
+        duration = info.get('duration')
+        if (duration and int(duration) > (60 * 10)) and int(message.author.id) not in cmds.RCE_IDS:
+            await client.send_message(message.channel, ":x: Videos are limited to a maximum of 10 minutes.")
+            return
 
     # Contrary to the name, this file DOES use queues.
     # However, unlike voice_queue, OAuth2 bots can run on multiple voice servers at once.
@@ -256,16 +267,14 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     else:
         voice_client = client.voice[message.server.id]
 
-    async def _oauth2_play_youtube():
+    async def _oauth2_play_youtube(d, t):
         # Much smaller than voice_queue, as we don't have to do fucky logic.
-        player = voice_client.create_ffmpeg_player(download_url)
+        player = voice_client.create_ffmpeg_player(d)
         voice_params[message.server.id]["playing"] = True
-        voice_params[message.server.id]["title"] = title
+        voice_params[message.server.id]["title"] = t
         voice_params[message.server.id]["player"] = player
-        await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(title))
+        await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(t))
         assert isinstance(player, discord.voice_client.ProcessPlayer)
-        # Set the thread title
-        player.setName("Voice stream playing {}".format(download_url))
         # Start playing
         player.start()
         # Check ever 0.5 seconds if we're done or not.
@@ -283,17 +292,37 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Get the number of songs on the queue.
     items = queue.qsize()
 
-    try:
-        queue.put_nowait((_oauth2_play_youtube(), info))
-    except asyncio.QueueFull:
-        await client.send_message(message.channel, ":no_entry: There are too many songs on the queue. Cannot start "
-                                                   "playing.")
-    # Send a helpful error message.
-    if items != 0:
-        await client.send_message(message.channel,
-                                  ":heavy_check_mark: You are number {} in the queue.".format(items + 1))
+    if not is_playlist:
+        try:
+            queue.put_nowait((_oauth2_play_youtube(download_url, title), info))
+        except asyncio.QueueFull:
+            await client.send_message(message.channel, ":no_entry: There are too many songs on the queue. Cannot start "
+                                                       "playing.")
+        # Send a helpful error message.
+        if items != 0:
+            await client.send_message(message.channel,
+                                      ":heavy_check_mark: You are number {} in the queue.".format(items + 1))
+        else:
+            await client.send_message(message.channel, ":heavy_check_mark: You are next in the queue.")
+
     else:
-        await client.send_message(message.channel, ":heavy_check_mark: You are next in the queue.")
+        # Loop over each item from the playlist.
+        for num, item in enumerate(pl_data):
+            if num == 99:
+                await client.send_message(
+                    message.channel,
+                    ":grey_exclamation: Cannot play more than 99 songs from a playlist. Skipping the rest."
+                )
+                break
+            # Add it to the queue.
+            try:
+                queue.put_nowait((_oauth2_play_youtube(item.get("url"), item.get("title", "???")), item))
+            except asyncio.QueueFull:
+                await client.send_message(
+                    message.channel, ":no_entry: There are too many songs on the queue. Limiting playlist."
+                )
+
+        await client.send_message(message.channel, ":heavy_check_mark: Added {} tracks to queue.".format(num))
 
     # Create a new task, if applicable.
     if 'task' not in voice_params[message.server.id]:
