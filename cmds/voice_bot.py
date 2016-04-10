@@ -125,6 +125,7 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, s)
 
 
+@command("skip")
 @command("stop")
 @util.with_permission("Bot Commander", "Voice", "Admin")
 async def stop_vid(client: discord.Client, message: discord.Message):
