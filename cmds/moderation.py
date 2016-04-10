@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import os
 
 import discord
 
@@ -156,8 +157,8 @@ async def avatar(client: discord.Client, message: discord.Message, args: list):
     file = args[0]
     try:
         await get_file((client, message), url=file, name='avatar.jpg')
-        fp = open(r'files\avatar.jpg', 'rb')
+        fp = open(os.path.join(os.getcwd(), "files", "avatar.jpg"), 'rb')
         await client.edit_profile(avatar=fp.read())
-        await client.send_message(message.channel, "Avater got changed!")
+        await client.send_message(message.channel, "Avatar got changed!")
     except (ValueError, discord.errors.InvalidArgument):
         await client.send_message(message.channel, "This command only supports jpeg or png files!")
