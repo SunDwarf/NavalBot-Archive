@@ -118,23 +118,23 @@ async def commands(client: discord.Client, message: discord.Message):
             [util.get_config(message.server.id, "command_prefix", "?") + c if ' ' not in c else c for c in com])))
 
 
-@cmds.command("reddit")
-async def reddit(client: discord.Client, message: discord.Message):
-    """
-    Fetches the currently front page from the specified subreddit.
-    """
-    try:
-        choice = ' '.join(message.content.split(" ")[1:]).lower()
-        if choice in nsfw.PURITAN_VALUES:
-            await client.send_message(message.channel, 'You´re not supposed to search for this ಠ_ಠ')
-        else:
-            await client.send_message(message.channel, 'The top posts from {} have been sent to you'.format(choice))
-            func = functools.partial(red.main, choice)
-            info = await loop.run_in_executor(None, func)
-            for link in info:
-                await client.send_message(message.author, content=link)
-    except TypeError as f:
-        print('[ERROR]', f)
+#@cmds.command("reddit")
+#async def reddit(client: discord.Client, message: discord.Message):
+#    """
+#    Fetches the currently front page from the specified subreddit.
+#    """
+#    try:
+#        choice = ' '.join(message.content.split(" ")[1:]).lower()
+#        if choice in nsfw.PURITAN_VALUES:
+#            await client.send_message(message.channel, 'You´re not supposed to search for this ಠ_ಠ')
+#        else:
+#            await client.send_message(message.channel, 'The top posts from {} have been sent to you'.format(choice))
+#            func = functools.partial(red.main, choice)
+#            info = await loop.run_in_executor(None, func)
+#            for link in info:
+#                await client.send_message(message.author, content=link)
+#    except TypeError as f:
+#        print('[ERROR]', f)
 
 
 @cmds.command("whois")
