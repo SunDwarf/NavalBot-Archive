@@ -272,7 +272,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
 
     # Get the voice client.
     if message.server.id not in client.voice:
-        voice_client = await client.join_voice_channel(channel=voice_channel)
+        try:
+            voice_client = await asyncio.wait_for(client.join_voice_channel(channel=voice_channel), 5)
+        except asyncio.TimeoutError:
+            await client.send_message(message.channel, ":x: Timed out trying to connect to server.")
     else:
         voice_client = client.voice[message.server.id]
         assert isinstance(voice_client, discord.VoiceClient)
