@@ -154,8 +154,10 @@ async def invite(client: discord.Client, message: discord.Message):
 @util.enforce_args(1, error_msg='You need to provide a link')
 async def avatar(client: discord.Client, message: discord.Message, args: list):
     file = args[0]
-
-    await get_file((client, message), url=file, name='avatar.jpg')
-    fp = open(r'files\avatar.jpg', 'rb')
-    await client.edit_profile(avatar=fp.read())
-    await client.send_message(message.channel, "Avater got changed!")
+    try:
+        await get_file((client, message), url=file, name='avatar.jpg')
+        fp = open(r'files\avatar.jpg', 'rb')
+        await client.edit_profile(avatar=fp.read())
+        await client.send_message(message.channel, "Avater got changed!")
+    except (ValueError, discord.errors.InvalidArgument):
+        await client.send_message(message.channel, "This command only supports jpeg or png files!")
