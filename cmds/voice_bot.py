@@ -263,6 +263,9 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         voice_params[message.server.id]["title"] = title
         voice_params[message.server.id]["player"] = player
         await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(title))
+        assert isinstance(player, discord.voice_client.ProcessPlayer)
+        # Set the thread title
+        player.setName("Voice stream playing {}".format(download_url))
         # Start playing
         player.start()
         # Check ever 0.5 seconds if we're done or not.
