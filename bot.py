@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "2.3.0"
+VERSION = "2.3.1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
