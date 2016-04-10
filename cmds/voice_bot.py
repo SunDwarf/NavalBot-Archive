@@ -336,6 +336,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 await client.send_message(
                     message.channel, ":no_entry: There are too many songs on the queue. Limiting playlist."
                 )
+                return
 
         await client.send_message(message.channel, ":heavy_check_mark: Added {} tracks to queue.".format(num))
 
