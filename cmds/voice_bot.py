@@ -282,7 +282,12 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         assert isinstance(voice_client, discord.VoiceClient)
         if not voice_client.is_connected():
             # Reconnect the voice client.
-            await voice_client.connect()
+            try:
+                await voice_client.connect()
+            except UnicodeDecodeError:
+                await client.send_message(message.channel, ":x: Unknown error connecting to Discord voice. Try "
+                                                           "changing your voice server region.")
+                return
 
     async def _oauth2_play_youtube(d, t):
         # Much smaller than voice_queue, as we don't have to do fucky logic.
