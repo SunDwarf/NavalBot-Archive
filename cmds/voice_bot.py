@@ -20,15 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-import json
-import os
-import logging
 import asyncio
 
 import discord
 import functools
 import youtube_dl
-from discord.voice_client import StreamPlayer, VoiceClient
 
 import cmds
 import util
@@ -98,10 +94,10 @@ async def reset_voice(client: discord.Client, message: discord.Message):
         voice_params[message.server.id] = s_p
         # Disconnect from voice
         if message.server.id in client.voice:
-            client.voice[message.server.id].disconnect()
+            await client.voice[message.server.id].disconnect()
             del client.voice[message.server.id]
 
-    await client.send_message(message.channel, ":heavy_check_mark: ")
+    await client.send_message(message.channel, ":heavy_check_mark: Reset voice parameters.")
 
 
 @command("np")
