@@ -136,7 +136,7 @@ attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setatt
 @client.event
 async def on_ready():
     # Get the OAuth2 URL, or something
-    if not hasattr(client, "email"):
+    if client.user.bot:
         bot_id = args.oauth_bot_id
         permissions = discord.Permissions.all_channel()
         oauth_url = discord.utils.oauth_url(str(bot_id), permissions=permissions)
@@ -358,6 +358,7 @@ def main():
         except KeyboardInterrupt:
             loop.run_until_complete(client.logout())
             loop.set_exception_handler(lambda *args, **kwargs: None)
+            return
         except Exception:
             import traceback
             traceback.print_exc()
