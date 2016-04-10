@@ -26,6 +26,7 @@ import sqlite3
 import datetime
 import time
 
+import asyncio
 import discord
 from math import floor
 
@@ -36,6 +37,45 @@ startup = datetime.datetime.fromtimestamp(time.time())
 
 # Some useful variables
 msgcount = 0
+
+def _monkeypatch_client(client: discord.Client):
+    # Patches the client to prevent hard crashes.
+    # Temporarily solution.
+
+    @asyncio.coroutine
+    def _mk_connect():
+        """|coro|
+    
+        Creates a websocket connection and lets the websocket listen
+        to messages from discord.
+    
+        Raises
+        -------
+        ClientException
+            If this is called before :meth:`login` was invoked successfully
+            or when an unexpected closure of the websocket occurs.
+        GatewayNotFound
+            If the gateway to connect to discord is not found. Usually if this
+            is thrown then there is a discord API outage.
+        """
+        client.gateway = yield from client._get_gateway()
+        yield from client._make_websocket()
+
+        while not client.is_closed:
+            msg = yield from client.ws.recv()
+            if msg is None:
+                if client.ws.close_code == 1012:
+                    yield from client.redirect_websocket(client.gateway)
+                    continue
+                elif not client._is_ready.is_set():
+                    raise discord.ClientException('Unexpected websocket closure received')
+                else:
+                    yield from client.close()
+                    break
+
+            client.loop.create_task(client.received_message(msg))
+
+    client.connect = _mk_connect
 
 
 def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{seconds2}"):

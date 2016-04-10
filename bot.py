@@ -339,6 +339,7 @@ async def default(client: discord.Client, message: discord.Message):
 
 def main():
     init_logging()
+    util._monkeypatch_client(client)
     # Switch login method based on args.
     if args.oauth_bot_id is not None:
         login = (args.oauth_bot_secret,)
