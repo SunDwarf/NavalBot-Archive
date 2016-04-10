@@ -245,7 +245,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         download_url = info['url']
 
         duration = info.get('duration')
-        if (duration and int(duration) > (60 * 10)) and int(message.author.id) not in cmds.RCE_IDS:
+        if (duration and int(duration) > (60 * 10)) and not util.has_permissions(
+                message.author, {"Bot Commander", "Voice", "Admin"}):
             await client.send_message(message.channel, ":x: Videos are limited to a maximum of 10 minutes.")
             return
 

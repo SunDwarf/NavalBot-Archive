@@ -110,6 +110,14 @@ def set_config(server_id: str, key: str, value: str):
     db.commit()
 
 
+def has_permissions(author: discord.Member, roles: set):
+    U_roles = set([r.name for r in author.roles])
+    if roles.intersection(U_roles):
+        return True
+    else:
+        return False
+
+
 def with_permission(*role: str):
     """
     Only allows a command with permission.
