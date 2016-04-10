@@ -352,22 +352,20 @@ def main():
         loop.set_exception_handler(lambda *args, **kwargs: None)
         sys.exit(1)
 
-    # Create the future
-    loop.create_task(client.start(*login))
-
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        loop.run_until_complete(client.logout())
-        loop.set_exception_handler(lambda *args, **kwargs: None)
-    except Exception:
-        import traceback
-        traceback.print_exc()
-        logger.error("Crashed. Don't know how, don't care. Exiting.")
-        sys.exit(1)
-    finally:
-        loop.close()
-    logger.info("NavalBot shutting down.")
+    while True:
+        try:
+            loop.run_until_complete(client.start(*login))
+        except KeyboardInterrupt:
+            loop.run_until_complete(client.logout())
+            loop.set_exception_handler(lambda *args, **kwargs: None)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            logger.error("Crashed. Don't know how, don't care. Continuing..")
+            continue
+        finally:
+            loop.close()
+        logger.info("NavalBot shutting down.")
 
 
 if __name__ == "__main__":
