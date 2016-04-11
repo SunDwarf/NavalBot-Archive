@@ -28,7 +28,7 @@ Unlike many other bots, it's also fast due to the asyncio-based back end.
 3. Open up `__init__.py` and change `RCE_IDS` to match your Discord user id.  
 
 Next, open your command line and launch `bot.py` with the login credentials for your bot.  
-E.g: `>>  python bot.py --oauth-bot-id <client-id> --oauth-bot-secret <oauth secret>`
+E.g: `>>  python bot.py --oauth-bot-id <client-id> --oauth-bot-secret <oauth token>`
 
 ## Configuration
 
