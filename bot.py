@@ -351,9 +351,18 @@ def main():
         logger.error("You must use one login method!")
         sys.exit(1)
 
+    try:
+        loop.run_until_complete(client.login(*login))
+    except discord.errors.HTTPException as e:
+        if e.response.status == 401:
+            logger.error("Your bot token is incorrect. Cannot login.")
+            return
+        else:
+            raise from e
+
     while True:
         try:
-            loop.run_until_complete(client.start(*login))
+            loop.run_until_complete(client.connect())
         except KeyboardInterrupt:
             loop.run_until_complete(client.logout())
             return
