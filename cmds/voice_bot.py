@@ -281,13 +281,15 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         voice_client = client.voice[message.server.id]
         assert isinstance(voice_client, discord.VoiceClient)
         if not voice_client.is_connected():
-            # Reconnect the voice client.
+            # Re-create the voice client.
             try:
-                await voice_client.connect()
-            except UnicodeDecodeError:
-                await client.send_message(message.channel, ":x: Unknown error connecting to Discord voice. Try "
-                                                           "changing your voice server region.")
+                voice_client = await asyncio.wait_for(client.join_voice_channel(channel=voice_channel), 5)
+                client.voice[message.server.id] = voice_client
+            except asyncio.TimeoutError:
+                await client.send_message(message.channel, ":x: Timed out trying to connect to server.")
                 return
+
+
 
     async def _oauth2_play_youtube(d, t):
         # Much smaller than voice_queue, as we don't have to do fucky logic.
