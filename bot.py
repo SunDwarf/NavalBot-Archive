@@ -358,7 +358,7 @@ def main():
             logger.error("Your bot token is incorrect. Cannot login.")
             return
         else:
-            raise from e
+            raise
 
     while True:
         try:

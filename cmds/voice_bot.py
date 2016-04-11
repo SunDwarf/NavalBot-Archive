@@ -69,12 +69,13 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
 
     If it is invalid, it destroys it and creates a new one.
     """
-    if not vc.is_connected():
+    if not vc.ws.open or not vc.is_connected():
         # Fix it.
         new_vc = await client.join_voice_channel(channel)
         return new_vc
     else:
         return vc
+
 
 @command("reset")
 @util.with_permission("Bot Commander", "Voice", "Admin")
