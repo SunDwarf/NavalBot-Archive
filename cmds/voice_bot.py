@@ -108,7 +108,9 @@ async def reset_voice(client: discord.Client, message: discord.Message):
         del voice_params[message.server.id]
     # Disconnect from voice
     if message.server.id in client.voice:
-        await client.voice[message.server.id].disconnect()
+        vc = client.voice[message.server.id]
+        if vc.ws.open and vc.is_connected():
+            await client.voice[message.server.id].disconnect()
         del client.voice[message.server.id]
 
     await client.send_message(message.channel, ":heavy_check_mark: Reset voice parameters.")
@@ -289,7 +291,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         try:
             voice_client = await asyncio.wait_for(client.join_voice_channel(channel=voice_channel), 5)
         except asyncio.TimeoutError:
-            await client.send_message(message.channel, ":x: Timed out trying to connect to server.")
+            await client.send_message(message.channel, ":x: Timed out trying to connect to server. Try ?reset")
             return
     else:
         voice_client = client.voice[message.server.id]
@@ -300,7 +302,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 voice_client = await asyncio.wait_for(client.join_voice_channel(channel=voice_channel), 5)
                 client.voice[message.server.id] = voice_client
             except asyncio.TimeoutError:
-                await client.send_message(message.channel, ":x: Timed out trying to connect to server.")
+                await client.send_message(message.channel, ":x: Timed out trying to connect to server. Try ?reset")
                 return
             except discord.ClientException:
                 await client.send_message(message.channel, ":x: Error happened on connecting to voice.")
