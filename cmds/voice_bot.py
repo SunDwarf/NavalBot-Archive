@@ -301,8 +301,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
             except asyncio.TimeoutError:
                 await client.send_message(message.channel, ":x: Timed out trying to connect to server.")
                 return
-
-
+            except discord.ClientException:
+                await client.send_message(message.channel, ":x: Error happened on connecting to voice.")
 
     async def _oauth2_play_youtube(d, t):
         # Fix the voice client if we need to.
