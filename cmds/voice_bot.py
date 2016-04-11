@@ -63,6 +63,19 @@ async def _await_queue(server_id: str):
         await items[0]
 
 
+async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: discord.Channel):
+    """
+    Fixes a voice client.
+
+    If it is invalid, it destroys it and creates a new one.
+    """
+    if not vc.is_connected():
+        # Fix it.
+        new_vc = await client.join_voice_channel(channel)
+        return new_vc
+    else:
+        return vc
+
 @command("reset")
 @util.with_permission("Bot Commander", "Voice", "Admin")
 async def reset_voice(client: discord.Client, message: discord.Message):
@@ -292,8 +305,9 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
 
 
     async def _oauth2_play_youtube(d, t):
-        # Much smaller than voice_queue, as we don't have to do fucky logic.
-        player = voice_client.create_ffmpeg_player(d)
+        # Fix the voice client if we need to.
+        vc = await _fix_voice(client, voice_client, voice_channel)
+        player = vc.create_ffmpeg_player(d)
         voice_params[message.server.id]["playing"] = True
         voice_params[message.server.id]["title"] = t
         voice_params[message.server.id]["player"] = player
