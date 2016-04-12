@@ -144,9 +144,19 @@ async def on_ready():
             logger.critical("You didn't set the bot ID using --oauth-bot-id. Your bot cannot be invited anywhere.")
             sys.exit(1)
         logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
-        from cmds import voice_bot as voice
     else:
         logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
+
+    # Change voice module as applicable.
+    if isinstance(client.voice, dict):
+        if client.user.bot:
+            logger.info("Using upstream voice module.")
+            from cmds import voice_bot as voice
+        else:
+            logger.error("Using modified discord.py without a bot account! Cannot continue.")
+            sys.exit(3)
+    else:
+        logger.warning("Using queue-based voice module. This is not ideal.")
         from cmds import voice_queue as voice
     # print ready msg
     logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
