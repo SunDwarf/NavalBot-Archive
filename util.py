@@ -25,7 +25,10 @@ import datetime
 import shlex
 import sqlite3
 import time
+from concurrent import futures
 from math import floor
+
+import asyncio
 
 import discord
 
@@ -37,6 +40,15 @@ startup = datetime.datetime.fromtimestamp(time.time())
 # Some useful variables
 msgcount = 0
 
+loop = asyncio.get_event_loop()
+
+multi = futures.ProcessPoolExecutor()
+
+async def with_multiprocessing(func):
+    """
+    Runs a func inside a Multiprocessing executor
+    """
+    return await loop.run_in_executor(multi, func)
 
 def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{seconds2}"):
     if hasattr(value, 'seconds'):

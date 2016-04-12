@@ -26,6 +26,8 @@ import datetime
 import os
 import random
 
+import functools
+
 import discord
 import pyowm
 from google import search
@@ -59,13 +61,19 @@ async def info(client: discord.Client, message: discord.Message):
                               " https://github.com/SunDwarf/NavalBot/blob/stable/README.md")
 
 
+def _get_google(f):
+    return list(f())[0]
+
+
 @cmds.command("google")
 async def google(client: discord.Client, message: discord.Message):
     """
     Searches google for the top two results for the search.
     """
     userinput = ' '.join(message.content.split(" ")[1:])
-    l = list(search(userinput, stop=1))[0]
+    f = functools.partial(search, userinput, stop=1)
+    f2 = functools.partial(_get_google, f)
+    l = await util.with_multiprocessing(f2)
     await client.send_message(message.channel, l)
 
 
@@ -187,11 +195,12 @@ async def search_youtube(client: discord.Client, message: discord.Message, args:
 
     # Create a new instance of the APIClient
     yt_api_client = build("youtube", "v3", developerKey=api_key)
-    search_response = yt_api_client.search().list(
+    built = yt_api_client.search().list(
         q=to_search,
         part="id,snippet",
         maxResults=1
-    ).execute()
+    )
+    search_response = await loop.run_in_executor(None, built.execute)
 
     items = search_response.get("items", [])
     if not items:
@@ -242,4 +251,3 @@ async def remind_me(client: discord.Client, message: discord.Message, args: list
     )
 
     loop.create_task(__remind_coro())
-
