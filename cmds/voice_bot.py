@@ -69,7 +69,7 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
 
     If it is invalid, it destroys it and creates a new one.
     """
-    if not vc.ws.open or not vc.is_connected():
+    if not hasattr(vc, 'ws') or not vc.ws.open or not vc.is_connected():
         # Fix it.
         try:
             await asyncio.wait_for(vc.disconnect(), timeout=1)
@@ -115,8 +115,9 @@ async def reset_voice(client: discord.Client, message: discord.Message):
     # Disconnect from voice
     if message.server.id in client.voice:
         vc = client.voice[message.server.id]
-        if vc.ws.open and vc.is_connected():
-            await client.voice[message.server.id].disconnect()
+        if hasattr(vc, 'ws'):
+            if vc.ws.open and vc.is_connected():
+                await client.voice[message.server.id].disconnect()
         del client.voice[message.server.id]
 
     await client.send_message(message.channel, ":heavy_check_mark: Reset voice parameters.")
