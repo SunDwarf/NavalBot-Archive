@@ -71,6 +71,12 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
     """
     if not vc.ws.open or not vc.is_connected():
         # Fix it.
+        try:
+            await asyncio.wait_for(vc.disconnect(), timeout=1)
+        except Exception:
+            # Tried to send on a closed web socket. We can safely ignore this
+            pass
+        del client.voice[channel.server.id]
         new_vc = await client.join_voice_channel(channel)
         return new_vc
     else:
