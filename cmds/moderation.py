@@ -154,6 +154,11 @@ async def invite(client: discord.Client, message: discord.Message):
 @util.only(cmds.RCE_IDS)
 @util.enforce_args(1, error_msg='You need to provide a link')
 async def avatar(client: discord.Client, message: discord.Message, args: list):
+    """
+    Changes the avatar of the bot.
+    You must provide a valid url, pointing to a jpeg or png file.
+    """
+
     file = args[0]
     try:
         await get_file((client, message), url=file, name='avatar.jpg')

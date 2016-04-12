@@ -197,6 +197,8 @@ def only(ids):
                 await client.send_message(message.channel,
                                           ":no_entry: This command is restricted to bot owners!")
 
+        __fake_permission_func.__doc__ = func.__doc__
+
         return __fake_permission_func
 
     return __decorator
