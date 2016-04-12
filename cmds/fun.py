@@ -105,7 +105,7 @@ async def commands(client: discord.Client, message: discord.Message):
     Lists the commands for the bot.
     """
     com = ['lock', 'info', 'version', 'weather', 'whois', 'uptime', 'google', 'playyt', 'stop', 'skip', 'queue',
-           '\n**Admins only:**\n', 'game', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg',
+           '\n**Admins only:**\n', 'game', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg', 'avatar',
            'setcfg']
     await client.send_message(message.channel, "**These commands are available:**\n{}".format(
         '\n'.join(

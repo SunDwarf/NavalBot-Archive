@@ -21,14 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
+import datetime
 import shlex
 import sqlite3
-import datetime
 import time
-
-import asyncio
-import discord
 from math import floor
+
+import discord
 
 db = sqlite3.connect("navalbot.db")
 cursor = db.cursor()

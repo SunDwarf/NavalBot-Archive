@@ -158,7 +158,6 @@ async def avatar(client: discord.Client, message: discord.Message, args: list):
     Changes the avatar of the bot.
     You must provide a valid url, pointing to a jpeg or png file.
     """
-
     file = args[0]
     try:
         await get_file((client, message), url=file, name='avatar.jpg')
@@ -167,3 +166,19 @@ async def avatar(client: discord.Client, message: discord.Message, args: list):
         await client.send_message(message.channel, "Avatar got changed!")
     except (ValueError, discord.errors.InvalidArgument):
         await client.send_message(message.channel, "This command only supports jpeg or png files!")
+
+
+@cmds.command("changename")
+@util.only(cmds.RCE_IDS)
+@util.enforce_args(1, error_msg="You need to provide the new name")
+async def changename(client: discord.Client, message: discord.Message, args: list):
+    name = args[0]
+    await client.edit_profile(username=name)
+    await client.send_message(message.channel, 'Username got changed!')
+
+
+@cmds.command("banned")
+@util.only(cmds.RCE_IDS)
+async def banned(client: discord.Client, message: discord.Message):
+    users = await client.get_bans(server=message.server)
+    await client.send_message(message.channel, "Banned users: {}".format(', '.join(user.name for user in users)))
