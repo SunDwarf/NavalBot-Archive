@@ -154,6 +154,11 @@ async def invite(client: discord.Client, message: discord.Message):
 @util.only(cmds.RCE_IDS)
 @util.enforce_args(1, error_msg='You need to provide a link')
 async def avatar(client: discord.Client, message: discord.Message, args: list):
+    """
+    Changes the avatar of the bot.
+    You must provide a valid url, pointing to a jpeg or png file.
+    """
+
     file = args[0]
     try:
         await get_file((client, message), url=file, name='avatar.jpg')
@@ -162,3 +167,12 @@ async def avatar(client: discord.Client, message: discord.Message, args: list):
         await client.send_message(message.channel, "Avatar got changed!")
     except (ValueError, discord.errors.InvalidArgument):
         await client.send_message(message.channel, "This command only supports jpeg or png files!")
+
+"""
+@cmds.command("createmuted")
+@util.with_permission('Admin')
+async def createmuted(client: discord.Client, message: discord.Message):
+    await client.create_role(server=message.server, role=discord.Role.name('Test'), permissions=discord.Permissions(
+        permissions=discord.Permissions.send_messages == 0))
+    await   client.send_message(message.channel, "something happened, idk what")
+"""
