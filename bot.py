@@ -30,8 +30,10 @@ import re
 import sys
 import traceback
 from ctypes.util import find_library
+import platform
 
 import aiohttp
+import requests
 import discord
 
 # =============== Commands
@@ -93,12 +95,33 @@ logger = logging.getLogger("NavalBot")
 logger.setLevel(logging.DEBUG)
 
 # Load opus
-found = find_library("opus")
+if sys.platform == "win32":
+    if os.path.exists(os.path.join(os.getcwd(), "libopus.dll")):
+        found = "libopus"
+    else:
+        found = False
+else:
+    found = find_library("opus")
 if found:
+    print(">> Loaded libopus from {}".format(found))
     discord.opus.load_opus(found)
 else:
-    print(">> Cannot load opus library - cannot use voice.")
-    del found
+    if sys.platform == "win32":
+        print(">> Downloading libopus for Windows.")
+        sfbit = sys.maxsize > 2**32
+        if sfbit:
+            to_dl = 'x64'
+        else:
+            to_dl = 'x86'
+        r = requests.get("https://github.com/SexualRhinoceros/MusicBot/raw/develop/libopus-0.{}.dll".format(to_dl))
+        # Save it as opus.dll
+        with open("libopus.dll", 'wb') as f:
+            f.write(r.raw.read())
+        discord.opus.load_opus("libopus")
+        del sfbit, to_dl
+    else:
+        print(">> Cannot load opus library - cannot use voice.")
+        del found
 
 
 # Create a client.
@@ -121,7 +144,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "2.5.3"
+VERSION = "2.5.4"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
@@ -144,9 +167,19 @@ async def on_ready():
             logger.critical("You didn't set the bot ID using --oauth-bot-id. Your bot cannot be invited anywhere.")
             sys.exit(1)
         logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
-        from cmds import voice_bot as voice
     else:
         logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
+
+    # Change voice module as applicable.
+    if isinstance(client.voice, dict):
+        if client.user.bot:
+            logger.info("Using upstream voice module.")
+            from cmds import voice_bot as voice
+        else:
+            logger.error("Using modified discord.py without a bot account! Cannot continue.")
+            sys.exit(3)
+    else:
+        logger.warning("Using queue-based voice module. This is not ideal.")
         from cmds import voice_queue as voice
     # print ready msg
     logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))

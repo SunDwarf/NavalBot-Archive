@@ -152,9 +152,9 @@ async def stop(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, ":heavy_check_mark: Stopped playing.")
 
 
+@command("play")
 @command("playyt")
 @command("playyoutube")
-@util.with_permission("Bot Commander", "Voice")
 @util.enforce_args(1, ":x: You must pass a video!")
 async def play_youtube(client: discord.Client, message: discord.Message, args: list):
     """
