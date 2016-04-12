@@ -115,7 +115,7 @@ else:
             to_dl = 'x86'
         r = requests.get("https://github.com/SexualRhinoceros/MusicBot/raw/develop/libopus-0.{}.dll".format(to_dl))
         # Save it as opus.dll
-        with open("libopus.dll") as f:
+        with open("libopus.dll", 'wb') as f:
             f.write(r.raw.read())
         discord.opus.load_opus("libopus")
         del sfbit, to_dl
