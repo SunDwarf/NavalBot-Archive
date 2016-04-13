@@ -24,18 +24,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import argparse
 import asyncio
-from concurrent import futures
 import logging
 import os
 import re
 import sys
 import traceback
 from ctypes.util import find_library
-import platform
 
 import aiohttp
-import requests
 import discord
+import requests
 
 # =============== Commands
 import cmds
@@ -111,7 +109,7 @@ if found:
 else:
     if sys.platform == "win32":
         print(">> Downloading libopus for Windows.")
-        sfbit = sys.maxsize > 2**32
+        sfbit = sys.maxsize > 2 ** 32
         if sfbit:
             to_dl = 'x64'
         else:
@@ -125,7 +123,6 @@ else:
     else:
         print(">> Cannot load opus library - cannot use voice.")
         del found
-
 
 # Create a client.
 client = discord.Client()
@@ -147,7 +144,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "2.5.5"
+VERSION = "2.5.6"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
