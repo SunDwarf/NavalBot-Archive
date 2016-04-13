@@ -377,7 +377,11 @@ def main():
         try:
             loop.run_until_complete(client.connect())
         except KeyboardInterrupt:
-            loop.run_until_complete(client.logout())
+            try:
+                loop.run_until_complete(client.logout())
+            except Exception:
+                logger.error("Couldn't log out. Oh well. We tried!")
+                return
             return
         except Exception:
             import traceback
