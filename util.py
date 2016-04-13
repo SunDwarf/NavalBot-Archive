@@ -21,14 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
+import asyncio
 import datetime
 import shlex
 import sqlite3
 import time
 from concurrent import futures
 from math import floor
-
-import asyncio
 
 import discord
 
@@ -44,11 +43,13 @@ loop = asyncio.get_event_loop()
 
 multi = futures.ProcessPoolExecutor()
 
+
 async def with_multiprocessing(func):
     """
     Runs a func inside a Multiprocessing executor
     """
     return await loop.run_in_executor(multi, func)
+
 
 def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{seconds2}"):
     if hasattr(value, 'seconds'):
@@ -93,7 +94,7 @@ def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{secon
 
 def get_config(server_id: str, key: str, default=None) -> str:
     """
-    Gets a config value from the DB.
+    Gets a server-specific config value from the DB.
     """
     if server_id:
         cursor.execute("""SELECT value FROM configuration WHERE name = ?
@@ -108,6 +109,9 @@ def get_config(server_id: str, key: str, default=None) -> str:
 
 
 def set_config(server_id: str, key: str, value: str):
+    """
+    Sets a server-specific config value in the DB
+    """
     if server_id:
         cursor.execute("""INSERT OR REPLACE
                        INTO configuration (id, name, value, server)

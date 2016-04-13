@@ -172,6 +172,9 @@ async def avatar(client: discord.Client, message: discord.Message, args: list):
 @util.only(cmds.RCE_IDS)
 @util.enforce_args(1, error_msg="You need to provide the new name")
 async def changename(client: discord.Client, message: discord.Message, args: list):
+    """
+    Change the name of the bot.
+    """
     name = args[0]
     await client.edit_profile(username=name)
     await client.send_message(message.channel, 'Username got changed!')
@@ -180,5 +183,8 @@ async def changename(client: discord.Client, message: discord.Message, args: lis
 @cmds.command("banned")
 @util.only(cmds.RCE_IDS)
 async def banned(client: discord.Client, message: discord.Message):
+    """
+    Get a list of all currently banned users on a server.
+    """
     users = await client.get_bans(server=message.server)
     await client.send_message(message.channel, "Banned users: {}".format(', '.join(user.name for user in users)))

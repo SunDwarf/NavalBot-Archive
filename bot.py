@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "2.5.6"
+VERSION = "2.5.7"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
@@ -245,10 +245,13 @@ def read_version(data):
 
 @cmds.command("version")
 async def version(client: discord.Client, message: discord.Message):
+    """
+    Checks for the latest stable version of NavalBot.
+    """
     await client.send_message(
         message.channel,
         "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-            .format(VERSION)
+                .format(VERSION)
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
