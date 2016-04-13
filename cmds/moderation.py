@@ -188,3 +188,17 @@ async def banned(client: discord.Client, message: discord.Message):
     """
     users = await client.get_bans(server=message.server)
     await client.send_message(message.channel, "Banned users: {}".format(', '.join(user.name for user in users)))
+
+
+@cmds.command("blacklist")
+@util.with_permission('Admin')
+async def blacklist(client: discord.Client, message: discord.Message):
+    try:
+        black_list = []
+        for user in message.mentions:
+            black_list.append(user)
+        await client.send_message(message.channel, "User(s) {} got added to the blacklist".format(user))
+        return black_list
+    except Exception:
+        await client.send_message(message.channel, "Not a valid user!")
+
