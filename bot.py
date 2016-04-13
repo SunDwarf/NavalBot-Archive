@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import argparse
 import asyncio
+from concurrent import futures
 import logging
 import os
 import re
@@ -56,6 +57,8 @@ importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
 
 # =============== End commands
+
+loop = asyncio.get_event_loop()
 
 # =============== Argparse
 
@@ -144,13 +147,11 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "2.5.3"
+VERSION = "2.5.5"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(.*?) is (.*)')
-
-loop = asyncio.get_event_loop()
 
 attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
 

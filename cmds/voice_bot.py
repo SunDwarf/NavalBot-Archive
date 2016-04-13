@@ -69,7 +69,7 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
 
     If it is invalid, it destroys it and creates a new one.
     """
-    if not vc.ws.open or not vc.is_connected():
+    if not hasattr(vc, 'ws') or not vc.ws.open or not vc.is_connected():
         # Fix it.
         try:
             await asyncio.wait_for(vc.disconnect(), timeout=1)
@@ -115,8 +115,9 @@ async def reset_voice(client: discord.Client, message: discord.Message):
     # Disconnect from voice
     if message.server.id in client.voice:
         vc = client.voice[message.server.id]
-        if vc.ws.open and vc.is_connected():
-            await client.voice[message.server.id].disconnect()
+        if hasattr(vc, 'ws'):
+            if vc.ws.open and vc.is_connected():
+                await client.voice[message.server.id].disconnect()
         del client.voice[message.server.id]
 
     await client.send_message(message.channel, ":heavy_check_mark: Reset voice parameters.")
@@ -177,6 +178,9 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
         i = queue[item]
         title = i[1].get('title')
         s += "\n{}. `{}`".format(item + 1, title)
+
+    if len(queue) > 10:
+        s += "\n(Omitted {} queued items.)".format(len(queue) - 10)
     await client.send_message(message.channel, s)
 
 
@@ -244,7 +248,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
 
-    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True})
+    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": 99})
     func = functools.partial(ydl.extract_info, vidname, download=False)
     try:
         info = await loop.run_in_executor(None, func)
