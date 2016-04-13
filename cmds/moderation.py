@@ -26,7 +26,7 @@ import discord
 
 import cmds
 import util
-from bot import get_file
+from util import get_file
 from exceptions import CommandError
 
 
@@ -148,36 +148,6 @@ async def invite(client: discord.Client, message: discord.Message):
 
     await client.accept_invite(invite)
     await client.send_message(message.channel, "Joined server specified.")
-
-
-@cmds.command("avatar")
-@util.only(cmds.RCE_IDS)
-@util.enforce_args(1, error_msg='You need to provide a link')
-async def avatar(client: discord.Client, message: discord.Message, args: list):
-    """
-    Changes the avatar of the bot.
-    You must provide a valid url, pointing to a jpeg or png file.
-    """
-    file = args[0]
-    try:
-        await get_file((client, message), url=file, name='avatar.jpg')
-        fp = open(os.path.join(os.getcwd(), "files", "avatar.jpg"), 'rb')
-        await client.edit_profile(avatar=fp.read())
-        await client.send_message(message.channel, "Avatar got changed!")
-    except (ValueError, discord.errors.InvalidArgument):
-        await client.send_message(message.channel, "This command only supports jpeg or png files!")
-
-
-@cmds.command("changename")
-@util.only(cmds.RCE_IDS)
-@util.enforce_args(1, error_msg="You need to provide the new name")
-async def changename(client: discord.Client, message: discord.Message, args: list):
-    """
-    Change the name of the bot.
-    """
-    name = args[0]
-    await client.edit_profile(username=name)
-    await client.send_message(message.channel, 'Username got changed!')
 
 
 @cmds.command("banned")

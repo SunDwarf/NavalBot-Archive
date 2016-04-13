@@ -1,7 +1,7 @@
 # NavalBot 2.x
 
 [![Requirements Status](https://requires.io/github/SunDwarf/NavalBot/requirements.svg?branch=develop)](https://requires.io/github/SunDwarf/NavalBot/requirements/?branch=develop)
-![https://img.shields.io/github/release/SunDwarf/NavalBot.svg](https://img.shields.io/badge/release-v2.5.7-brightgreen.svg)
+![https://img.shields.io/github/release/SunDwarf/NavalBot.svg](https://img.shields.io/github/release/SunDwarf/NavalBot.svg)
 
 A bot for discord servers using [discord.py] (https://github.com/Rapptz/discord.py)
 

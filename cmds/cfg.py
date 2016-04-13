@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import os
 import shlex
 
 import asyncio
@@ -149,3 +150,33 @@ async def update(client: discord.Client, message: discord.Message):
     tdout, stderr, ret = await get_stdout_and_return_code("git rev-parse HEAD")
     await client.send_message(message.channel, "Done! Navalbot is now at revision `{}`."
                               .format(tdout.decode().replace('\n', '')))
+
+
+@cmds.command("avatar")
+@util.only(cmds.RCE_IDS)
+@util.enforce_args(1, error_msg='You need to provide a link')
+async def avatar(client: discord.Client, message: discord.Message, args: list):
+    """
+    Changes the avatar of the bot.
+    You must provide a valid url, pointing to a jpeg or png file.
+    """
+    file = args[0]
+    try:
+        await util.get_file((client, message), url=file, name='avatar.jpg')
+        fp = open(os.path.join(os.getcwd(), "files", "avatar.jpg"), 'rb')
+        await client.edit_profile(avatar=fp.read())
+        await client.send_message(message.channel, "Avatar got changed!")
+    except (ValueError, discord.errors.InvalidArgument):
+        await client.send_message(message.channel, "This command only supports jpeg or png files!")
+
+
+@cmds.command("changename")
+@util.only(cmds.RCE_IDS)
+@util.enforce_args(1, error_msg="You need to provide the new name")
+async def changename(client: discord.Client, message: discord.Message, args: list):
+    """
+    Change the name of the bot.
+    """
+    name = args[0]
+    await client.edit_profile(username=name)
+    await client.send_message(message.channel, 'Username got changed!')

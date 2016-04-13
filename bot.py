@@ -24,19 +24,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import argparse
 import asyncio
-from concurrent import futures
 import logging
 import os
 import re
 import sys
 import traceback
 from ctypes.util import find_library
-import platform
 
 import aiohttp
 import requests
-import discord
 
+import discord
 # =============== Commands
 import cmds
 import util
@@ -44,7 +42,7 @@ from cmds import commands
 # Fuck off PyCharm
 import importlib
 
-from util import db, cursor
+from util import db, cursor, get_file, sanitize
 
 __zipdep_zipmodules = ['youtube_dl', 'aiohttp', 'blessings', 'chardet', 'curtsies', 'decorator',
                        'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'praw', 'pygments', 'pyowm',
@@ -277,30 +275,6 @@ async def version(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
 
 
-async def get_file(client: tuple, url, name):
-    """
-    Get a file from the web using aiohttp, and save it
-    """
-    with aiohttp.ClientSession() as sess:
-        async with sess.get(url) as get:
-            assert isinstance(get, aiohttp.ClientResponse)
-            if int(get.headers["content-length"]) > 1024 * 1024 * 8:
-                # 1gib
-                await client[0].send_message(client[1].channel, "File {} is too big to DL")
-                return
-            else:
-                data = await get.read()
-                with open(os.path.join(os.getcwd(), 'files', name), 'wb') as f:
-                    f.write(data)
-                print("--> Saved file to {}".format(name))
-
-
-def sanitize(param):
-    param = param.replace('..', '.').replace('/', '')
-    param = param.split('?')[0]
-    return param
-
-
 @cmds.command("help")
 @util.enforce_args(1, error_msg=":x: You must provide a command for help!")
 async def help(client: discord.Client, message: discord.Message, args: list):
@@ -403,7 +377,11 @@ def main():
         try:
             loop.run_until_complete(client.connect())
         except KeyboardInterrupt:
-            loop.run_until_complete(client.logout())
+            try:
+                loop.run_until_complete(client.logout())
+            except Exception:
+                logger.error("Couldn't log out. Oh well. We tried!")
+                return
             return
         except Exception:
             import traceback

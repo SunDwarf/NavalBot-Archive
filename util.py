@@ -23,11 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import asyncio
 import datetime
+import os
 import shlex
 import sqlite3
 import time
 from concurrent import futures
 from math import floor
+
+import aiohttp
 
 import discord
 
@@ -217,3 +220,27 @@ def only(ids):
         return __fake_permission_func
 
     return __decorator
+
+
+async def get_file(client: tuple, url, name):
+    """
+    Get a file from the web using aiohttp, and save it
+    """
+    with aiohttp.ClientSession() as sess:
+        async with sess.get(url) as get:
+            assert isinstance(get, aiohttp.ClientResponse)
+            if int(get.headers["content-length"]) > 1024 * 1024 * 8:
+                # 1gib
+                await client[0].send_message(client[1].channel, "File {} is too big to DL")
+                return
+            else:
+                data = await get.read()
+                with open(os.path.join(os.getcwd(), 'files', name), 'wb') as f:
+                    f.write(data)
+                print("--> Saved file to {}".format(name))
+
+
+def sanitize(param):
+    param = param.replace('..', '.').replace('/', '')
+    param = param.split('?')[0]
+    return param
