@@ -23,10 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import asyncio
 import datetime
+import functools
 import os
 import random
-
-import functools
 
 import discord
 import pyowm
@@ -190,7 +189,9 @@ async def search_youtube(client: discord.Client, message: discord.Message, args:
     # Get the API key
     api_key = util.get_config(None, "youtube_api_key")
     if not api_key:
-        await client.send_message(message.channel, ":x: The YouTube Data API v3 key has not been set!")
+        await client.send_message(message.channel,
+                                  ':x: The YouTube Data API v3 key has not been set!\n'
+                                  ':x: Set it with `?setconfig "youtube_api_key" "key"`.')
         return
 
     # Create a new instance of the APIClient
