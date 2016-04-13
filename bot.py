@@ -250,6 +250,9 @@ def read_version(data):
 
 @cmds.command("version")
 async def version(client: discord.Client, message: discord.Message):
+    """
+    Checks for the latest stable version of NavalBot.
+    """
     await client.send_message(
         message.channel,
         "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
