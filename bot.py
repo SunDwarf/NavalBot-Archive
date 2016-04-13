@@ -256,7 +256,7 @@ async def version(client: discord.Client, message: discord.Message):
     await client.send_message(
         message.channel,
         "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-            .format(VERSION)
+                .format(VERSION)
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
