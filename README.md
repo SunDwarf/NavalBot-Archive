@@ -38,9 +38,9 @@ Make sure to create a `Bot Commander` role and assign it to your Discord moderat
 Members with the `Bot Commander` role can execute specifc commands that are inaccessible for regular members.  
 Your bot needs the `Admin` flag in order for moderation commands like `?kick` or `?ban` to work. 
 
-## Creating the `Muted` Role
+### Creating the `Muted` Role
 
-This role is needed for the ?mute and ?unmute command to work
+This role is needed for the `?mute` and `?unmute` command to work.
 
 1. Create a role named 'Muted'
 2. Go into your server settings and edit the permissions for the role
@@ -51,6 +51,17 @@ This role is needed for the ?mute and ?unmute command to work
 4. Add the `Muted` role and remove these permissions
     - [Screenshot](https://i.imgur.com/iuKw1i8.png)
     - Repeat this step for every channel in which you want the `Muted` role to work
+    
+### Configuring the music commands
+
+You need a Google Youtube API v3 key in order for commands like `searchyt` and `playyt` to work properly.
+
+1. Go to the [Google Developer Console](https://console.developers.google.com/)
+2. Register a new application which uses the Google Youtube v3 API
+3. Copy your key
+4. Add it to the server configuration with `?setcfg "youtube_api_key" "your_key"`
+   **IMPORTANT:** Make sure that nobody sees your API key!
+5. [Download ffmpeg](https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-20160412-git-196cfc2-win64-static.7z) and add ffmpeg.exe to your $PATH
 
 ## Available commands
 ### Commands
@@ -74,7 +85,6 @@ This role is needed for the ?mute and ?unmute command to work
 - ?invite
 - ?stats
 - ?lock
-- ?reddit
 
 #### Music commands:
 - ?searchyt
