@@ -198,26 +198,34 @@ async def on_ready():
 async def on_message(message: discord.Message):
     # Increment the message count.
     util.msgcount += 1
-    # print("-> Recieved message:", message.content, "from", message.author.name)
+
     logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
+
     if not isinstance(message.channel, discord.PrivateChannel):
         # print("--> On channel: #" + message.channel.name)
         logger.info(" On channel: #{message.channel.name}".format(message=message))
+
     # Check if it matches the command prefix.
     if message.author.name == client.user.name:
         logger.info("Not processing own message.")
         return
+
+    # Check for a valid server.
     if message.server is not None:
         prefix = util.get_config(message.server.id, "command_prefix", "?")
         autodelete = True if util.get_config(message.server.id, "autodelete") == "True" else False
         if autodelete and message.content.startswith(prefix):
             await client.delete_message(message)
+        logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
     else:
+        # No DMs
         await client.send_message(message.channel, "I don't accept private messages.")
         return
+
     if len(message.content) == 0:
         logger.info("Ignoring (presumably) image-only message.")
         return
+
     if message.content.startswith(prefix):
         cmd_content = message.content[len(prefix):]
         cmd_word = cmd_content.split(" ")[0]
