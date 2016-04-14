@@ -26,7 +26,6 @@ import datetime
 import functools
 import os
 import random
-from math import floor
 
 import discord
 import pyowm
