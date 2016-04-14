@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 import os
+import json
 
 import discord
 
@@ -163,12 +164,14 @@ async def banned(client: discord.Client, message: discord.Message):
 @cmds.command("blacklist")
 @util.with_permission('Admin')
 async def blacklist(client: discord.Client, message: discord.Message):
-    try:
+    if os.path.exists("blacklist.json"):
+        with open("blacklist.json") as f:
+            black_list = json.load(f)
+    else:
         black_list = []
-        for user in message.mentions:
-            black_list.append(user)
-        await client.send_message(message.channel, "User(s) {} got added to the blacklist".format(user))
-        return black_list
-    except Exception:
-        await client.send_message(message.channel, "Not a valid user!")
-
+    for user in message.mentions:
+        black_list.append(user.id)
+    await client.send_message(message.channel, "User(s) `{}` got added to the blacklist"
+                              .format(' '.join(u.name for u in message.mentions)))
+    with open("blacklist.json", 'w') as f:
+        json.dump(black_list, f)
