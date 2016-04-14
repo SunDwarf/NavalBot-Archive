@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import argparse
 import asyncio
+import json
 import logging
 import os
 import re
@@ -32,6 +33,8 @@ import traceback
 from ctypes.util import find_library
 
 import aiohttp
+import time
+
 import discord
 import requests
 
@@ -154,6 +157,15 @@ factoid_matcher = re.compile(r'(.*?) is (.*)')
 
 attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
 
+# Pre-load the blacklist.
+if os.path.exists("blacklist.json"):
+    with open("blacklist.json") as f:
+        bl = json.load(f)
+        bl_mtime = os.stat(f.fileno()).st_mtime
+else:
+    bl = []
+    bl_mtime = time.time()
+
 
 # Events.
 @client.event
@@ -210,6 +222,25 @@ async def on_message(message: discord.Message):
         logger.info("Not processing own message.")
         return
 
+    # Re-process the blacklist.
+    if os.path.exists("blacklist.json"):
+        # Get the time
+        mtime = os.stat("blacklist.json").st_mtime
+        if mtime > bl_mtime:
+            logger.debug("Blacklist file changed, reloading...")
+            # Update mtime
+            global bl_mtime
+            bl_mtime = mtime
+            # Reload blacklist
+            with open("blacklist.json") as f:
+                global bl
+                bl = json.load(f)
+
+    if message.author.id in bl:
+        # Ignore message
+        logger.warn("Ignoring message, as user is on the blacklist.")
+        return
+
     # Check for a valid server.
     if message.server is not None:
         prefix = util.get_config(message.server.id, "command_prefix", "?")
@@ -264,7 +295,7 @@ async def version(client: discord.Client, message: discord.Message):
     await client.send_message(
         message.channel,
         "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-                .format(VERSION)
+            .format(VERSION)
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
