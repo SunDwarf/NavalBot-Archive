@@ -31,7 +31,6 @@ from concurrent import futures
 from math import floor
 
 import aiohttp
-
 import discord
 
 db = sqlite3.connect("navalbot.db")
@@ -231,7 +230,7 @@ async def get_file(client: tuple, url, name):
             assert isinstance(get, aiohttp.ClientResponse)
             if int(get.headers["content-length"]) > 1024 * 1024 * 8:
                 # 1gib
-                await client[0].send_message(client[1].channel, "File {} is too big to DL")
+                await client[0].send_message(client[1].channel, "File {} is too big to DL".format(name))
                 return
             else:
                 data = await get.read()

@@ -113,9 +113,9 @@ async def commands(client: discord.Client, message: discord.Message):
     """
     Lists the commands for the bot.
     """
-    com = ['lock', 'info', 'version', 'weather', 'whois', 'uptime', 'google', 'playyt', 'stop', 'skip', 'queue',
-           '\n**Admins only:**\n', 'game', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg', 'avatar',
-           'setcfg']
+    com = ['help', 'lock', 'info', 'version', 'weather', 'whois', 'uptime', 'google', 'playyt', 'stop', 'skip', 'queue',
+           '\n**Admins only:**\n', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg', 'avatar',
+           'setcfg', 'changename', 'blacklist']
     await client.send_message(message.channel, "**These commands are available:**\n{}".format(
         '\n'.join(
             [util.get_config(message.server.id, "command_prefix", "?") + c if ' ' not in c else c for c in com])))
@@ -225,6 +225,9 @@ async def coin(client: discord.Client, message: discord.Message):
 @cmds.command("remindme")
 @util.enforce_args(2, error_msg=":x: You must provide a time and reason!")
 async def remind_me(client: discord.Client, message: discord.Message, args: list):
+    """
+    Set a reminder
+    """
     time = args[0]
     try:
         time = int(time)

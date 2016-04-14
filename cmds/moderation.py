@@ -20,14 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-import os
 import json
+import os
 
 import discord
 
 import cmds
 import util
-from util import get_file
 from exceptions import CommandError
 
 
