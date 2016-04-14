@@ -162,15 +162,39 @@ async def banned(client: discord.Client, message: discord.Message):
 
 @cmds.command("blacklist")
 @util.with_permission('Admin')
-async def blacklist(client: discord.Client, message: discord.Message):
+@util.enforce_args(1, ":x: You must select at least one user to blacklist!")
+async def blacklist(client: discord.Client, message: discord.Message, _: list):
+    """
+    Blocks a user from communicating with the bot.
+    """
     if os.path.exists("blacklist.json"):
         with open("blacklist.json") as f:
             black_list = json.load(f)
     else:
         black_list = []
     for user in message.mentions:
-        black_list.append(user.id)
-    await client.send_message(message.channel, "User(s) `{}` got added to the blacklist"
+        if user not in black_list:
+            black_list.append(user.id)
+    await client.send_message(message.channel, ":heavy_check_mark: User(s) `{}` added to the blacklist."
                               .format(' '.join(u.name for u in message.mentions)))
     with open("blacklist.json", 'w') as f:
         json.dump(black_list, f)
+
+
+@cmds.command("unblacklist")
+@util.with_permission("Admin")
+@util.enforce_args(1, ":x: You must select at least one user to unblacklist!")
+async def unblacklist(client: discord.Client, message: discord.Message, _: list):
+    """
+    Unblocks a user from communicating with the bot.
+    """
+    if os.path.exists("blacklist.json"):
+        with open("blacklist.json") as f:
+            black_list = json.load(f)
+    else:
+        black_list = []
+    for user in message.mentions:
+        if user.id in black_list:
+            black_list.remove(user.id)
+    await client.send_message(message.channel, ":heavy_check_mark: User(s) `{}` removed from the blacklist."
+                              .format(' '.join(u.name for u in message.mentions)))
