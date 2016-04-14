@@ -163,7 +163,7 @@ async def banned(client: discord.Client, message: discord.Message):
 @cmds.command("blacklist")
 @util.with_permission('Admin')
 @util.enforce_args(1, ":x: You must select at least one user to blacklist!")
-async def blacklist(client: discord.Client, message: discord.Message):
+async def blacklist(client: discord.Client, message: discord.Message, _: list):
     """
     Blocks a user from communicating with the bot.
     """
@@ -184,7 +184,7 @@ async def blacklist(client: discord.Client, message: discord.Message):
 @cmds.command("unblacklist")
 @util.with_permission("Admin")
 @util.enforce_args(1, ":x: You must select at least one user to unblacklist!")
-async def unblacklist(client: discord.Client, message: discord.Message):
+async def unblacklist(client: discord.Client, message: discord.Message, _: list):
     """
     Unblocks a user from communicating with the bot.
     """
