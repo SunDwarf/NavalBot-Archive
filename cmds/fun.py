@@ -23,13 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import asyncio
 import datetime
+import functools
 import os
 import random
+from math import floor
 
 import discord
 import pyowm
 from google import search
 from googleapiclient.discovery import build
+import psutil
 
 import cmds
 import util
@@ -59,13 +62,19 @@ async def info(client: discord.Client, message: discord.Message):
                               " https://github.com/SunDwarf/NavalBot/blob/stable/README.md")
 
 
+def _get_google(f):
+    return list(f())[0]
+
+
 @cmds.command("google")
 async def google(client: discord.Client, message: discord.Message):
     """
     Searches google for the top two results for the search.
     """
     userinput = ' '.join(message.content.split(" ")[1:])
-    l = list(search(userinput, stop=1))[0]
+    f = functools.partial(search, userinput, stop=1)
+    f2 = functools.partial(_get_google, f)
+    l = await util.with_multiprocessing(f2)
     await client.send_message(message.channel, l)
 
 
@@ -104,31 +113,12 @@ async def commands(client: discord.Client, message: discord.Message):
     """
     Lists the commands for the bot.
     """
-    com = ['lock', 'info', 'version', 'weather', 'whois', 'uptime', 'google', 'playyt', 'stop', 'skip', 'queue',
-           '\n**Admins only:**\n', 'game', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg', 'avatar',
-           'setcfg']
+    com = ['help', 'lock', 'info', 'version', 'weather', 'whois', 'uptime', 'google', 'playyt', 'stop', 'skip', 'queue',
+           '\n**Admins only:**\n', 'kick', 'ban', 'unban', 'mute', 'unmute', 'delete', 'getcfg', 'avatar',
+           'setcfg', 'changename', 'blacklist']
     await client.send_message(message.channel, "**These commands are available:**\n{}".format(
         '\n'.join(
             [util.get_config(message.server.id, "command_prefix", "?") + c if ' ' not in c else c for c in com])))
-
-
-# @cmds.command("reddit")
-# async def reddit(client: discord.Client, message: discord.Message):
-#    """
-#    Fetches the currently front page from the specified subreddit.
-#    """
-#    try:
-#        choice = ' '.join(message.content.split(" ")[1:]).lower()
-#        if choice in nsfw.PURITAN_VALUES:
-#            await client.send_message(message.channel, 'You´re not supposed to search for this ಠ_ಠ')
-#        else:
-#            await client.send_message(message.channel, 'The top posts from {} have been sent to you'.format(choice))
-#            func = functools.partial(red.main, choice)
-#            info = await loop.run_in_executor(None, func)
-#            for link in info:
-#                await client.send_message(message.author, content=link)
-#    except TypeError as f:
-#        print('[ERROR]', f)
 
 
 @cmds.command("whois")
@@ -167,8 +157,19 @@ async def stats(client: discord.Client, message: discord.Message):
     """
     server_count = len(client.servers)
     msgcount = util.msgcount
-    await client.send_message(message.channel, "Currently running on `{}` server(s). Processed `{}` messages since "
-                                               "startup.".format(server_count, msgcount))
+    if isinstance(client.voice, dict):
+        voice_clients = len(client.voice)
+    else:
+        voice_clients = 1 if client.is_voice_connected() else 0
+    # Memory stats
+    used_memory = psutil.Process().memory_info().rss
+    used_memory = round(used_memory / 1024 / 1024, 2)
+    await client.send_message(
+        message.channel,
+        "Currently running on `{}` server(s). Processed `{}` messages since startup.\n"
+        "Connected to `{}` voice channels.\n"
+        "Using `{}MB` of memory."
+        .format(server_count, msgcount, voice_clients, used_memory))
 
 
 @cmds.command("searchyt")
@@ -182,16 +183,19 @@ async def search_youtube(client: discord.Client, message: discord.Message, args:
     # Get the API key
     api_key = util.get_config(None, "youtube_api_key")
     if not api_key:
-        await client.send_message(message.channel, ":x: The YouTube Data API v3 key has not been set!")
+        await client.send_message(message.channel,
+                                  ':x: The YouTube Data API v3 key has not been set!\n'
+                                  ':x:Set it with `?setconfig "youtube_api_key" "key"`.')
         return
 
     # Create a new instance of the APIClient
     yt_api_client = build("youtube", "v3", developerKey=api_key)
-    search_response = yt_api_client.search().list(
+    built = yt_api_client.search().list(
         q=to_search,
         part="id,snippet",
         maxResults=1
-    ).execute()
+    )
+    search_response = await loop.run_in_executor(None, built.execute)
 
     items = search_response.get("items", [])
     if not items:
@@ -221,6 +225,9 @@ async def coin(client: discord.Client, message: discord.Message):
 @cmds.command("remindme")
 @util.enforce_args(2, error_msg=":x: You must provide a time and reason!")
 async def remind_me(client: discord.Client, message: discord.Message, args: list):
+    """
+    Set a reminder
+    """
     time = args[0]
     try:
         time = int(time)
@@ -242,4 +249,3 @@ async def remind_me(client: discord.Client, message: discord.Message, args: list
     )
 
     loop.create_task(__remind_coro())
-

@@ -21,12 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
+import asyncio
 import datetime
+import os
 import shlex
 import sqlite3
 import time
+from concurrent import futures
 from math import floor
 
+import aiohttp
 import discord
 
 db = sqlite3.connect("navalbot.db")
@@ -36,6 +40,17 @@ startup = datetime.datetime.fromtimestamp(time.time())
 
 # Some useful variables
 msgcount = 0
+
+loop = asyncio.get_event_loop()
+
+multi = futures.ProcessPoolExecutor()
+
+
+async def with_multiprocessing(func):
+    """
+    Runs a func inside a Multiprocessing executor
+    """
+    return await loop.run_in_executor(multi, func)
 
 
 def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{seconds2}"):
@@ -81,7 +96,7 @@ def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{secon
 
 def get_config(server_id: str, key: str, default=None) -> str:
     """
-    Gets a config value from the DB.
+    Gets a server-specific config value from the DB.
     """
     if server_id:
         cursor.execute("""SELECT value FROM configuration WHERE name = ?
@@ -96,6 +111,9 @@ def get_config(server_id: str, key: str, default=None) -> str:
 
 
 def set_config(server_id: str, key: str, value: str):
+    """
+    Sets a server-specific config value in the DB
+    """
     if server_id:
         cursor.execute("""INSERT OR REPLACE
                        INTO configuration (id, name, value, server)
@@ -201,3 +219,28 @@ def only(ids):
         return __fake_permission_func
 
     return __decorator
+
+
+async def get_file(client: tuple, url, name):
+    """
+    Get a file from the web using aiohttp, and save it
+    """
+    with aiohttp.ClientSession() as sess:
+        async with sess.get(url) as get:
+            assert isinstance(get, aiohttp.ClientResponse)
+            if int(get.headers["content-length"]) > 1024 * 1024 * 8:
+                # 1gib
+                await client[0].send_message(client[1].channel, "File {} is too big to DL".format(name))
+                return
+            else:
+                data = await get.read()
+                with open(os.path.join(os.getcwd(), 'files', name), 'wb') as f:
+                    f.write(data)
+                print("--> Saved file to {}".format(name))
+
+
+def sanitize(param):
+    param = param.replace('..', '.').replace('/', '')
+    param = param.split('?')[0]
+    return param
+

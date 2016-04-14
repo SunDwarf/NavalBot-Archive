@@ -30,11 +30,10 @@ import re
 import sys
 import traceback
 from ctypes.util import find_library
-import platform
 
 import aiohttp
-import requests
 import discord
+import requests
 
 # =============== Commands
 import cmds
@@ -43,7 +42,7 @@ from cmds import commands
 # Fuck off PyCharm
 import importlib
 
-from util import db, cursor
+from util import db, cursor, get_file, sanitize
 
 __zipdep_zipmodules = ['youtube_dl', 'aiohttp', 'blessings', 'chardet', 'curtsies', 'decorator',
                        'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'praw', 'pygments', 'pyowm',
@@ -56,6 +55,8 @@ importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
 
 # =============== End commands
+
+loop = asyncio.get_event_loop()
 
 # =============== Argparse
 
@@ -108,21 +109,22 @@ if found:
 else:
     if sys.platform == "win32":
         print(">> Downloading libopus for Windows.")
-        sfbit = sys.maxsize > 2**32
+        sfbit = sys.maxsize > 2 ** 32
         if sfbit:
             to_dl = 'x64'
         else:
             to_dl = 'x86'
-        r = requests.get("https://github.com/SexualRhinoceros/MusicBot/raw/develop/libopus-0.{}.dll".format(to_dl))
+        r = requests.get("https://github.com/SexualRhinoceros/MusicBot/raw/develop/libopus-0.{}.dll".format(to_dl),
+                         stream=True)
         # Save it as opus.dll
         with open("libopus.dll", 'wb') as f:
-            f.write(r.raw.read())
+            for chunk in r.iter_content(256):
+                f.write(chunk)
         discord.opus.load_opus("libopus")
         del sfbit, to_dl
     else:
         print(">> Cannot load opus library - cannot use voice.")
         del found
-
 
 # Create a client.
 client = discord.Client()
@@ -144,13 +146,11 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "2.5.5"
+VERSION = "2.6.0"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(.*?) is (.*)')
-
-loop = asyncio.get_event_loop()
 
 attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
 
@@ -209,6 +209,9 @@ async def on_message(message: discord.Message):
         return
     if message.server is not None:
         prefix = util.get_config(message.server.id, "command_prefix", "?")
+        autodelete = True if util.get_config(message.server.id, "autodelete") == "True" else False
+        if autodelete and message.content.startswith(prefix):
+            await client.delete_message(message)
     else:
         await client.send_message(message.channel, "I don't accept private messages.")
         return
@@ -247,10 +250,13 @@ def read_version(data):
 
 @cmds.command("version")
 async def version(client: discord.Client, message: discord.Message):
+    """
+    Checks for the latest stable version of NavalBot.
+    """
     await client.send_message(
         message.channel,
         "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-            .format(VERSION)
+                .format(VERSION)
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
@@ -269,30 +275,6 @@ async def version(client: discord.Client, message: discord.Message):
                                                    "available online ({}).*".format(version))
     else:
         await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
-
-
-async def get_file(client: tuple, url, name):
-    """
-    Get a file from the web using aiohttp, and save it
-    """
-    with aiohttp.ClientSession() as sess:
-        async with sess.get(url) as get:
-            assert isinstance(get, aiohttp.ClientResponse)
-            if int(get.headers["content-length"]) > 1024 * 1024 * 8:
-                # 1gib
-                await client[0].send_message(client[1].channel, "File {} is too big to DL")
-                return
-            else:
-                data = await get.read()
-                with open(os.path.join(os.getcwd(), 'files', name), 'wb') as f:
-                    f.write(data)
-                print("--> Saved file to {}".format(name))
-
-
-def sanitize(param):
-    param = param.replace('..', '.').replace('/', '')
-    param = param.split('?')[0]
-    return param
 
 
 @cmds.command("help")
@@ -397,13 +379,20 @@ def main():
         try:
             loop.run_until_complete(client.connect())
         except KeyboardInterrupt:
-            loop.run_until_complete(client.logout())
+            try:
+                loop.run_until_complete(client.logout())
+            except Exception:
+                logger.error("Couldn't log out. Oh well. We tried!")
+                return
             return
         except Exception:
             import traceback
             traceback.print_exc()
             logger.error("Crashed. Don't know how, don't care. Continuing..")
             continue
+        except RuntimeError:
+            logger.error("Session appears to have errored. Exiting.")
+            return
 
 
 if __name__ == "__main__":

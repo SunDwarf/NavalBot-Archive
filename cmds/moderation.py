@@ -20,13 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import json
 import os
 
 import discord
 
 import cmds
 import util
-from bot import get_file
 from exceptions import CommandError
 
 
@@ -150,35 +150,27 @@ async def invite(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "Joined server specified.")
 
 
-@cmds.command("avatar")
-@util.only(cmds.RCE_IDS)
-@util.enforce_args(1, error_msg='You need to provide a link')
-async def avatar(client: discord.Client, message: discord.Message, args: list):
-    """
-    Changes the avatar of the bot.
-    You must provide a valid url, pointing to a jpeg or png file.
-    """
-    file = args[0]
-    try:
-        await get_file((client, message), url=file, name='avatar.jpg')
-        fp = open(os.path.join(os.getcwd(), "files", "avatar.jpg"), 'rb')
-        await client.edit_profile(avatar=fp.read())
-        await client.send_message(message.channel, "Avatar got changed!")
-    except (ValueError, discord.errors.InvalidArgument):
-        await client.send_message(message.channel, "This command only supports jpeg or png files!")
-
-
-@cmds.command("changename")
-@util.only(cmds.RCE_IDS)
-@util.enforce_args(1, error_msg="You need to provide the new name")
-async def changename(client: discord.Client, message: discord.Message, args: list):
-    name = args[0]
-    await client.edit_profile(username=name)
-    await client.send_message(message.channel, 'Username got changed!')
-
-
 @cmds.command("banned")
 @util.only(cmds.RCE_IDS)
 async def banned(client: discord.Client, message: discord.Message):
+    """
+    Get a list of all currently banned users on a server.
+    """
     users = await client.get_bans(server=message.server)
     await client.send_message(message.channel, "Banned users: {}".format(', '.join(user.name for user in users)))
+
+
+@cmds.command("blacklist")
+@util.with_permission('Admin')
+async def blacklist(client: discord.Client, message: discord.Message):
+    if os.path.exists("blacklist.json"):
+        with open("blacklist.json") as f:
+            black_list = json.load(f)
+    else:
+        black_list = []
+    for user in message.mentions:
+        black_list.append(user.id)
+    await client.send_message(message.channel, "User(s) `{}` got added to the blacklist"
+                              .format(' '.join(u.name for u in message.mentions)))
+    with open("blacklist.json", 'w') as f:
+        json.dump(black_list, f)
