@@ -55,7 +55,7 @@ async def lock(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "Factoid `{}` locked to ID `{}` ({})".format(fac, message.author.id,
                                                                                             message.author.name))
 
-
+@cmds.command("set")
 @cmds.command("setcfg")
 @util.with_permission("Admin")
 async def set_config(client: discord.Client, message: discord.Message):
@@ -75,6 +75,7 @@ async def set_config(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, ":heavy_check_mark: Config updated: `{}` -> `{}`".format(name, val))
 
 
+@cmds.command("get")
 @cmds.command("getcfg")
 @util.with_permission("Admin")
 async def get_config(client: discord.Client, message: discord.Message):
