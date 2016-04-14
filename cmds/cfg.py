@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import asyncio
 import os
 import shlex
 
-import asyncio
 import discord
 
 import cmds
@@ -54,6 +54,7 @@ async def lock(client: discord.Client, message: discord.Message):
     util.db.commit()
     await client.send_message(message.channel, "Factoid `{}` locked to ID `{}` ({})".format(fac, message.author.id,
                                                                                             message.author.name))
+
 
 @cmds.command("set")
 @cmds.command("setcfg")
