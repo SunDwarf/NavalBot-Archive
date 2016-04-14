@@ -243,3 +243,4 @@ def sanitize(param):
     param = param.replace('..', '.').replace('/', '')
     param = param.split('?')[0]
     return param
+

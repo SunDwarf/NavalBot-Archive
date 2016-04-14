@@ -32,9 +32,9 @@ import traceback
 from ctypes.util import find_library
 
 import aiohttp
+import discord
 import requests
 
-import discord
 # =============== Commands
 import cmds
 import util
@@ -109,7 +109,7 @@ if found:
 else:
     if sys.platform == "win32":
         print(">> Downloading libopus for Windows.")
-        sfbit = sys.maxsize > 2**32
+        sfbit = sys.maxsize > 2 ** 32
         if sfbit:
             to_dl = 'x64'
         else:
@@ -125,7 +125,6 @@ else:
     else:
         print(">> Cannot load opus library - cannot use voice.")
         del found
-
 
 # Create a client.
 client = discord.Client()
@@ -147,7 +146,7 @@ CREATE TABLE IF NOT EXISTS configuration (
 """)
 
 # Version information.
-VERSION = "2.5.9"
+VERSION = "2.6.0"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
@@ -210,6 +209,9 @@ async def on_message(message: discord.Message):
         return
     if message.server is not None:
         prefix = util.get_config(message.server.id, "command_prefix", "?")
+        autodelete = True if util.get_config(message.server.id, "autodelete") == "True" else False
+        if autodelete and message.content.startswith(prefix):
+            await client.delete_message(message)
     else:
         await client.send_message(message.channel, "I don't accept private messages.")
         return
