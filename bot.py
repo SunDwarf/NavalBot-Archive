@@ -29,11 +29,9 @@ import logging
 import os
 import re
 import sys
+import time
 import traceback
 from ctypes.util import find_library
-
-import aiohttp
-import time
 
 import discord
 import requests
@@ -48,7 +46,7 @@ import importlib
 from util import db, cursor, get_file, sanitize
 
 __zipdep_zipmodules = ['youtube_dl', 'aiohttp', 'blessings', 'chardet', 'curtsies', 'decorator',
-                       'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'praw', 'pygments', 'pyowm',
+                       'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'pygments', 'pyowm',
                        'requests', 'six', 'wcwidth', 'websockets', 'ws4py', 'googleapiclient', 'bs4', 'httplib2',
                        'uritemplate', 'oauth2client', 'update_checker', 'nacl']
 
@@ -56,6 +54,7 @@ importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
+importlib.import_module("cmds.version")
 
 # =============== End commands
 
@@ -75,6 +74,11 @@ if __name__ != "__zipdep":
     ep_group.add_argument("--ep-password", help="Bot account's password")
 
     args = parser.parse_args()
+
+# =============== Version information
+
+VERSION = "2.6.0"
+VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 
 # ===============
@@ -147,10 +151,6 @@ CREATE TABLE IF NOT EXISTS configuration (
   server VARCHAR
 )
 """)
-
-# Version information.
-VERSION = "2.6.0"
-VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(.*?) is (.*)')
@@ -275,46 +275,6 @@ async def on_message(message: discord.Message):
 
 
 # ============= Built-in commands.
-
-def read_version(data):
-    regexp = re.compile(r"^VERSION\W*=\W*([\d.abrc]+)")
-
-    for line in data:
-        match = regexp.match(line)
-        if match is not None:
-            return match.group(1)
-    else:
-        print("Cannot get new version from GitHub.")
-
-
-@cmds.command("version")
-async def version(client: discord.Client, message: discord.Message):
-    """
-    Checks for the latest stable version of NavalBot.
-    """
-    await client.send_message(
-        message.channel,
-        "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-            .format(VERSION)
-    )
-    # Download the latest version
-    async with aiohttp.ClientSession() as sess:
-        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/stable/bot.py")
-        assert isinstance(s, aiohttp.ClientResponse)
-        data = await s.read()
-        data = data.decode().split('\n')
-    version = read_version(data)
-    if not version:
-        await client.send_message(message.channel, ":grey_exclamation: Could not download version information.")
-        return
-    if tuple(int(i) for i in version.split(".")) > VERSIONT:
-        await client.send_message(message.channel, ":exclamation: *New version available:* **{}**".format(version))
-    elif tuple(int(i) for i in version.split(".")) < VERSIONT:
-        await client.send_message(message.channel, ":grey_exclamation: *You are running a newer version than the one "
-                                                   "available online ({}).*".format(version))
-    else:
-        await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
-
 
 @cmds.command("help")
 @util.enforce_args(1, error_msg=":x: You must provide a command for help!")
