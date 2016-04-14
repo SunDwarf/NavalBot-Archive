@@ -1,5 +1,4 @@
 """
-The main entry point of NavalBot.
 =================================
 This file is part of NavalBot.
 Copyright (C) 2016 Isaac Dickinson
