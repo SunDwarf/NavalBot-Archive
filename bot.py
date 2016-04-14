@@ -390,6 +390,9 @@ def main():
             traceback.print_exc()
             logger.error("Crashed. Don't know how, don't care. Continuing..")
             continue
+        except RuntimeError:
+            logger.error("Session appears to have errored. Exiting.")
+            return
 
 
 if __name__ == "__main__":
