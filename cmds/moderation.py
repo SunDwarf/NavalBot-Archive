@@ -198,3 +198,5 @@ async def unblacklist(client: discord.Client, message: discord.Message, _: list)
             black_list.remove(user.id)
     await client.send_message(message.channel, ":heavy_check_mark: User(s) `{}` removed from the blacklist."
                               .format(' '.join(u.name for u in message.mentions)))
+    with open("blacklist.json", 'w') as f:
+        json.dump(black_list, f)
