@@ -24,14 +24,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import argparse
 import asyncio
+import json
 import logging
 import os
 import re
 import sys
+import time
 import traceback
 from ctypes.util import find_library
 
-import aiohttp
 import discord
 import requests
 
@@ -45,7 +46,7 @@ import importlib
 from util import db, cursor, get_file, sanitize
 
 __zipdep_zipmodules = ['youtube_dl', 'aiohttp', 'blessings', 'chardet', 'curtsies', 'decorator',
-                       'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'praw', 'pygments', 'pyowm',
+                       'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'pygments', 'pyowm',
                        'requests', 'six', 'wcwidth', 'websockets', 'ws4py', 'googleapiclient', 'bs4', 'httplib2',
                        'uritemplate', 'oauth2client', 'update_checker', 'nacl']
 
@@ -53,6 +54,7 @@ importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
+importlib.import_module("cmds.version")
 
 # =============== End commands
 
@@ -72,6 +74,11 @@ if __name__ != "__zipdep":
     ep_group.add_argument("--ep-password", help="Bot account's password")
 
     args = parser.parse_args()
+
+# =============== Version information
+
+VERSION = "2.6.1"
+VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
 
 # ===============
@@ -145,14 +152,19 @@ CREATE TABLE IF NOT EXISTS configuration (
 )
 """)
 
-# Version information.
-VERSION = "2.6.0"
-VERSIONT = tuple(int(i) for i in VERSION.split("."))
-
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(.*?) is (.*)')
 
 attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
+
+# Pre-load the blacklist.
+if os.path.exists("blacklist.json"):
+    with open("blacklist.json") as f:
+        bl = json.load(f)
+        bl_mtime = os.stat(f.fileno()).st_mtime
+else:
+    bl = []
+    bl_mtime = time.time()
 
 
 # Events.
@@ -198,26 +210,53 @@ async def on_ready():
 async def on_message(message: discord.Message):
     # Increment the message count.
     util.msgcount += 1
-    # print("-> Recieved message:", message.content, "from", message.author.name)
+
     logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
+
     if not isinstance(message.channel, discord.PrivateChannel):
         # print("--> On channel: #" + message.channel.name)
         logger.info(" On channel: #{message.channel.name}".format(message=message))
+
     # Check if it matches the command prefix.
     if message.author.name == client.user.name:
         logger.info("Not processing own message.")
         return
+
+    # Re-process the blacklist.
+    if os.path.exists("blacklist.json"):
+        # Get the time
+        mtime = os.stat("blacklist.json").st_mtime
+        if mtime > bl_mtime:
+            logger.debug("Blacklist file changed, reloading...")
+            # Update mtime
+            global bl_mtime
+            bl_mtime = mtime
+            # Reload blacklist
+            with open("blacklist.json") as f:
+                global bl
+                bl = json.load(f)
+
+    if message.author.id in bl:
+        # Ignore message
+        logger.warn("Ignoring message, as user is on the blacklist.")
+        return
+
+    # Check for a valid server.
     if message.server is not None:
         prefix = util.get_config(message.server.id, "command_prefix", "?")
         autodelete = True if util.get_config(message.server.id, "autodelete") == "True" else False
         if autodelete and message.content.startswith(prefix):
             await client.delete_message(message)
+        logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
     else:
+        # No DMs
         await client.send_message(message.channel, "I don't accept private messages.")
         return
+
     if len(message.content) == 0:
         logger.info("Ignoring (presumably) image-only message.")
         return
+
     if message.content.startswith(prefix):
         cmd_content = message.content[len(prefix):]
         cmd_word = cmd_content.split(" ")[0]
@@ -236,46 +275,6 @@ async def on_message(message: discord.Message):
 
 
 # ============= Built-in commands.
-
-def read_version(data):
-    regexp = re.compile(r"^VERSION\W*=\W*([\d.abrc]+)")
-
-    for line in data:
-        match = regexp.match(line)
-        if match is not None:
-            return match.group(1)
-    else:
-        print("Cannot get new version from GitHub.")
-
-
-@cmds.command("version")
-async def version(client: discord.Client, message: discord.Message):
-    """
-    Checks for the latest stable version of NavalBot.
-    """
-    await client.send_message(
-        message.channel,
-        "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-                .format(VERSION)
-    )
-    # Download the latest version
-    async with aiohttp.ClientSession() as sess:
-        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/stable/bot.py")
-        assert isinstance(s, aiohttp.ClientResponse)
-        data = await s.read()
-        data = data.decode().split('\n')
-    version = read_version(data)
-    if not version:
-        await client.send_message(message.channel, ":grey_exclamation: Could not download version information.")
-        return
-    if tuple(int(i) for i in version.split(".")) > VERSIONT:
-        await client.send_message(message.channel, ":exclamation: *New version available:* **{}**".format(version))
-    elif tuple(int(i) for i in version.split(".")) < VERSIONT:
-        await client.send_message(message.channel, ":grey_exclamation: *You are running a newer version than the one "
-                                                   "available online ({}).*".format(version))
-    else:
-        await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
-
 
 @cmds.command("help")
 @util.enforce_args(1, error_msg=":x: You must provide a command for help!")
