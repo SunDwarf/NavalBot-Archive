@@ -384,14 +384,14 @@ def main():
                 logger.error("Couldn't log out. Oh well. We tried!")
                 return
             return
+        except RuntimeError:
+            logger.error("Session appears to have errored. Exiting.")
+            return
         except Exception:
             import traceback
             traceback.print_exc()
             logger.error("Crashed. Don't know how, don't care. Continuing..")
             continue
-        except RuntimeError:
-            logger.error("Session appears to have errored. Exiting.")
-            return
 
 
 if __name__ == "__main__":
