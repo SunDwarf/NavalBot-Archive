@@ -344,17 +344,19 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     items = queue.qsize()
 
     if not is_playlist:
-        try:
-            queue.put_nowait((_oauth2_play_youtube(download_url, title), info))
-        except asyncio.QueueFull:
-            await client.send_message(message.channel, ":no_entry: There are too many songs on the queue. Cannot start "
-                                                       "playing.")
         # Send a helpful error message.
         if items != 0:
             await client.send_message(message.channel,
                                       ":heavy_check_mark: You are number {} in the queue.".format(items + 1))
         else:
             await client.send_message(message.channel, ":heavy_check_mark: You are next in the queue.")
+
+        try:
+            queue.put_nowait((_oauth2_play_youtube(download_url, title), info))
+        except asyncio.QueueFull:
+            await client.send_message(message.channel,
+                                      ":no_entry: There are too many songs on the queue. Cannot start "
+                                      "playing.")
 
     else:
         # Loop over each item from the playlist.
