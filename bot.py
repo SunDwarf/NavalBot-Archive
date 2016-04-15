@@ -236,10 +236,12 @@ async def on_message(message: discord.Message):
                 global bl
                 bl = json.load(f)
 
-    if message.author.id in bl:
-        # Ignore message
-        logger.warn("Ignoring message, as user is on the blacklist.")
-        return
+    if message.server.id in bl:
+        bb = bl[message.server.id]
+        if message.author.id in bb:
+            # Ignore message
+            logger.warn("Ignoring message, as user is on the blacklist.")
+            return
 
     # Check for a valid server.
     if message.server is not None:

@@ -171,10 +171,12 @@ async def blacklist(client: discord.Client, message: discord.Message, _: list):
         with open("blacklist.json") as f:
             black_list = json.load(f)
     else:
-        black_list = []
+        black_list = {}
     for user in message.mentions:
-        if user not in black_list:
-            black_list.append(user.id)
+        if message.server.id not in black_list:
+            black_list[message.server.id] = []
+        if user not in black_list[message.server.id]:
+            black_list[message.server.id].append(user.id)
     await client.send_message(message.channel, ":heavy_check_mark: User(s) `{}` added to the blacklist."
                               .format(' '.join(u.name for u in message.mentions)))
     with open("blacklist.json", 'w') as f:
@@ -192,10 +194,11 @@ async def unblacklist(client: discord.Client, message: discord.Message, _: list)
         with open("blacklist.json") as f:
             black_list = json.load(f)
     else:
-        black_list = []
+        black_list = {}
     for user in message.mentions:
-        if user.id in black_list:
-            black_list.remove(user.id)
+        if message.server.id in black_list:
+            if user.id in black_list[message.server.id]:
+                black_list[message.server.id].remove(user.id)
     await client.send_message(message.channel, ":heavy_check_mark: User(s) `{}` removed from the blacklist."
                               .format(' '.join(u.name for u in message.mentions)))
     with open("blacklist.json", 'w') as f:
