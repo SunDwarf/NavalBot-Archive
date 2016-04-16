@@ -52,7 +52,8 @@ async def mute(client: discord.Client, message: discord.Message):
             await client.send_message('Not enough permissions to mute user {}'.format(message.mentions[0].name))
             raise CommandError('Not enough permissions to mute user : {}'.format(message.mentions[0].name))
     else:
-        await client.send_message(message.channel, "Usage: ?mute @UserName")
+        prefix = util.get_config(message.server.id, "command_prefix", "?")
+        await client.send_message(message.channel, "Usage: {}mute @UserName".format(prefix))
 
 
 @cmds.command("unmute")
@@ -76,7 +77,8 @@ async def unmute(client: discord.Client, message: discord.Message):
             await client.send_message('Not enough permissions to unmute user {}'.format(message.mentions[0].name))
             raise CommandError('Not enough permissions to unmute user : {}'.format(message.mentions[0].name))
     else:
-        await client.send_message(message.channel, "Usage: ?unmute @UserName")
+        prefix = util.get_config(message.server.id, "command_prefix", "?")
+        await client.send_message(message.channel, "Usage: {}unmute @UserName".format(prefix))
 
 
 @cmds.command("ban")
@@ -143,7 +145,8 @@ async def invite(client: discord.Client, message: discord.Message):
     try:
         invite = message.content.split(" ")[1]
     except IndexError:
-        await client.send_message(message.channel, "Usage: ?invite [link]")
+        prefix = util.get_config(message.server.id, "command_prefix", "?")
+        await client.send_message(message.channel, "Usage: {}invite [link]".format(prefix))
         return
 
     await client.accept_invite(invite)

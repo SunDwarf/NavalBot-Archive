@@ -335,7 +335,7 @@ async def default(client: discord.Client, message: discord.Message):
     else:
         # Get factoid
         cursor.execute("SELECT (content) FROM factoids "
-                       "WHERE factoids.name = ?"
+                       "WHERE factoids.name = ? "
                        "AND factoids.server = ?", (data, message.server.id))
         rows = cursor.fetchone()
         if not rows:
