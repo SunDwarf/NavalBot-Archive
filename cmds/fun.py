@@ -78,6 +78,16 @@ async def google(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, l)
 
 
+def _get_weather(api_key, userinput):
+    owm = pyowm.OWM(api_key)
+    observation = owm.weather_at_place(userinput)
+    # Get the weather and stuff.
+    w = observation.get_weather()
+    wind = w.get_wind()['speed']
+    humidity = w.get_humidity()
+    temp = w.get_temperature('celsius')['temp']
+    return wind, humidity, temp
+
 @cmds.command("weather")
 @util.enforce_args(1, ":x: You must specify a village/town/city/settlement to query!")
 async def weather(client: discord.Client, message: discord.Message, args: list):
@@ -89,16 +99,9 @@ async def weather(client: discord.Client, message: discord.Message, args: list):
         await client.send_message(message.channel, ":exclamation: You have not set the API key. Set it with `setcfg "
                                                    "owm_api_key <your_api_key>`.")
         return
-    owm = pyowm.OWM(api_key)
     try:
         userinput = ' '.join(args[0:])
-        # Get it from the place
-        observation = owm.weather_at_place(userinput)
-        # Get the weather and stuff.
-        w = observation.get_weather()
-        wind = w.get_wind()['speed']
-        humidity = w.get_humidity()
-        temp = w.get_temperature('celsius')['temp']
+        wind, humidity, temp = await util.with_multiprocessing(functools.partial(_get_weather(api_key, userinput)))
         await client.send_message(
             message.channel,
             '☁_Weather for {}:_\n** Temperature:** {} °C **Humidity:** {} % **Wind:** {} m/s'
