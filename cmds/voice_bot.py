@@ -239,7 +239,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                                                            "must be named `Music` or `NavalBot`.)")
         return
 
-    vidname = args[0]
+    vidname = ' '.join(args[0:])
 
     if 'list' in vidname or 'playlist' in vidname:
         await client.send_message(message.channel, ":warning: If this is a playlist, it may take a long time to "
