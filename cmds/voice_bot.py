@@ -248,7 +248,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
 
-    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": 99})
+    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": 99,
+                                "default_search": "ytsearch"})
     func = functools.partial(ydl.extract_info, vidname, download=False)
     try:
         info = await loop.run_in_executor(None, func)
