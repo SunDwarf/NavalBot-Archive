@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import json
 import os
-import random
 
 import discord
 
@@ -212,7 +211,9 @@ async def unblacklist(client: discord.Client, message: discord.Message, _: list)
 @cmds.command("broadcast")
 @util.only(cmds.RCE_IDS)
 async def broadcast(client: discord.Client, message: discord.Message):
+    """
+    Sends a message to all servers the bot is connected to.
+    """
     text = message.content.split(" ")[1]
     for servers in client.servers:
         await client.send_message(servers, "*Broadcast message:* {}".format(text))
-
