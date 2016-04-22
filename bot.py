@@ -35,6 +35,7 @@ from ctypes.util import find_library
 
 import discord
 import requests
+from colorama import init, Fore, Back, Style
 
 # =============== Commands
 import cmds
@@ -45,10 +46,8 @@ import importlib
 
 from util import db, cursor, get_file, sanitize
 
-__zipdep_zipmodules = ['youtube_dl', 'aiohttp', 'blessings', 'chardet', 'curtsies', 'decorator',
-                       'discord', 'docopt', 'google', 'greenlet', 'monotonic', 'pygments', 'pyowm',
-                       'requests', 'six', 'wcwidth', 'websockets', 'ws4py', 'googleapiclient', 'bs4', 'httplib2',
-                       'uritemplate', 'oauth2client', 'update_checker', 'nacl']
+init()
+
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -211,10 +210,10 @@ async def on_message(message: discord.Message):
     # Increment the message count.
     util.msgcount += 1
 
-    logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
-
     if not isinstance(message.channel, discord.PrivateChannel):
-        # print("--> On channel: #" + message.channel.name)
+        print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
+              Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
+        logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
         logger.info(" On channel: #{message.channel.name}".format(message=message))
 
     # Check if it matches the command prefix.
