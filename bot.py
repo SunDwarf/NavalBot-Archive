@@ -211,8 +211,8 @@ async def on_message(message: discord.Message):
     util.msgcount += 1
 
     if not isinstance(message.channel, discord.PrivateChannel):
-        print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
-              Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
+        #print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
+        #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
         logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
         logger.info(" On channel: #{message.channel.name}".format(message=message))
 
