@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 import asyncio
+import copy
+import random
 
 import discord
 import functools
@@ -53,8 +55,8 @@ async def find_voice_channel(server: discord.Server):
 
 async def _await_queue(server_id: str):
     # Awaits new songs on the queue.
-    queue = voice_params[server_id]["queue"]
     while True:
+        queue = voice_params[server_id]["queue"]
         try:
             items = await queue.get()
         except RuntimeError:
@@ -81,6 +83,46 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
         return new_vc
     else:
         return vc
+
+
+@command("shuffle")
+@util.with_permission("Bot Commander", "Voice", "Admin")
+async def shuffle(client: discord.Client, message: discord.Message):
+    """
+    Shuffles the queue.
+    """
+    # Standard checks.
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if message.server.id not in voice_params:
+        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+        return
+
+    queue = voice_params[message.server.id].get("queue")
+    if not queue:
+        await client.send_message(message.channel, ":x: There is no queue for this server.")
+        # this never happens
+    new_queue = asyncio.Queue(maxsize=100)
+    assert isinstance(queue, asyncio.Queue)
+    deq = list(queue._queue)
+
+    # shuffle deq
+    random.shuffle(deq)
+
+    # append all items
+    for i in deq:
+        try:
+            new_queue.put_nowait(i)
+        except asyncio.QueueFull:
+            # wat
+            break
+
+    # set the new queue
+    voice_params[message.server.id]["queue"] = new_queue
+
+    await client.send_message(message.channel, ":heavy_check_mark: Shuffled queue.")
 
 
 @command("reset")
@@ -376,7 +418,9 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 )
                 return
 
-        await client.send_message(message.channel, ":heavy_check_mark: Added {} tracks to queue.".format(num))
+        if num == 0:
+            num = 1
+        await client.send_message(message.channel, ":heavy_check_mark: Added {} track(s) to queue.".format(num))
 
     # Create a new task, if applicable.
     if 'task' not in voice_params[message.server.id]:
