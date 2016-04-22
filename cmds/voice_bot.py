@@ -313,6 +313,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         title = info.get('title')
         download_url = info['url']
 
+        pl_data = None
+
         duration = info.get('duration')
         if (duration and int(duration) > (60 * 10)) and not util.has_permissions(
                 message.author, {"Bot Commander", "Voice", "Admin"}):
@@ -383,6 +385,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Get the number of songs on the queue.
     items = queue.qsize()
 
+    # Switch based on if we're a playlist.
     if not is_playlist:
         # Send a helpful error message.
         if items != 0:
@@ -399,6 +402,9 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                                       "playing.")
 
     else:
+        # If it's pretending to be a playlist, but there's nothing there, set num to -1 to prevent UnboundLocalError
+        if not pl_data:
+            num = -1
         # Loop over each item from the playlist.
         for num, item in enumerate(pl_data):
             if not item:
@@ -418,9 +424,15 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 )
                 return
 
-        if num == 0:
-            num = 1
-        await client.send_message(message.channel, ":heavy_check_mark: Added {} track(s) to queue.".format(num))
+        # See above, to see justification of num being -1.
+        if num == -1:
+            await client.send_message(
+                message.channel,
+                ":x: Search returned nothing, or playlist errored."
+            )
+            return
+
+        await client.send_message(message.channel, ":heavy_check_mark: Added {} track(s) to queue.".format(num+1))
 
     # Create a new task, if applicable.
     if 'task' not in voice_params[message.server.id]:
