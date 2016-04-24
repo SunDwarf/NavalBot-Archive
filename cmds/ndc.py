@@ -38,13 +38,13 @@ loop = asyncio.get_event_loop()
 
 
 @cmds.command("sql")
+@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
 async def sql(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) in cmds.RCE_IDS:
-        await client.send_message(message.channel, "You're not Sun")
+    sql_cmd = getter.findall(message.content)
+    if not sql_cmd:
         return
-    else:
-        sql_cmd = ' '.join(message.content.split(' ')[1:])
-        util.cursor.execute(sql_cmd)
+    util.cursor.execute(sql_cmd[0])
+    await client.send_message(message.channel, "`{}`".format(util.cursor.fetchall()))
 
 
 @cmds.command("py")
@@ -54,5 +54,5 @@ async def py(client: discord.Client, message: discord.Message):
     if not match:
         return
     else:
-        result = exec(match[0])
+        result = eval(match[0])
         await client.send_message(message.channel, "```{}```".format(result))
