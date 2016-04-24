@@ -147,6 +147,7 @@ async def invite(client: discord.Client, message: discord.Message):
 
     if client.user.bot:
         await client.send_message(":X: Cannot accept invite as a bot account.")
+        return
     try:
         invite = message.content.split(" ")[1]
     except IndexError:
