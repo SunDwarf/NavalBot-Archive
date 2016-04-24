@@ -35,7 +35,7 @@ from ctypes.util import find_library
 
 import discord
 import requests
-from colorama import init, Fore, Back, Style
+import setproctitle
 
 # =============== Commands
 import cmds
@@ -45,8 +45,6 @@ from cmds import commands
 import importlib
 
 from util import db, cursor, get_file, sanitize
-
-init()
 
 
 importlib.import_module("cmds.cfg")
@@ -200,6 +198,8 @@ async def on_ready():
 
     # Set the game.
     await client.change_status(discord.Game(name="Type ?info for help!"))
+
+    setproctitle.setproctitle("NavalBot - {}".format(args.oauth_bot_id))
 
 
 @client.event
