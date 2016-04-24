@@ -421,7 +421,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Play it via ffmpeg.
 
     # Get the max queue size
-    qsize = util.get_config(message.server.id, "voice_limit", default=99, type_=int)
+    qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": qsize,
                                 "default_search": "ytsearch"})
