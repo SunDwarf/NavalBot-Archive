@@ -35,7 +35,7 @@ from ctypes.util import find_library
 
 import discord
 import requests
-import setproctitle
+
 
 # =============== Commands
 import cmds
@@ -114,8 +114,11 @@ if sys.platform == "win32":
         found = "libopus"
     else:
         found = False
+    has_setproctitle = False
 else:
     found = find_library("opus")
+    has_setproctitle = True
+    import setproctitle
 if found:
     print(">> Loaded libopus from {}".format(found))
     discord.opus.load_opus(found)
@@ -202,7 +205,8 @@ async def on_ready():
     # Set the game.
     await client.change_status(discord.Game(name="Type ?info for help!"))
 
-    setproctitle.setproctitle("NavalBot - {}".format(args.oauth_bot_id))
+    if has_setproctitle:
+        setproctitle.setproctitle("NavalBot - {}".format(args.oauth_bot_id))
 
 
 @client.event
