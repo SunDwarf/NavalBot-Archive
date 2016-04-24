@@ -46,6 +46,21 @@ import importlib
 
 from util import db, cursor, get_file, sanitize
 
+# Create DB
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS factoids (
+  id INTEGER PRIMARY KEY, name VARCHAR, content VARCHAR, locked INTEGER, locker VARCHAR, server VARCHAR
+);
+""")
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS configuration (
+  id INTEGER PRIMARY KEY,
+  name VARCHAR,
+  value VARCHAR,
+  server VARCHAR
+)
+""")
+
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -129,19 +144,7 @@ client = discord.Client()
 
 # Get DB
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS factoids (
-  id INTEGER PRIMARY KEY, name VARCHAR, content VARCHAR, locked INTEGER, locker VARCHAR, server VARCHAR
-);
-""")
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS configuration (
-  id INTEGER PRIMARY KEY,
-  name VARCHAR,
-  value VARCHAR,
-  server VARCHAR
-)
-""")
+
 
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(.*?) is (.*)')
