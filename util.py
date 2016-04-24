@@ -102,7 +102,8 @@ def get_config(server_id: str, key: str, default=None, type_: type=str) -> str:
         cursor.execute("""SELECT value FROM configuration WHERE name = ?
                           AND server = ?""", (key, server_id))
     else:
-        cursor.execute("""SELECT value FROM configuration WHERE name = ?""", (key,))
+        cursor.execute("""SELECT value FROM configuration WHERE name = ?
+                          AND server IS NULL""", (key,))
     row = cursor.fetchone()
     if row:
         try:

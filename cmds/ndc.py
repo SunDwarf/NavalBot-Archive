@@ -26,15 +26,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import discord
 import subprocess
 import asyncio
+import re
 
 # RCE ids
 import cmds
 import util
 
+getter = re.compile(r'`{1,3}(.*?)`{1,3}')
+
 loop = asyncio.get_event_loop()
 
 
-#@cmds.command("sql")
+@cmds.command("sql")
 async def sql(client: discord.Client, message: discord.Message):
     if not int(message.author.id) in cmds.RCE_IDS:
         await client.send_message(message.channel, "You're not Sun")
@@ -44,20 +47,12 @@ async def sql(client: discord.Client, message: discord.Message):
         util.cursor.execute(sql_cmd)
 
 
-#@cmds.command("py")
+@cmds.command("py")
+@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
 async def py(client: discord.Client, message: discord.Message):
-    if not int(message.author.id) in cmds.RCE_IDS:
-        await client.send_message(message.channel, "You're not Sun")
+    match = getter.findall(message.content)
+    if not match:
         return
     else:
-        cmd = ' '.join(message.content.split(' ')[1:])
-
-        def smsg(content):
-            loop.create_task(client.send_message(message.channel, '`' + content + '`'))
-
-        def ec(cmd):
-            data = subprocess.check_output(cmd, shell=True)
-            data = data.decode().replace('\n', '')
-            smsg(data)
-
-        exec(cmd)
+        result = exec(match[0])
+        await client.send_message(message.channel, "```{}```".format(result))

@@ -447,6 +447,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                                                    "information.")
         return
 
+    # Check for a playlist.
     if "entries" in info:
         # Playlist!
         is_playlist = True
@@ -457,12 +458,6 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         download_url = info['url']
 
         pl_data = None
-
-        duration = info.get('duration')
-        if (duration and int(duration) > (60 * 10)) and not util.has_permissions(
-                message.author, {"Bot Commander", "Voice", "Admin"}):
-            await client.send_message(message.channel, ":x: Videos are limited to a maximum of 10 minutes.")
-            return
 
     # Contrary to the name, this file DOES use queues.
     # However, unlike voice_queue, OAuth2 bots can run on multiple voice servers at once.

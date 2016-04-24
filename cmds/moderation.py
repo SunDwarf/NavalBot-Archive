@@ -142,6 +142,9 @@ async def invite(client: discord.Client, message: discord.Message):
     """
     Accepts an invite to another server.
     """
+
+    if client.user.bot:
+        await client.send_message(":X: Cannot accept invite as a bot account.")
     try:
         invite = message.content.split(" ")[1]
     except IndexError:
