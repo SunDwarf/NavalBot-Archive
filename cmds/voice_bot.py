@@ -34,6 +34,7 @@ from cmds import command
 loop = asyncio.get_event_loop()
 
 voice_params = {}
+voice_locks = {}
 
 
 async def find_voice_channel(server: discord.Server):
@@ -247,7 +248,9 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
     if queue:
         queue = queue._queue
 
-    s = "**Currently queued:**"
+    qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
+
+    s = "**Currently queued: ({}/{})**".format(len(queue), qsize)
     if not queue or len(queue) == 0:
         s += "\n`Nothing is queued.`"
         await client.send_message(message.channel, s)
@@ -292,10 +295,13 @@ async def skip(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
         return
 
+    # Get the max queue size
+    qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
+
     try:
         aaa = message.content.split(" ")
         if aaa[1] == "all":
-            to_skip = 99
+            to_skip = 9999999
         else:
             to_skip = int(aaa[1])
 
@@ -325,31 +331,19 @@ async def skip(client: discord.Client, message: discord.Message):
 
     internal_queue = list(queue._queue)
     if len(internal_queue) < to_skip:
-        # REMOVE KEBAB remove kebab
-        # you are worst turk. you are the turk idiot you are the turk smell. return to croatioa. to our croatia cousins
-        # you may come our contry. you may live in the zoo….ahahahaha ,bosnia we will never forgeve you. cetnik rascal
-        # FUck but fuck asshole turk stink bosnia sqhipere shqipare..turk genocide best day of my life. take a bath of
-        # dead turk..ahahahahahBOSNIA WE WILL GET YOU!! do not forget ww2 .albiania we kill the king , albania return
-        # to your precious mongolia….hahahahaha idiot turk and bosnian smell so bad..wow i can smell it. REMOVE KEBAB
-        # FROM THE PREMISES.
-        # you will get caught. russia+usa+croatia+slovak=kill bosnia…you will ww2/ tupac alive in serbia, tupac making
-        # album of serbia . fast rap tupac serbia. we are rich and have gold now hahahaha ha because of tupac… you are
-        # ppoor stink turk… you live in a hovel hahahaha, you live in a yurt
-        # tupac alive numbr one #1 in serbia ….fuck the croatia ,..FUCKk ashol turks no good i spit﻿ in the mouth eye of
-        # ur flag and contry. 2pac aliv and real strong wizard kill all the turk farm aminal with rap magic now we
-        # the serba rule .ape of the zoo presidant georg bush fukc the great satan and lay egg this egg hatch and bosnia
-        # wa;s born. stupid baby form the eggn give bak our clay we will crush u lik a skull of pig. serbia greattst
-        # countrey
         del voice_params[message.server.id]["queue"]
         player.stop()
         await client.send_message(message.channel, ":x: Reached end of queue - stopped playing.")
         return
 
     # Put things from index: onto the queue.
-    new_queue = asyncio.Queue(maxsize=99)
+    new_queue = asyncio.Queue(maxsize=qsize)
     for i in internal_queue[to_skip:]:
-        # No need for try/catch
-        new_queue.put_nowait(i)
+        try:
+            new_queue.put_nowait(i)
+        except asyncio.QueueFull:
+            # if the queue-size was shrunk between playing and a skip, this might happen
+            pass
 
     voice_params[message.server.id]["queue"] = new_queue
     await client.send_message(message.channel, ":heavy_check_mark: Skipped {} items.".format(to_skip + 1))
@@ -409,6 +403,9 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                                                            "must be named `Music` or `NavalBot`.)")
         return
 
+    if message.server.id not in voice_locks:
+        voice_locks[message.server.id] = asyncio.Lock()
+
     vidname = ' '.join(args[0:])
 
     if 'list' in vidname or 'playlist' in vidname:
@@ -418,10 +415,14 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
 
-    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": 99,
+    # Get the max queue size
+    qsize = util.get_config(message.server.id, "voice_limit", default=99, type_=int)
+
+    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": qsize,
                                 "default_search": "ytsearch"})
     func = functools.partial(ydl.extract_info, vidname, download=False)
     try:
+        # Set the download lock.
         info = await loop.run_in_executor(None, func)
     except Exception as e:
         await client.send_message(message.channel, ":no_entry: Something went horribly wrong. Error: {}".format(e))
@@ -449,6 +450,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
             await client.send_message(message.channel, ":x: Videos are limited to a maximum of 10 minutes.")
             return
 
+
     # Contrary to the name, this file DOES use queues.
     # However, unlike voice_queue, OAuth2 bots can run on multiple voice servers at once.
     # This means multiple queues can be used per bot.
@@ -465,7 +467,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         # Nope!
         voice_params[message.server.id] = {}
     if 'queue' not in voice_params[message.server.id]:
-        voice_params[message.server.id]["queue"] = asyncio.Queue(maxsize=99)
+        voice_params[message.server.id]["queue"] = asyncio.Queue(maxsize=qsize)
 
     queue = voice_params[message.server.id]["queue"]
 
@@ -537,10 +539,12 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         for num, item in enumerate(pl_data):
             if not item:
                 continue
-            if num == 99:
+            # If the playlist is bigger than the queue, stop it from putting onto the queue.
+            if num == qsize:
                 await client.send_message(
                     message.channel,
-                    ":grey_exclamation: Cannot play more than 99 songs from a playlist. Skipping the rest."
+                    ":grey_exclamation: Cannot play more than {} "
+                    "songs from a playlist. Skipping the rest.".format(qsize)
                 )
                 break
             # Add it to the queue.
@@ -548,9 +552,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 queue.put_nowait((_oauth2_play_youtube(item.get("url"), item.get("title", "???")), item))
             except asyncio.QueueFull:
                 await client.send_message(
-                    message.channel, ":no_entry: There are too many songs on the queue. Limiting playlist."
+                    message.channel, ":no_entry: There are too many songs on the queue. "
+                                     "Limiting playlist to {}.".format(num)
                 )
-                return
+                break
 
         # See above, to see justification of num being -1.
         if num == -1:

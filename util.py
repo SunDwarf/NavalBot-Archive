@@ -94,7 +94,7 @@ def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{secon
     })
 
 
-def get_config(server_id: str, key: str, default=None) -> str:
+def get_config(server_id: str, key: str, default=None, type_: type=str) -> str:
     """
     Gets a server-specific config value from the DB.
     """
@@ -105,9 +105,15 @@ def get_config(server_id: str, key: str, default=None) -> str:
         cursor.execute("""SELECT value FROM configuration WHERE name = ?""", (key,))
     row = cursor.fetchone()
     if row:
-        return row[0]
+        try:
+            return type_(row[0])
+        except ValueError:
+            return default
     else:
-        return default
+        try:
+            return type_(default)
+        except ValueError:
+            return default
 
 
 def set_config(server_id: str, key: str, value: str):
