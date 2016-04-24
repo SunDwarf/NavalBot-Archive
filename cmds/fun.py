@@ -50,17 +50,6 @@ async def choice(client: discord.Client, message: discord.Message, args: list):
     await client.send_message(message.channel, "My choice was: `{}`".format(chosen))
 
 
-@cmds.command("info")
-async def info(client: discord.Client, message: discord.Message):
-    """
-    Sends a PM with information about the bot.
-    """
-    await client.send_message(message.channel, "{} `Ok, check your private messages` 👍".format(message.author.mention))
-    await client.send_message(message.author,
-                              "Here's a link with some information:"
-                              " https://github.com/SunDwarf/NavalBot/blob/stable/README.md")
-
-
 def _get_google(f):
     return list(f())[0]
 
@@ -117,7 +106,7 @@ async def commands(client: discord.Client, message: discord.Message):
     """
     Gives a link for information about the bot.
     """
-    await client.send_message(message.channel, "See https://github.com/SunDwarf/NavalBot/wiki for more info.")
+    await client.send_message(message.channel, "**See https://github.com/SunDwarf/NavalBot/wiki for more info.**")
 
 
 @cmds.command("whois")
