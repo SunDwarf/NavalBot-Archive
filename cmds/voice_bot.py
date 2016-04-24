@@ -513,10 +513,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": qsize,
                                 "default_search": "ytsearch"})
     func = functools.partial(ydl.extract_info, vidname, download=False)
+    # Set the download lock.
+    lock = voice_locks.get(message.server.id)
+    assert isinstance(lock, asyncio.Lock)
     try:
-        # Set the download lock.
-        lock = voice_locks.get(message.server.id)
-        assert isinstance(lock, asyncio.Lock)
         if lock.locked():
             await client.send_message(message.channel, ":hourglass: Something else is downloading. Waiting for that "
                                                        "to finish.")
@@ -527,6 +527,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     except Exception as e:
         await client.send_message(message.channel, ":no_entry: Something went horribly wrong. Error: {}".format(e))
         logger.error(e)
+        lock.release()
         return
 
     if not info:
