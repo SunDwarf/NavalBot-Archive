@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import asyncio
 import random
+import logging
 
 import discord
 import functools
@@ -35,6 +36,8 @@ loop = asyncio.get_event_loop()
 
 voice_params = {}
 voice_locks = {}
+
+logger = logging.getLogger("NavalBot::Voice")
 
 
 async def find_voice_channel(server: discord.Server):
@@ -412,6 +415,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         await client.send_message(message.channel, ":warning: If this is a playlist, it may take a long time to "
                                                    "download.")
 
+    logger.info("Downloading video data: `{}`".format(vidname))
+
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
 
@@ -423,9 +428,18 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     func = functools.partial(ydl.extract_info, vidname, download=False)
     try:
         # Set the download lock.
+        lock = voice_locks.get(message.server.id)
+        assert isinstance(lock, asyncio.Lock)
+        if lock.locked():
+            await client.send_message(message.channel, ":hourglass: Something else is downloading. Waiting for that "
+                                                       "to finish.")
+        await lock.acquire()
+        await client.send_message(":hourglass: Downloading video information...")
         info = await loop.run_in_executor(None, func)
+        lock.release()
     except Exception as e:
         await client.send_message(message.channel, ":no_entry: Something went horribly wrong. Error: {}".format(e))
+        logger.error(e)
         return
 
     if not info:
@@ -449,7 +463,6 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 message.author, {"Bot Commander", "Voice", "Admin"}):
             await client.send_message(message.channel, ":x: Videos are limited to a maximum of 10 minutes.")
             return
-
 
     # Contrary to the name, this file DOES use queues.
     # However, unlike voice_queue, OAuth2 bots can run on multiple voice servers at once.
