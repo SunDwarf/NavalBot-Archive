@@ -434,7 +434,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
             await client.send_message(message.channel, ":hourglass: Something else is downloading. Waiting for that "
                                                        "to finish.")
         await lock.acquire()
-        await client.send_message(":hourglass: Downloading video information...")
+        await client.send_message(message.channel, ":hourglass: Downloading video information...")
         info = await loop.run_in_executor(None, func)
         lock.release()
     except Exception as e:
