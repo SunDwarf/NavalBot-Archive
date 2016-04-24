@@ -132,9 +132,11 @@ async def delete(client: discord.Client, message: discord.Message, count=None):
     async for msg in client.logs_from(message.channel, count + 1):
         await client.delete_message(msg)
     if count == 1:
-        await client.send_message(message.channel, '**{} message deleted by {}**💣'.format(count, message.author))
+        await client.send_message(message.channel, ':wastebasket: **{} message deleted by {}**'
+                                  .format(count, message.author))
     else:
-        await client.send_message(message.channel, '**{} messages deleted by {}** 💣'.format(count, message.author))
+        await client.send_message(message.channel, ':wastebasket: **{} messages deleted by {}**'
+                                  .format(count, message.author))
 
 
 @cmds.command("invite")
