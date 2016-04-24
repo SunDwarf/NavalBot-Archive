@@ -21,9 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-# Commands designed for Naval.TF's discord.
+# Owner commands.
+import sys
 
 import discord
+import importlib
 import subprocess
 import asyncio
 import re
@@ -35,6 +37,24 @@ import util
 getter = re.compile(r'`{1,3}(.*?)`{1,3}')
 
 loop = asyncio.get_event_loop()
+
+
+@cmds.command("reload")
+@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
+@util.enforce_args(1, "You must pick a file to reload.")
+async def reload_f(client: discord.Client, message: discord.Message, args: list):
+    """
+    Reloads a module in the bot.
+    """
+    mod = args[0]
+    if mod not in sys.modules:
+        await client.send_message(message.channel, ":x: Module is not loaded.")
+        return
+    # Reload using importlib.
+    new_mod = importlib.reload(sys.modules[mod])
+    # Update sys.modules
+    sys.modules[mod] = new_mod
+    await client.send_message(message.channel, ":heavy_check_mark: Reloaded module.")
 
 
 @cmds.command("sql")
