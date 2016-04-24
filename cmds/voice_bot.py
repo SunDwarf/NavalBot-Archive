@@ -511,7 +511,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": qsize,
-                                "default_search": "ytsearch"})
+                                "default_search": "ytsearch", "source_address": "0.0.0.0"})
     func = functools.partial(ydl.extract_info, vidname, download=False)
     # Set the download lock.
     lock = voice_locks.get(message.server.id)
