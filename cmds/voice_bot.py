@@ -230,7 +230,8 @@ async def np(client: discord.Client, message: discord.Message):
         return
 
     title = voice_params[message.server.id].get("title", "??? Internal error")
-    await client.send_message(message.channel, content="Currently playing: `{}`".format(title))
+    playing = "" if player.is_playing() else "[PAUSED]"
+    await client.send_message(message.channel, content="Currently playing: `{}` {}".format(title, playing))
 
 
 @command("queued")
@@ -382,6 +383,72 @@ async def stop_vid(client: discord.Client, message: discord.Message):
     # Finally, stop the player.
     player.stop()
     await client.send_message(message.channel, content=":heavy_check_mark: Stopped current song.")
+
+
+@command("pause")
+async def pause_vid(client: discord.Client, message: discord.Message):
+    """
+    Pauses the currently playing track. Use ?resume to continue playing.
+    """
+    # Get the current player instance.
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if message.server.id not in voice_params:
+        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+        return
+
+    playing = voice_params[message.server.id].get("playing")
+    if not playing:
+        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+        return
+
+    player = voice_params[message.server.id].get("player")
+    if not player:
+        # ???
+        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+        return
+
+    assert isinstance(player, discord.voice_client.ProcessPlayer)
+    if player.is_playing():
+        player.pause()
+    else:
+        await client.send_message(message.channel, ":x: Track is already paused.")
+        return
+    await client.send_message(message.channel, ":heavy_check_mark: Paused current track.")
+
+
+@command("resume")
+async def resume(client: discord.Client, message: discord.Message):
+    """
+    Resumes a paused track.
+    """
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if message.server.id not in voice_params:
+        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+        return
+
+    playing = voice_params[message.server.id].get("playing")
+    if not playing:
+        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+        return
+
+    player = voice_params[message.server.id].get("player")
+    if not player:
+        # ???
+        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+        return
+
+    if player.is_playing():
+        await client.send_message(message.channel, ":x: Track is already playing.")
+        return
+    else:
+        player.resume()
+    await client.send_message(message.channel, ":heavy_check_mark: Resumed playback.")
 
 
 @command("play")
