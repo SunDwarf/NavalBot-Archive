@@ -74,12 +74,6 @@ if __name__ != "__zipdep":
 
     args = parser.parse_args()
 
-# =============== Version information
-
-VERSION = "3.0.0"
-VERSIONT = tuple(int(i) for i in VERSION.split("."))
-
-
 # ===============
 
 # Define logging.
