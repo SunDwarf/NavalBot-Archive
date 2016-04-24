@@ -111,18 +111,13 @@ async def weather(client: discord.Client, message: discord.Message, args: list):
         await client.send_message(message.channel, "This city does not exist")
 
 
+@cmds.command("info")
 @cmds.command("commands")
 async def commands(client: discord.Client, message: discord.Message):
     """
-    Lists the commands for the bot.
+    Gives a link for information about the bot.
     """
-    com = ['help', 'lock', 'info', 'version', 'weather', 'whois', 'uptime', 'remindme', 'coin', 'google', 'searchyt',
-           'playyt', 'stop', 'skip', 'reset', 'queue', 'shuffle', 'np', 'again',
-           '\n**Admins only:**\n', 'kick', 'ban', 'unban', 'banned', 'mute', 'unmute', 'delete', 'getcfg', 'avatar',
-           'setcfg', 'changename', 'blacklist', 'unblacklist', 'changename', 'broadcast']
-    await client.send_message(message.channel, "**These commands are available:**\n{}".format(
-        '\n'.join(
-            [util.get_config(message.server.id, "command_prefix", "?") + c if ' ' not in c else c for c in com])))
+    await client.send_message(message.channel, "See https://github.com/SunDwarf/NavalBot/wiki for more info.")
 
 
 @cmds.command("whois")

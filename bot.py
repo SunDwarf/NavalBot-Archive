@@ -204,6 +204,9 @@ async def on_ready():
         logger.warning("Using old queue-based music player!")
         loop.create_task(voice.play_music_from_queue())
 
+    # Set the game.
+    await client.change_status(discord.Game(name="Type ?info for help!"))
+
 
 @client.event
 async def on_message(message: discord.Message):
