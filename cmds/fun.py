@@ -237,3 +237,27 @@ async def remind_me(client: discord.Client, message: discord.Message, args: list
     )
 
     loop.create_task(__remind_coro())
+
+
+@cmds.command("source")
+@util.enforce_args(1, error_msg=":x: Must provide a function to lookup source for.")
+async def get_source(client: discord.Client, message: discord.Message, args: list):
+    """
+    Displays the source code of a specific command.
+    """
+    base_url = "https://github.com/SunDwarf/NavalBot/"
+
+    if not args[0] in cmds.commands:
+        await client.send_message(message.channel, ":x: This function does exist")
+        return
+
+    func = cmds.commands[args[0]]
+    # check for decorated cmds
+    if hasattr(func, 'func'):
+        func = func.func
+
+    co = func.__code__
+    location = os.path.relpath(co.co_filename).replace('\\', '/')
+
+    final_url = '<{}/blob/develop/{}#L{}>'.format(base_url, location, co.co_firstlineno)
+    await client.send_message(message.channel, final_url)

@@ -165,6 +165,12 @@ def with_permission(*role: str):
 
         __fake_func.__doc__ = func.__doc__
 
+        if hasattr(func, "func"):
+            # chain the .func call for source function
+            __fake_func.func = func.func
+        else:
+            __fake_func.func = func
+
         return __fake_func
 
     return __decorator
@@ -203,6 +209,11 @@ def enforce_args(count: int, error_msg: str = None):
                                           "information.")
 
         __fake_enforcing_func.__doc__ = func.__doc__
+        if hasattr(func, "func"):
+            # chain the .func call for source function
+            __fake_enforcing_func.func = func.func
+        else:
+            __fake_enforcing_func.func = func
 
         return __fake_enforcing_func
 
@@ -228,6 +239,12 @@ def only(ids):
                                           ":no_entry: This command is restricted to bot owners!")
 
         __fake_permission_func.__doc__ = func.__doc__
+
+        if hasattr(func, "func"):
+            # chain the .func call for source function
+            __fake_permission_func.func = func.func
+        else:
+            __fake_permission_func.func = func
 
         return __fake_permission_func
 
