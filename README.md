@@ -7,6 +7,7 @@ NavalBot is a music bot for your channel. It supports cross-server playing, inte
 It uses [discord.py.] (https://github.com/Rapptz/discord.py)
 
 Want to learn more? [See the wiki.] (https://github.com/SunDwarf/NavalBot/wiki)
+
 **If you are running a local version, anything before version 2.5.3 is not supported. Don't even ask.**
 
 
