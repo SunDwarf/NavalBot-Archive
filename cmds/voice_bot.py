@@ -230,7 +230,7 @@ async def np(client: discord.Client, message: discord.Message):
         return
 
     title = voice_params[message.server.id].get("title", "??? Internal error")
-    playing = "" if player.is_playing() else "[PAUSED]"
+    playing = "" if player.is_playing() else "`[PAUSED]`"
     await client.send_message(message.channel, content="Currently playing: `{}` {}".format(title, playing))
 
 
@@ -338,6 +338,15 @@ async def skip(client: discord.Client, message: discord.Message):
         del voice_params[message.server.id]["queue"]
         player.stop()
         await client.send_message(message.channel, ":x: Reached end of queue - stopped playing.")
+        # Kill the task.
+        ts = voice_params[message.server.id]["task"]
+        if ts:
+            assert isinstance(ts, asyncio.Task)
+            ts.cancel()
+        del voice_params[message.server.id]["task"]
+        # Kill the player.
+        del voice_params[message.server.id]["player"]
+        del voice_params[message.server.id]["playing"]
         return
 
     # Put things from index: onto the queue.
@@ -643,7 +652,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         await client.send_message(message.channel, ":heavy_check_mark: Added {} track(s) to queue.".format(num + 1))
 
     # Create a new task, if applicable.
-    if 'task' not in voice_params[message.server.id]:
+    if 'task' not in voice_params[message.server.id] or voice_params[message.server.id]["task"].cancelled():
         # Create the new task.
         task = loop.create_task(_await_queue(message.server.id))
         voice_params[message.server.id]["task"] = task
