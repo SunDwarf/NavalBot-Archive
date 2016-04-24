@@ -56,6 +56,33 @@ async def lock(client: discord.Client, message: discord.Message):
                                                                                             message.author.name))
 
 
+@cmds.command("gsetcfg")
+@util.owner
+@util.enforce_args(2, ":x: Config set must be in `setcfg 'key' 'value'` format, "
+                      "with quotation marks surrounding the spaces")
+async def g_set_config(client: discord.Client, message: discord.Message, args: list):
+    """
+    Globally set a config value.
+    Owner-only.
+    """
+    util.set_config(None, args[0], args[1])
+    await client.send_message(message.channel, ":heavy_check_mark: Config updated: `{}` -> `{}`".format(args[0],
+                                                                                                        args[1]))
+
+
+@cmds.command("ggetcfg")
+@util.owner
+@util.enforce_args(1, ":x: Config set must be in `getcfg 'key'` format, "
+                      "with quotation marks surrounding the spaces")
+async def g_get_config(client: discord.Client, message: discord.Message, args: list):
+    """
+    Globally set a config value.
+    Owner-only.
+    """
+    val = util.get_config(None, args[0])
+    await client.send_message(message.channel, "`{}` -> `{}`".format(args[0], val))
+
+
 @cmds.command("set")
 @cmds.command("setcfg")
 @util.with_permission("Admin")

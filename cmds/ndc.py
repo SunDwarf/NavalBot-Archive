@@ -48,8 +48,11 @@ async def reload_f(client: discord.Client, message: discord.Message, args: list)
     """
     mod = args[0]
     if mod not in sys.modules:
-        await client.send_message(message.channel, ":x: Module is not loaded.")
-        return
+        if 'cmds.' + mod not in sys.modules:
+            await client.send_message(message.channel, ":x: Module is not loaded.")
+            return
+        else:
+            mod = 'cmds.' + mod
     # Reload using importlib.
     new_mod = importlib.reload(sys.modules[mod])
     # Update sys.modules

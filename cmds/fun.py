@@ -214,7 +214,7 @@ async def coin(client: discord.Client, message: discord.Message):
 @util.enforce_args(2, error_msg=":x: You must provide a time and reason!")
 async def remind_me(client: discord.Client, message: discord.Message, args: list):
     """
-    Set a reminder
+    Set a reminder.
     """
     time = args[0]
     try:
