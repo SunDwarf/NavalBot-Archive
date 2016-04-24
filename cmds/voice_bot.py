@@ -34,8 +34,16 @@ from cmds import command
 
 loop = asyncio.get_event_loop()
 
-voice_params = {}
-voice_locks = {}
+# Declare variables, inside try to prevent overwrites on reload.
+try:
+    voice_params
+except NameError:
+    voice_params = {}
+
+try:
+    voice_locks
+except NameError:
+    voice_locks = {}
 
 logger = logging.getLogger("NavalBot::Voice")
 
@@ -145,7 +153,10 @@ async def shuffle(client: discord.Client, message: discord.Message):
     if not queue:
         await client.send_message(message.channel, ":x: There is no queue for this server.")
         # this never happens
-    new_queue = asyncio.Queue(maxsize=100)
+
+    qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
+
+    new_queue = asyncio.Queue(maxsize=qsize)
     assert isinstance(queue, asyncio.Queue)
     deq = list(queue._queue)
 
@@ -656,3 +667,56 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         # Create the new task.
         task = loop.create_task(_await_queue(message.server.id))
         voice_params[message.server.id]["task"] = task
+
+
+@command("remove")
+@util.with_permission("Bot Commander", "Voice", "Admin")
+@util.enforce_args(1, error_msg=":x: You must give an index to remove.")
+async def remove_vid(client: discord.Client, message: discord.Message, args: list):
+    """
+    Removes a video at a specific index from the queue.
+    """
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if message.server.id not in voice_params:
+        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+        return
+
+    queue = voice_params[message.server.id].get("queue")
+    if not queue:
+        # ???
+        return
+
+    assert isinstance(queue, asyncio.Queue)
+
+    # Standard prodecure - turn deque into a list
+    internal_queue = list(queue._queue)
+    try:
+        removed = internal_queue.pop(int(args[0]) - 1)
+    except IndexError:
+        await client.send_message(message.channel, ":x: No track at index `{}`".format(args[0]))
+        return
+    except ValueError:
+        await client.send_message(message.channel, ":x: Not a valid index.")
+        return
+
+    qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
+
+    # Re-create queue, blah blah blah
+    new_queue = asyncio.Queue(maxsize=qsize)
+
+    for i in internal_queue:
+        try:
+            new_queue.put_nowait(i)
+        except asyncio.QueueFull:
+            pass
+
+    if isinstance(removed[1], str):
+        title = removed[1]
+    else:
+        title = removed[1].get("title")
+
+    voice_params[message.server.id]["queue"] = new_queue
+    await client.send_message(message.channel, ":heavy_check_mark: Deleted item {} `({})`.".format(args[0], title))
