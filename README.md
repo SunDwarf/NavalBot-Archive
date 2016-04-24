@@ -1,7 +1,7 @@
 # NavalBot 2.x
-
 [![Requirements Status](https://requires.io/github/SunDwarf/NavalBot/requirements.svg?branch=develop)](https://requires.io/github/SunDwarf/NavalBot/requirements/?branch=develop)
 ![https://img.shields.io/github/release/SunDwarf/NavalBot.svg](https://img.shields.io/github/release/SunDwarf/NavalBot.svg)
+<img src="https://puu.sh/otS4Z/850d0a78f6.png" align="left" hspace="10" vspace="6" height="120" width="120">
 
 NavalBot is a music bot for your channel. It supports cross-server playing, intelligent downloads, pausing and resuming of your music, and more.
 It uses [discord.py.] (https://github.com/Rapptz/discord.py)
