@@ -477,6 +477,64 @@ async def resume(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, ":heavy_check_mark: Resumed playback.")
 
 
+@command("move")
+@util.enforce_args(2, error_msg=":x: You must provide two numbers: The original position, and the new position.")
+async def move(client: discord.Client, message: discord.Message, args: list):
+    """
+    Moves a song in the queue from position <x> to position <y>.
+    """
+    if not discord.opus.is_loaded():
+        await client.send_message(message.channel, content=":x: Cannot load voice module.")
+        return
+
+    if message.server.id not in voice_params:
+        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+        return
+
+    queue = voice_params[message.server.id].get("queue")
+    if not queue:
+        # ???
+        return
+
+    try:
+        fr, to = int(args[0]) - 1, int(args[1]) - 1
+    except ValueError:
+        await client.send_message(message.channel, ":x: You must provide two numbers.")
+        return
+
+    assert isinstance(queue, asyncio.Queue)
+
+    # Turn into list, pop from index, insert at index.
+    internal_queue = list(queue._queue)
+    try:
+        got = internal_queue.pop(fr)
+        internal_queue.insert(to, got)
+    except IndexError as e:
+        await client.send_message(message.channel, ":x: Could not find track at index `{}`.".format(fr))
+        return
+
+    qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
+
+    # Re-create queue, blah blah blah
+    new_queue = asyncio.Queue(maxsize=qsize)
+
+    for i in internal_queue:
+        try:
+            new_queue.put_nowait(i)
+        except asyncio.QueueFull:
+            pass
+
+    # Set new queue.
+    voice_params[message.server.id]["queue"] = new_queue
+    if isinstance(got[1], str):
+        title = got[1]
+    else:
+        title = got[1].get("title")
+
+    await client.send_message(message.channel, ":heavy_check_mark: Moved item `{}` to position `{}`.".format(title,
+                                                                                                             to + 1))
+
+
 @command("play")
 @command("playyt")
 @command("playyoutube")
