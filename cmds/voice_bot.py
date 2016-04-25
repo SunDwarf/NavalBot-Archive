@@ -263,6 +263,12 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
     if queue:
         queue = queue._queue
 
+    # Get the start pos.
+    try:
+        start_pos = int(message.content.split(" ")[1])
+    except (ValueError, IndexError):
+        start_pos = 0
+
     qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     s = "**Currently queued: ({}/{})**".format(len(queue), qsize)
@@ -271,7 +277,7 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, s)
         return
 
-    for item in range(0, len(queue) if len(queue) < 10 else 10):
+    for item in range(start_pos, start_pos + len(queue) if len(queue) < 10 else start_pos + 10):
         i = queue[item]
         if isinstance(i[1], str):
             title = i[1]
@@ -280,7 +286,7 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
         s += "\n{}. `{}`".format(item + 1, title)
 
     if len(queue) > 10:
-        s += "\n(Omitted {} queued items.)".format(len(queue) - 10)
+        s += "\n(Omitted {} queued items.)".format((len(queue) - 10) - start_pos)
     await client.send_message(message.channel, s)
 
 
