@@ -277,15 +277,25 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, s)
         return
 
+    if start_pos + 1 > len(queue):
+        await client.send_message(message.channel, ":x: Queue is not as long as that.")
+        return
+    if start_pos < 0:
+        await client.send_message(message.channel, ":x: Cannot check queue for negative numbers.")
+        return
+
     for item in range(start_pos, start_pos + len(queue) if len(queue) < 10 else start_pos + 10):
-        i = queue[item]
+        try:
+            i = queue[item]
+        except IndexError:
+            break
         if isinstance(i[1], str):
             title = i[1]
         else:
             title = i[1].get("title")
         s += "\n{}. `{}`".format(item + 1, title)
 
-    if len(queue) > 10:
+    if len(queue) > start_pos + 10:
         s += "\n(Omitted {} queued items.)".format((len(queue) - 10) - start_pos)
     await client.send_message(message.channel, s)
 
