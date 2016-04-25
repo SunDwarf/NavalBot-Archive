@@ -261,3 +261,20 @@ async def get_source(client: discord.Client, message: discord.Message, args: lis
 
     final_url = '<{}/blob/develop/{}#L{}>'.format(base_url, location, co.co_firstlineno)
     await client.send_message(message.channel, final_url)
+
+
+@cmds.command("echo")
+@util.owner
+@util.enforce_args(3, error_msg=":x: Must give server ID, channel name, message")
+async def echo(client: discord.Client, message: discord.Message, args: list):
+    server = client.get_server(args[0])
+    if not server:
+        await client.send_message(message.channel, ":x: No such server found")
+        return
+
+    channel = discord.utils.get(server.channels, name=args[1])
+    if not channel:
+        await client.send_message(message.channel, ":x: No such channel found")
+        return
+
+    await client.send_message(channel, args[2])
