@@ -278,3 +278,13 @@ async def echo(client: discord.Client, message: discord.Message, args: list):
         return
 
     await client.send_message(channel, args[2])
+
+
+@cmds.command("factoid")
+async def factoid(client: discord.Client, message: discord.Message):
+    """
+    Displays help on how to create a factoid.
+    """
+    prefix = util.get_config(message.server.id, "command_prefix", "?")
+    await client.send_message(message.server,
+                              "You can create a factoid by typing `{}<factoid_name> is <answer>`".format(prefix))
