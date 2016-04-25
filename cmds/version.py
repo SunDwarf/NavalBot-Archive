@@ -28,7 +28,7 @@ import cmds
 
 
 def read_version(data):
-    regexp = re.compile(r"^VERSION\W*=\W*([\d.abrc]+)")
+    regexp = re.compile(r"^\W*?VERSION\W*=\W*([\d.abrc]+)")
 
     for line in data:
         match = regexp.match(line)
@@ -57,7 +57,7 @@ async def version(client: discord.Client, message: discord.Message):
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
-        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/stable/bot.py")
+        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/develop/cmds/version.py")
         assert isinstance(s, aiohttp.ClientResponse)
         data = await s.read()
         data = data.decode().split('\n')
