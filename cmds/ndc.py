@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # Owner commands.
+import logging
 import sys
 
 import discord
@@ -37,6 +38,8 @@ import util
 getter = re.compile(r'`{1,3}(.*?)`{1,3}')
 
 loop = asyncio.get_event_loop()
+
+logger = logging.getLogger("NavalBot")
 
 
 @cmds.command("reload")
@@ -58,6 +61,24 @@ async def reload_f(client: discord.Client, message: discord.Message, args: list)
     # Update sys.modules
     sys.modules[mod] = new_mod
     await client.send_message(message.channel, ":heavy_check_mark: Reloaded module.")
+
+
+@cmds.command("reloadall")
+@util.owner
+async def reload_all(client: discord.Client, message: discord.Message):
+    """
+    Reloads all modules.
+    """
+    # Reload util
+    importlib.reload(sys.modules["util"])
+    for mod in sys.modules:
+        if mod.startswith("cmds."):
+            # Reload it.
+            logger.info("Reloading module: {}".format(mod))
+            importlib.reload(sys.modules[mod])
+            logger.info("Reloaded module.")
+
+    await client.send_message(message.channel, ":heavy_check_mark: Reloaded all.")
 
 
 @cmds.command("sql")
