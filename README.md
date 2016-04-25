@@ -9,7 +9,7 @@ It uses [discord.py.] (https://github.com/Rapptz/discord.py)
 
 Want to learn more? [See the wiki.] (https://github.com/SunDwarf/NavalBot/wiki)
 
-**If you are running a local version, anything before version 3.0.0 is not supported. Don't even ask.**
+**If you are running a local version, anything before version 3.0.0 is not supported.**
 
 
 ## Contributing

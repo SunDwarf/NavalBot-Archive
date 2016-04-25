@@ -37,7 +37,6 @@ from ctypes.util import find_library
 import discord
 import requests
 
-
 # =============== Commands
 import cmds
 import util
@@ -61,7 +60,6 @@ CREATE TABLE IF NOT EXISTS configuration (
   server VARCHAR
 )
 """)
-
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -87,6 +85,7 @@ if __name__ != "__zipdep":
     ep_group.add_argument("--ep-password", help="Bot account's password")
 
     args = parser.parse_args()
+
 
 # ===============
 
@@ -210,7 +209,7 @@ async def on_message(message: discord.Message):
     util.msgcount += 1
 
     if not isinstance(message.channel, discord.PrivateChannel):
-        #print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
+        # print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
         #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
         logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
         logger.info(" On channel: #{message.channel.name}".format(message=message))
