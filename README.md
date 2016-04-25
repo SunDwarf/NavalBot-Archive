@@ -5,7 +5,7 @@
 <img src="https://puu.sh/otS4Z/850d0a78f6.png" align="left" hspace="10" vspace="6" height="120" width="120">
 
 NavalBot is a music bot for your channel. It supports cross-server playing, intelligent downloads, pausing and resuming of your music, and more.
-It uses [discord.py.] (https://github.com/Rapptz/discord.py)
+It uses a modified version of [discord.py.] (https://github.com/Rapptz/discord.py)
 
 Want to learn more? [See the wiki.] (https://github.com/SunDwarf/NavalBot/wiki)
 
