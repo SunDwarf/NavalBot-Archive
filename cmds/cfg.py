@@ -130,57 +130,6 @@ async def get_stdout_and_return_code(cmd: str):
     return stdout, stderr, returncode
 
 
-@cmds.command("update")
-@util.only(cmds.RCE_IDS)
-async def update(client: discord.Client, message: discord.Message):
-    """
-    Updates the bot. If you're curious if you have access to this function, you don't.
-    """
-    await client.send_message(message.channel, "First, fetching the new data from GitHub.")
-    stdout, stderr, ret = await get_stdout_and_return_code("git fetch")
-    if ret != 0:
-        await client.send_message(message.channel, "Command failed!\n```\nstdout:\n\n{}\nstderr:\n\n{}".format(
-            stdout, stderr
-        ))
-        return
-    else:
-        if stdout:
-            await client.send_message(message.channel, "```\n{}\n```".format(stdout.decode()))
-    await client.send_message(message.channel, "Stashing your changes.")
-    stdout, stderr, ret = await get_stdout_and_return_code("git stash")
-    if ret != 0:
-        await client.send_message(message.channel, "Command failed!\n```\nstdout:\n\n{}\nstderr:\n\n{}".format(
-            stdout, stderr
-        ))
-        return
-    else:
-        if stdout:
-            await client.send_message(message.channel, "```\n{}\n```".format(stdout.decode()))
-    await client.send_message(message.channel, "Resetting to origin.")
-    stdout, stderr, ret = await get_stdout_and_return_code("git reset origin/stable")
-    if ret != 0:
-        await client.send_message(message.channel, "Command failed!\n```\nstdout:\n\n{}\nstderr:\n\n{}".format(
-            stdout, stderr
-        ))
-        return
-    else:
-        if stdout:
-            await client.send_message(message.channel, "```\n{}\n```".format(stdout.decode()))
-    await client.send_message(message.channel, "Unstashing your changes.")
-    stdout, stderr, ret = await get_stdout_and_return_code("git stash apply")
-    if ret != 0:
-        await client.send_message(message.channel, "Command failed!\n```\nstdout:\n\n{}\nstderr:\n\n{}".format(
-            stdout, stderr
-        ))
-        return
-    else:
-        if stdout:
-            await client.send_message(message.channel, "```\n{}\n```".format(stdout.decode()))
-    tdout, stderr, ret = await get_stdout_and_return_code("git rev-parse HEAD")
-    await client.send_message(message.channel, "Done! Navalbot is now at revision `{}`."
-                              .format(tdout.decode().replace('\n', '')))
-
-
 @cmds.command("avatar")
 @util.only(cmds.RCE_IDS)
 @util.enforce_args(1, error_msg='You need to provide a link')
