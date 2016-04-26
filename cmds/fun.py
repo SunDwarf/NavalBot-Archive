@@ -30,6 +30,7 @@ import random
 import discord
 import psutil
 import pyowm
+import urbandict
 from google import search
 from googleapiclient.discovery import build
 
@@ -288,3 +289,15 @@ async def factoid(client: discord.Client, message: discord.Message):
     prefix = util.get_config(message.server.id, "command_prefix", "?")
     await client.send_message(message.channel,
                               "You can create a factoid by typing `{}<factoid_name> is <answer>`".format(prefix))
+
+
+@cmds.command("urban")
+@util.enforce_args(1, error_msg="You have to provide a word!")
+async def urban(client: discord.Client, message: discord.Message, args: list):
+    define = urbandict.define(' '.join(args[0:]))[0]
+    word = define['word']
+    definition = define['def']
+    example = define['example']
+    await client.send_message(message.channel,
+                              "*Your search for `{}` returned the following:*\n\n**Definition:** {}\n\n**Example:** {}"
+                              .format(word, definition, example))
