@@ -424,7 +424,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
                 queue.put_nowait((_oauth2_play_youtube(
                     client, message,
                     voice_client, voice_channel,
-                    download_url, info
+                    item["url"], info
                 ), item))
             except asyncio.QueueFull:
                 await client.send_message(
