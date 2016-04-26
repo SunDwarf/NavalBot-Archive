@@ -129,6 +129,9 @@ async def delete(client: discord.Client, message: discord.Message, count=None):
         count = int(' '.join(message.content.split(" ")[1:]))
     except ValueError:
         await client.send_message(message.channel, "This is not a number")
+        return
+    if count is None:
+        return
     async for msg in client.logs_from(message.channel, count + 1):
         await client.delete_message(msg)
     if count == 1:
