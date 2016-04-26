@@ -121,7 +121,7 @@ async def kick(client: discord.Client, message: discord.Message):
 
 @cmds.command("delete")
 @util.with_permission("Admin", "Bot Commander")
-async def delete(client: discord.Client, message: discord.Message, count=None):
+async def delete(client: discord.Client, message: discord.Message):
     """
     Prunes a certain number of messages from the server.
     """
@@ -130,6 +130,7 @@ async def delete(client: discord.Client, message: discord.Message, count=None):
     except ValueError:
         await client.send_message(message.channel, "This is not a number")
         return
+
     if count is None:
         return
     async for msg in client.logs_from(message.channel, count + 1):

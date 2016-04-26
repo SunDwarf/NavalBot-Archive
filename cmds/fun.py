@@ -291,13 +291,15 @@ async def factoid(client: discord.Client, message: discord.Message):
                               "You can create a factoid by typing `{}<factoid_name> is <answer>`".format(prefix))
 
 
+def _get_urban(get):
+    define = urbandict.define(get)[0]
+    return define['word'], define['def'], define['example']
+
+
 @cmds.command("urban")
 @util.enforce_args(1, error_msg="You have to provide a word!")
 async def urban(client: discord.Client, message: discord.Message, args: list):
-    define = urbandict.define(' '.join(args[0:]))[0]
-    word = define['word']
-    definition = define['def']
-    example = define['example']
+    word, definition, example = await util.with_multiprocessing(functools.partial(_get_urban, ' '.join(args)))
     await client.send_message(message.channel,
                               "*Your search for `{}` returned the following:*\n\n**Definition:** {}\n\n**Example:** {}"
                               .format(word, definition, example))
