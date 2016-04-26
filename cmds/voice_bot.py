@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import asyncio
 import random
 import logging
+from math import trunc
 
 import discord
 import functools
@@ -241,8 +242,16 @@ async def np(client: discord.Client, message: discord.Message):
         return
 
     title = voice_params[message.server.id].get("title", "??? Internal error")
+    # progress/duration
+    m, s = divmod(voice_params[message.server.id]["progress"], 60)
+    if voice_params[message.server.id]["duration"]:
+        dm, ds = divmod(voice_params[message.server.id]["duration"], 60)
+    else:
+        dm, ds = 0, 0
     playing = "" if player.is_playing() else "`[PAUSED]`"
-    await client.send_message(message.channel, content="Currently playing: `{}` {}".format(title, playing))
+    print(m, s, dm, ds)
+    d_str = "[{:02d}:{:02d} / {:02d}:{:02d}]".format(trunc(m), trunc(s), trunc(dm), trunc(ds))
+    await client.send_message(message.channel, content="Currently playing: `{}` `{}` {}".format(title, d_str, playing))
 
 
 @command("queued")
@@ -291,9 +300,13 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
             break
         if isinstance(i[1], str):
             title = i[1]
+            df = "??:??"
         else:
             title = i[1].get("title")
-        s += "\n{}. `{}`".format(item + 1, title)
+            # get duration
+            dm, ds = divmod(i[1].get("duration"), 60)
+            df = "`[{:02d}:{:02d}]`".format(trunc(dm), trunc(ds))
+        s += "\n{}. `{}` `{}`".format(item + 1, title, df)
 
     if len(queue) > start_pos + 10:
         s += "\n(Omitted {} queued items.)".format((len(queue) - 10) - start_pos)
@@ -552,7 +565,7 @@ async def move(client: discord.Client, message: discord.Message, args: list):
 async def play_youtube(client: discord.Client, message: discord.Message, args: list):
     """
     Plays a video from any valid streaming source that `youtube-dl` can download from.
-    This included things such as YouTube (obviously) and SoundCloud.
+    This includes things such as YouTube (obviously) and SoundCloud.
     You must have the Voice or Bot Commander role to use this command.
     Use ?stop or ?skip to skip a song, ?queue to see the current queue of songs, ?np to see the currently playing
     track, and ?reset to fix the queue.
@@ -610,11 +623,14 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         return
 
     # Check for a playlist.
-    if "entries" in info:
+    if "entries" in info and len(info['entries']) > 1:
         # Playlist!
         is_playlist = True
         pl_data = info['entries']
     else:
+        # We might be a single video inside a playlist. Get that out.
+        if 'entries' in info:
+            info = info['entries'][0]
         is_playlist = False
         title = info.get('title')
         download_url = info['url']
@@ -659,13 +675,15 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
             except discord.ClientException:
                 await client.send_message(message.channel, ":x: Error happened on connecting to voice.")
 
-    async def _oauth2_play_youtube(d, t):
+    async def _oauth2_play_youtube(d, t, du=None):
         # Fix the voice client if we need to.
         vc = await _fix_voice(client, voice_client, voice_channel)
         player = vc.create_ffmpeg_player(d)
         voice_params[message.server.id]["playing"] = True
         voice_params[message.server.id]["title"] = t
         voice_params[message.server.id]["player"] = player
+        voice_params[message.server.id]["progress"] = 0
+        voice_params[message.server.id]["duration"] = du
         await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(t))
         assert isinstance(player, discord.voice_client.ProcessPlayer)
         # Start playing
@@ -676,11 +694,16 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
             if player.is_done():
                 break
             else:
+                if player.is_playing():
+                    # TODO: Use time.time instead
+                    voice_params[message.server.id]["progress"] += 0.5
                 await asyncio.sleep(0.5)
         # Reset everything after it's done.
         voice_params[message.server.id]["playing"] = False
         voice_params[message.server.id]["title"] = ""
         voice_params[message.server.id]["player"] = None
+        voice_params[message.server.id]["progress"] = None
+        voice_params[message.server.id]["duration"] = None
 
     # Get the number of songs on the queue.
     items = queue.qsize()
@@ -695,7 +718,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
             await client.send_message(message.channel, ":heavy_check_mark: You are next in the queue.")
 
         try:
-            queue.put_nowait((_oauth2_play_youtube(download_url, title), info))
+            queue.put_nowait((_oauth2_play_youtube(download_url, title, du=info.get("duration")), info))
         except asyncio.QueueFull:
             await client.send_message(message.channel,
                                       ":no_entry: There are too many songs on the queue. Cannot start "
