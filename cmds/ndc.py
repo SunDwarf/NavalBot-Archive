@@ -82,7 +82,7 @@ async def reload_all(client: discord.Client, message: discord.Message):
 
 
 @cmds.command("sql")
-@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
+@util.owner
 async def sql(client: discord.Client, message: discord.Message):
     sql_cmd = getter.findall(message.content)
     if not sql_cmd:
@@ -92,7 +92,7 @@ async def sql(client: discord.Client, message: discord.Message):
 
 
 @cmds.command("py")
-@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
+@util.owner
 async def py(client: discord.Client, message: discord.Message):
     match = getter.findall(message.content)
     if not match:
