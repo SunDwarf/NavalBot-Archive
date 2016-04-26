@@ -298,7 +298,7 @@ async def voteskip(client: discord.Client, message: discord.Message):
     voice_members = channel.voice_members
     vc_count = 0
 
-    if message.author.id not in [_.id for _ in voice_members]:
+    if message.author.id not in [_.id for _ in voice_members] or (message.author.deaf or message.author.self_deaf):
         await client.send_message(message.channel, content=":x: You are not in the correct channel.")
         return
 
@@ -338,8 +338,6 @@ async def voteskip(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, content=":heavy_check_mark: Skipped current song.")
         del voice_params[message.server.id]['voteskips']
         return
-
-
 
 
 @command("move")

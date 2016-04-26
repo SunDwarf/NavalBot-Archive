@@ -105,6 +105,8 @@ async def _oauth2_play_youtube(
     voice_params[message.server.id]["player"] = player
     voice_params[message.server.id]["progress"] = 0
     voice_params[message.server.id]["duration"] = info.get("duration")
+    if 'voteskips' in voice_params[message.server.id]:
+        del voice_params[message.server.id]['voteskips']
     await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(info.get("title", "???")))
     assert isinstance(player, discord.voice_client.ProcessPlayer)
     # Start playing
