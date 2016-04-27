@@ -131,12 +131,13 @@ async def get_stdout_and_return_code(cmd: str):
 
 
 @cmds.command("avatar")
-@util.only(cmds.RCE_IDS)
+@util.owner
 @util.enforce_args(1, error_msg='You need to provide a link')
 async def avatar(client: discord.Client, message: discord.Message, args: list):
     """
     Changes the avatar of the bot.
     You must provide a valid url, pointing to a jpeg or png file.
+    Owner-only
     """
     file = args[0]
     try:
@@ -149,11 +150,12 @@ async def avatar(client: discord.Client, message: discord.Message, args: list):
 
 
 @cmds.command("changename")
-@util.only(cmds.RCE_IDS)
+@util.owner
 @util.enforce_args(1, error_msg="You need to provide the new name")
 async def changename(client: discord.Client, message: discord.Message, args: list):
     """
     Change the name of the bot.
+    Owner-only
     """
     name = args[0]
     await client.edit_profile(username=name)

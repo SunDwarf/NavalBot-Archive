@@ -132,7 +132,7 @@ else:
             to_dl = 'x86'
         r = requests.get("https://github.com/SexualRhinoceros/MusicBot/raw/develop/libopus-0.{}.dll".format(to_dl),
                          stream=True)
-        # Save it as opus.dll
+        # Save it as libopus.dll
         with open("libopus.dll", 'wb') as f:
             for chunk in r.iter_content(256):
                 f.write(chunk)

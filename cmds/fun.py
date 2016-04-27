@@ -271,6 +271,10 @@ async def get_source(client: discord.Client, message: discord.Message, args: lis
 @util.owner
 @util.enforce_args(3, error_msg=":x: Must give server ID, channel name, message")
 async def echo(client: discord.Client, message: discord.Message, args: list):
+    """
+    Sends a message to a specific server.
+    You have to provide the server ID, channel name and message.
+    """
     server = client.get_server(args[0])
     if not server:
         await client.send_message(message.channel, ":x: No such server found")
@@ -302,6 +306,9 @@ def _get_urban(get):
 @cmds.command("urban")
 @util.enforce_args(1, error_msg="You have to provide a word!")
 async def urban(client: discord.Client, message: discord.Message, args: list):
+    """
+    Defines a word using urban dictionary.
+    """
     word, definition, example = await util.with_multiprocessing(functools.partial(_get_urban, ' '.join(args)))
     await client.send_message(message.channel,
                               "*Your search for `{}` returned the following:*\n\n**Definition:** {}\n\n**Example:** {}"

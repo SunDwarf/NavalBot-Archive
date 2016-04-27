@@ -23,11 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 commands = {}
 
-# Define the admins.
-RCE_IDS = [
-    141545699442425856, 151196442986414080
-]
-
 
 def command(name):
     """
@@ -39,4 +34,3 @@ def command(name):
         return func
 
     return __decorator
-

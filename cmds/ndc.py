@@ -22,16 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # Owner commands.
+import asyncio
+import importlib
 import logging
+import re
 import sys
 
 import discord
-import importlib
-import subprocess
-import asyncio
-import re
 
-# RCE ids
 import cmds
 import util
 
@@ -43,7 +41,7 @@ logger = logging.getLogger("NavalBot")
 
 
 @cmds.command("reload")
-@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
+@util.owner
 @util.enforce_args(1, "You must pick a file to reload.")
 async def reload_f(client: discord.Client, message: discord.Message, args: list):
     """
