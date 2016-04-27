@@ -154,6 +154,7 @@ async def stats(client: discord.Client, message: discord.Message):
         voice_clients = len(client.voice)
     else:
         voice_clients = 1 if client.is_voice_connected() else 0
+    streams = sum([1 for proc in psutil.process_iter() if proc.name() == "ffmpeg"])
     # Memory stats
     used_memory = psutil.Process().memory_info().rss
     used_memory = round(used_memory / 1024 / 1024, 2)
@@ -165,9 +166,9 @@ async def stats(client: discord.Client, message: discord.Message):
         message.channel,
         shardm +
         "Currently running on `{}` server(s). Processed `{}` messages since startup.\n"
-        "Connected to `{}` voice channels.\n"
+        "Connected to `{}` voice channels, with `{}` streams currently playing.\n"
         "Using `{}MB` of memory."
-            .format(server_count, msgcount, voice_clients, used_memory))
+            .format(server_count, msgcount, voice_clients, streams, used_memory))
 
 
 @cmds.command("searchyt")
