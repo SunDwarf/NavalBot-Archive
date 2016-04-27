@@ -23,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-import argparse
 import asyncio
 import json
 import logging
@@ -35,8 +34,11 @@ import traceback
 from ctypes.util import find_library
 
 import requests
+import shutil
 
 import discord
+import yaml
+
 # =============== Commands
 import cmds
 import util
@@ -44,22 +46,7 @@ from cmds import commands
 # Fuck off PyCharm
 import importlib
 
-from util import db, cursor, get_file, sanitize
-
-# Create DB
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS factoids (
-  id INTEGER PRIMARY KEY, name VARCHAR, content VARCHAR, locked INTEGER, locker VARCHAR, server VARCHAR
-);
-""")
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS configuration (
-  id INTEGER PRIMARY KEY,
-  name VARCHAR,
-  value VARCHAR,
-  server VARCHAR
-)
-""")
+from util import get_file, sanitize
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
@@ -71,20 +58,12 @@ importlib.import_module("cmds.version")
 
 loop = asyncio.get_event_loop()
 
-# =============== Argparse
+# Load config.
+if not os.path.exists("config.yml"):
+    shutil.copyfile("config.example.yml", "config.yml")
 
-if __name__ != "__zipdep":
-    parser = argparse.ArgumentParser(description="The best discord bot in the world!")
-
-    oauth_group = parser.add_argument_group(title="OAuth2")
-    oauth_group.add_argument("--oauth-bot-id", help="OAuth2 Bot ID", type=int)
-    oauth_group.add_argument("--oauth-bot-secret", help="OAuth2 Bot secret token")
-
-    ep_group = parser.add_argument_group(title="E-Mail/Password")
-    ep_group.add_argument("--ep-email", help="Bot account's email")
-    ep_group.add_argument("--ep-password", help="Bot account's password")
-
-    args = parser.parse_args()
+with open("config.yml", "r") as f:
+    global_config = yaml.load(f)
 
 
 # ===============
@@ -163,11 +142,11 @@ else:
 async def on_ready():
     # Get the OAuth2 URL, or something
     if client.user.bot:
-        bot_id = args.oauth_bot_id
+        bot_id = global_config.get("client", {}).get("oauth_client_id")
         permissions = discord.Permissions.all_channel()
         oauth_url = discord.utils.oauth_url(str(bot_id), permissions=permissions)
         if bot_id is None:
-            logger.critical("You didn't set the bot ID using --oauth-bot-id. Your bot cannot be invited anywhere.")
+            logger.critical("You didn't set the bot ID in config.yml. Your bot cannot be invited anywhere.")
             sys.exit(1)
         logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
     else:
@@ -200,7 +179,9 @@ async def on_ready():
     await client.change_status(discord.Game(name="Type ?info for help!"))
 
     if has_setproctitle:
-        setproctitle.setproctitle("NavalBot - {}".format(args.oauth_bot_id))
+        setproctitle.setproctitle("NavalBot - {bot_id}".format(
+            bot_id = global_config.get("client", {}).get("oauth_client_id", "???"))
+        )
 
 
 @client.event
@@ -356,14 +337,12 @@ async def default(client: discord.Client, message: discord.Message):
 def main():
     init_logging()
     # Switch login method based on args.
-    if args.oauth_bot_id is not None:
-        login = (args.oauth_bot_secret,)
-    elif args.ep_email is not None:
-        login = (args.ep_email, args.ep_password)
+    use_oauth = global_config.get("client", {}).get("use_oauth", False)
+    if use_oauth:
+        login = (global_config.get("client", {}).get("oauth_bot_token", ""),)
     else:
-        logger.error("You must use one login method!")
-        sys.exit(1)
-
+        login = (global_config.get("client", {}).get("old_bot_user", "lol"),
+                 global_config.get("client", {}).get("old_bot_pw", "aaaa"))
     try:
         loop.run_until_complete(client.login(*login))
     except discord.errors.HTTPException as e:
