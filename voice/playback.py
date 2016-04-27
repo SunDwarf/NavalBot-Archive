@@ -100,11 +100,13 @@ async def _oauth2_play_youtube(
     # Fix the voice client if we need to.
     vc = await _fix_voice(client, voice_client, voice_channel)
     player = vc.create_ffmpeg_player(download_url)
+    # Declare voice params
     voice_params[message.server.id]["playing"] = True
     voice_params[message.server.id]["title"] = info.get("title", "???")
     voice_params[message.server.id]["player"] = player
     voice_params[message.server.id]["progress"] = 0
     voice_params[message.server.id]["duration"] = info.get("duration")
+    voice_params[message.server.id]["voteskips"] = []
     if 'voteskips' in voice_params[message.server.id]:
         del voice_params[message.server.id]['voteskips']
     await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(info.get("title", "???")))

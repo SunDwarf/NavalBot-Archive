@@ -336,7 +336,6 @@ async def voteskip(client: discord.Client, message: discord.Message):
     if len(voteskips) >= required or required == 1:
         player.stop()
         await client.send_message(message.channel, content=":heavy_check_mark: Skipped current song.")
-        del voice_params[message.server.id]['voteskips']
         return
 
 
