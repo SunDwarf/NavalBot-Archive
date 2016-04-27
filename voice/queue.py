@@ -89,7 +89,7 @@ async def shuffle(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, ":x: There is no queue for this server.")
         # this never happens
 
-    qsize = db.get_config(message.server.id, "max_queue", default=99, type_=int)
+    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     new_queue = asyncio.Queue(maxsize=qsize)
     assert isinstance(queue, asyncio.Queue)
@@ -136,7 +136,7 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
     except (ValueError, IndexError):
         start_pos = 0
 
-    qsize = db.get_config(message.server.id, "max_queue", default=99, type_=int)
+    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     s = "**Currently queued: ({}/{})**".format(len(queue), qsize)
     if not queue or len(queue) == 0:
@@ -198,7 +198,7 @@ async def skip(client: discord.Client, message: discord.Message):
         return
 
     # Get the max queue size
-    qsize = db.get_config(message.server.id, "max_queue", default=99, type_=int)
+    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     try:
         aaa = message.content.split(" ")
@@ -376,7 +376,7 @@ async def move(client: discord.Client, message: discord.Message, args: list):
         await client.send_message(message.channel, ":x: Could not find track at index `{}`.".format(fr))
         return
 
-    qsize = db.get_config(message.server.id, "max_queue", default=99, type_=int)
+    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     # Re-create queue, blah blah blah
     new_queue = asyncio.Queue(maxsize=qsize)
@@ -431,7 +431,7 @@ async def remove_vid(client: discord.Client, message: discord.Message, args: lis
         await client.send_message(message.channel, ":x: Not a valid index.")
         return
 
-    qsize = db.get_config(message.server.id, "max_queue", default=99, type_=int)
+    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     # Re-create queue, blah blah blah
     new_queue = asyncio.Queue(maxsize=qsize)

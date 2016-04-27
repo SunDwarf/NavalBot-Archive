@@ -100,7 +100,7 @@ async def set_config(client: discord.Client, message: discord.Message):
     # Get the config values
     name, val = split[1:3]
     # Set them.
-    util.set_config(message.server.id, name, val)
+    await db.set_config(message.server.id, name, val)
     await client.send_message(message.channel, ":heavy_check_mark: Config updated: `{}` -> `{}`".format(name, val))
 
 
@@ -120,7 +120,7 @@ async def get_config(client: discord.Client, message: discord.Message):
 
     name = split[1]
     # Get the value
-    val = db.get_config(message.server.id, name)
+    val = await db.get_config(message.server.id, name)
     await client.send_message(message.channel, "`{}` -> `{}`".format(name, val))
 
 
