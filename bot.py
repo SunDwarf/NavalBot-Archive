@@ -123,7 +123,14 @@ else:
         del found
 
 # Create a client.
-client = discord.Client()
+# Also, use shards as appropriate.
+if global_config.get("shards", {}).get("enable_sharding"):
+    # Todo -> Auto shards
+    shards = global_config["shards"]["shard_max"]
+    my_shard = global_config["shards"]["shard_id"]
+    client = discord.Client(shard_count=int(shards), shard_id=int(my_shard))
+else:
+    client = discord.Client()
 
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(.*?) is (.*)')

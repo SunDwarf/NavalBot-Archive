@@ -22,3 +22,13 @@ redis:
   #password: hunter2
   # Uncomment and set if you want a DB that isn't 0.
   #db: 0
+
+# Shards.
+shards:
+  # Should we enable sharding?
+  enable_sharding: false
+  # What is our shard ID?
+  shard_id: 0
+  # What is the maximum number of shards?
+  # This MUST be the same accross all bots.
+  shard_max: 0

@@ -165,7 +165,7 @@ async def invite(client: discord.Client, message: discord.Message):
 
 
 @cmds.command("banned")
-@util.only(cmds.RCE_IDS)
+@util.owner
 async def banned(client: discord.Client, message: discord.Message):
     """
     Get a list of all currently banned users on a server.
@@ -220,7 +220,7 @@ async def unblacklist(client: discord.Client, message: discord.Message, _: list)
 
 
 @cmds.command("broadcast")
-@util.only(cmds.RCE_IDS)
+@util.owner
 async def broadcast(client: discord.Client, message: discord.Message):
     """
     Sends a message to all servers the bot is connected to.

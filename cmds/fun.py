@@ -157,8 +157,13 @@ async def stats(client: discord.Client, message: discord.Message):
     # Memory stats
     used_memory = psutil.Process().memory_info().rss
     used_memory = round(used_memory / 1024 / 1024, 2)
+    if client.shard_id is not None:
+        shardm = "Currently shard `{}/{}`.\n".format(client.shard_id + 1, client.shard_count)
+    else:
+        shardm = ""
     await client.send_message(
         message.channel,
+        shardm +
         "Currently running on `{}` server(s). Processed `{}` messages since startup.\n"
         "Connected to `{}` voice channels.\n"
         "Using `{}MB` of memory."
