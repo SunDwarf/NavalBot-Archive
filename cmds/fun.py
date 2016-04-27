@@ -31,6 +31,7 @@ import discord
 import psutil
 import pyowm
 import urbandict
+import praw
 from google import search
 from googleapiclient.discovery import build
 
@@ -38,6 +39,8 @@ import cmds
 import util
 
 loop = asyncio.get_event_loop()
+
+r = praw.Reddit(user_agent='NavalBot/3.x for Discord')
 
 
 @cmds.command("choice")
@@ -303,3 +306,22 @@ async def urban(client: discord.Client, message: discord.Message, args: list):
     await client.send_message(message.channel,
                               "*Your search for `{}` returned the following:*\n\n**Definition:** {}\n\n**Example:** {}"
                               .format(word, definition, example))
+
+
+def _get_sr_data(arg):
+    submissions = list(r.get_subreddit(arg).get_hot(limit=30))
+    # shuffle
+    random.shuffle(submissions)
+    sub = submissions[0]
+    assert isinstance(sub, praw.objects.Submission)
+    return sub.url
+
+
+@cmds.command("sr")
+@util.enforce_args(1, error_msg=":x: You must provide a subreddit.")
+async def subreddit(client: discord.Client, message: discord.Message, args: list):
+    """
+    Fetches random post from subreddit's front page.
+    """
+    sr_link = await util.with_multiprocessing(functools.partial(_get_sr_data, args[0]))
+    await client.send_message(message.channel, sr_link)
