@@ -25,6 +25,7 @@ from math import trunc
 
 import youtube_dl
 
+import db
 import discord
 import util
 from cmds import command
@@ -301,7 +302,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Play it via ffmpeg.
 
     # Get the max queue size
-    qsize = util.get_config(message.server.id, "max_queue", default=99, type_=int)
+    qsize = db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": qsize,
                                 "default_search": "ytsearch", "source_address": "0.0.0.0"})

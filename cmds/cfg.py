@@ -24,6 +24,7 @@ import asyncio
 import os
 import shlex
 
+import db
 import discord
 
 import cmds
@@ -79,7 +80,7 @@ async def g_get_config(client: discord.Client, message: discord.Message, args: l
     Globally set a config value.
     Owner-only.
     """
-    val = util.get_config(None, args[0])
+    val = util.get_global_config(args[0])
     await client.send_message(message.channel, "`{}` -> `{}`".format(args[0], val))
 
 
@@ -119,7 +120,7 @@ async def get_config(client: discord.Client, message: discord.Message):
 
     name = split[1]
     # Get the value
-    val = util.get_config(message.server.id, name)
+    val = db.get_config(message.server.id, name)
     await client.send_message(message.channel, "`{}` -> `{}`".format(name, val))
 
 

@@ -36,6 +36,7 @@ from ctypes.util import find_library
 import requests
 import shutil
 
+import db
 import discord
 import yaml
 
@@ -223,8 +224,8 @@ async def on_message(message: discord.Message):
 
     # Check for a valid server.
     if message.server is not None:
-        prefix = util.get_config(message.server.id, "command_prefix", "?")
-        autodelete = True if util.get_config(message.server.id, "autodelete") == "True" else False
+        prefix = await db.get_config(message.server.id, "command_prefix", "?")
+        autodelete = True if await db.get_config(message.server.id, "autodelete") == "True" else False
         if autodelete and message.content.startswith(prefix):
             await client.delete_message(message)
         logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
