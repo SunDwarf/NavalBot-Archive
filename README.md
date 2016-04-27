@@ -1,4 +1,4 @@
-# NavalBot 3.x
+# NavalBot 4.x
 
 [![Requirements Status](https://requires.io/github/SunDwarf/NavalBot/requirements.svg?branch=develop)](https://requires.io/github/SunDwarf/NavalBot/requirements/?branch=develop)
 ![https://img.shields.io/github/release/SunDwarf/NavalBot.svg](https://img.shields.io/github/release/SunDwarf/NavalBot.svg)
@@ -9,7 +9,7 @@ It uses a modified version of [discord.py.] (https://github.com/Rapptz/discord.p
 
 Want to learn more? [See the wiki.] (https://github.com/SunDwarf/NavalBot/wiki)
 
-**If you are running a local version, anything before version 3.0.0 is not supported.**
+**If you are running a local version, anything before version 4.0.0 is not supported.**
 
 
 ## Contributing
