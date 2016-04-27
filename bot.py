@@ -258,7 +258,7 @@ async def on_message(message: discord.Message):
 
     if message.content.startswith(prefix):
         cmd_content = message.content[len(prefix):]
-        cmd_word = cmd_content.split(" ")[0]
+        cmd_word = cmd_content.split(" ")[0].lower()
         try:
             coro = commands[cmd_word](client, message)
         except KeyError as e:
