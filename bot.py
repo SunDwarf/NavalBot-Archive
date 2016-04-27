@@ -287,6 +287,7 @@ async def help(client: discord.Client, message: discord.Message, args: list):
 
 
 async def default(client: discord.Client, message: discord.Message):
+    return
     data = message.content[1:]
     # Check if it matches a factoid creation
     matches = factoid_matcher.match(data)
