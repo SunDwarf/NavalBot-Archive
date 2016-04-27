@@ -294,7 +294,7 @@ async def factoid(client: discord.Client, message: discord.Message):
     """
     Displays help on how to create a factoid.
     """
-    prefix = db.get_config(message.server.id, "command_prefix", "?")
+    prefix = await db.get_config(message.server.id, "command_prefix", "?")
     await client.send_message(message.channel,
                               "You can create a factoid by typing `{}<factoid_name> is <answer>`".format(prefix))
 
