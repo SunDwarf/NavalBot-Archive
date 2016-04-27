@@ -304,8 +304,10 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     # Get the max queue size
     qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
-    ydl = youtube_dl.YoutubeDL({"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": qsize,
-                                "default_search": "ytsearch", "source_address": "0.0.0.0"})
+    # Use fallback for soundcloud, if possible
+    ydl = youtube_dl.YoutubeDL({
+        "format": '[format_id=fallback]/webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": qsize,
+        "default_search": "ytsearch", "source_address": "0.0.0.0"})
     func = functools.partial(ydl.extract_info, vidname, download=False)
     # Set the download lock.
     lock = voice_locks.get(message.server.id)
@@ -340,6 +342,14 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         is_playlist = False
         title = info.get('title')
         download_url = info['url']
+
+        # Override soundcloud URLs.
+        if 'formats' in info:
+            for fmt in info["formats"]:
+                if 'api.soundcloud' in fmt.get("url", ""):
+                    # Use that url.
+                    download_url = fmt.get("url")
+                    break
 
         pl_data = None
 
