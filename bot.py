@@ -287,8 +287,8 @@ async def help(client: discord.Client, message: discord.Message, args: list):
 
 
 async def default(client: discord.Client, message: discord.Message):
-    return
-    data = message.content[1:]
+    prefix = await db.get_config(message.server.id, "command_prefix", "?")
+    data = message.content[len(prefix):]
     # Check if it matches a factoid creation
     matches = factoid_matcher.match(data)
     if matches:
@@ -301,35 +301,14 @@ async def default(client: discord.Client, message: discord.Message):
             file = sanitize(fac.split('/')[-1])
             client.loop.create_task(get_file((client, message), url=fac, name=file))
             fac = "file:{}".format(file)
-        # check if locked
-        cursor.execute("SELECT locked, locker FROM factoids "
-                       "WHERE factoids.name = ?"
-                       "AND factoids.server = ?", (name, message.server.id))
-        row = cursor.fetchone()
-        if row:
-            locked, locker = row
-            if locked and locker != message.author.id and int(message.author.id) not in cmds.RCE_IDS:
-                await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
-                                          .format(name, locker))
-                return
-        cursor.execute("""INSERT OR REPLACE
-                       INTO factoids (id, name, content, server)
-                       VALUES (
-                       (SELECT id FROM factoids WHERE name = ? AND server = ?),
-                       ?, ?, ?)""", (name, message.server.id, name, fac, message.server.id))
-        db.commit()
+        await db.set_config(message.server.id, "fac:{}".format(name), fac)
         await client.send_message(message.channel, "Factoid `{}` is now `{}`".format(name, fac))
     else:
-        # Get factoid
-        cursor.execute("SELECT (content) FROM factoids "
-                       "WHERE factoids.name = ? "
-                       "AND factoids.server = ?", (data, message.server.id))
-        rows = cursor.fetchone()
-        if not rows:
-            return
         # Load content
-        content = rows[0]
-        assert isinstance(content, str)
+        content = await db.get_config(message.server.id, "fac:{}".format(data))
+        if not content:
+            return
+        print(content)
         # Check if it's a file
         if content.startswith("file:"):
             fname = content.split("file:")[1]
