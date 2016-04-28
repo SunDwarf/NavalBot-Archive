@@ -30,47 +30,6 @@ import discord
 import cmds
 import util
 
-
-@cmds.command("lock")
-async def lock(client: discord.Client, message: discord.Message):
-    """
-    Locks a factoid, so it cannot be edited by a different user.
-    """
-    # get factoid
-    fac = message.content.split(' ')[1]
-    # check if it's locked
-    util.cursor.execute("SELECT locked, locker FROM factoids WHERE name = ?", (fac,))
-    row = util.cursor.fetchone()
-    if row:
-        if row[0] and row[1] != message.author.id:
-            await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
-                                      .format(fac, row[1]))
-            return
-    else:
-        await client.send_message(message.channel, "Factoid `{}` does not exist".format(fac))
-        return
-    # Update factoid to be locked
-    util.cursor.execute("""UPDATE factoids SET locked = 1, locker = ? WHERE name = ?""",
-                        (str(message.author.id), fac))
-    util.db.commit()
-    await client.send_message(message.channel, "Factoid `{}` locked to ID `{}` ({})".format(fac, message.author.id,
-                                                                                            message.author.name))
-
-
-@cmds.command("gsetcfg")
-@util.owner
-@util.enforce_args(2, ":x: Config set must be in `setcfg 'key' 'value'` format, "
-                      "with quotation marks surrounding the spaces")
-async def g_set_config(client: discord.Client, message: discord.Message, args: list):
-    """
-    Globally set a config value.
-    Owner-only.
-    """
-    util.set_config(None, args[0], args[1])
-    await client.send_message(message.channel, ":heavy_check_mark: Config updated: `{}` -> `{}`".format(args[0],
-                                                                                                        args[1]))
-
-
 @cmds.command("ggetcfg")
 @util.owner
 @util.enforce_args(1, ":x: Config set must be in `getcfg 'key'` format, "
