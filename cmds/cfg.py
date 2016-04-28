@@ -30,6 +30,7 @@ import discord
 import cmds
 import util
 
+
 @cmds.command("ggetcfg")
 @util.owner
 @util.enforce_args(1, ":x: Config set must be in `getcfg 'key'` format, "

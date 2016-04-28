@@ -117,3 +117,17 @@ async def py(client: discord.Client, message: discord.Message):
     else:
         result = eval(match[0])
         await client.send_message(message.channel, "```{}```".format(result))
+
+
+@cmds.command("rget")
+@util.owner
+async def redis_get(client: discord.Client, message: discord.Message):
+    key = getter.findall(message.content)
+    if not key:
+        return
+    pool = await util.get_pool()
+    async with pool.get() as conn:
+        k = await conn.get(key[0])
+        if k:
+            k = k.decode()
+        await client.send_message(message.channel, "`{}`".format(k))
