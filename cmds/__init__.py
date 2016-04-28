@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 commands = {}
+message_hooks = {}
 
 
 def command(name):
@@ -34,3 +35,10 @@ def command(name):
         return func
 
     return __decorator
+
+
+def message_hook(func):
+    """
+    Registers an on_message hook.
+    """
+    message_hooks[func.__name__] = func

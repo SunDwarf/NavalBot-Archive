@@ -245,6 +245,10 @@ async def on_message(message: discord.Message):
         logger.info("Ignoring (presumably) image-only message.")
         return
 
+    # Run on_message hooks
+    for hook in cmds.message_hooks.values():
+        await hook(client, message)
+
     if message.content.startswith(prefix):
         cmd_content = message.content[len(prefix):]
         cmd_word = cmd_content.split(" ")[0].lower()
@@ -256,10 +260,7 @@ async def on_message(message: discord.Message):
         try:
             await coro
         except Exception as e:
-            if isinstance(e, discord.HTTPException):
-                pass
-            else:
-                await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
+            await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
 
 
 # ============= Built-in commands.
