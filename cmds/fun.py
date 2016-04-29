@@ -95,7 +95,7 @@ async def weather(client: discord.Client, message: discord.Message, args: list):
         return
     try:
         userinput = ' '.join(args[0:])
-        wind, humidity, temp = await util.with_multiprocessing(functools.partial(_get_weather(api_key, userinput)))
+        wind, humidity, temp = await util.with_multiprocessing(functools.partial(_get_weather, api_key, userinput))
         await client.send_message(
             message.channel,
             '☁_Weather for {}:_\n** Temperature:** {} °C **Humidity:** {} % **Wind:** {} m/s'
