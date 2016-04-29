@@ -44,7 +44,7 @@ async def version(client: discord.Client, message: discord.Message):
     Checks for the latest stable version of NavalBot.
     """
     # region VERSION
-    VERSION = "4.0.0"
+    VERSION = "4.0.1"
     VERSIONT = tuple(int(i) for i in VERSION.split("."))
     # endregion
 
