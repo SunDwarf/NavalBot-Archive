@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import asyncio
 import copy
 import functools
+import logging
 from math import trunc
 
 import youtube_dl
@@ -72,6 +73,30 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
         return vc
 
 
+async def _fix_sc(download_url: str, wp_url: str) -> str:
+    """
+    Fix sndcdn links.
+    """
+    if 'sndcdn' not in download_url or not wp_url:
+        logging.getLogger("NavalBot").info("No need to fix up track {}...".format(wp_url))
+        return download_url
+
+    logging.getLogger("NavalBot").info("Fixing up track {}...".format(wp_url))
+
+    ydl = youtube_dl.YoutubeDL(
+        {"format": '[format_id=fallback]/best', "ignoreerrors": True, "source_address": "0.0.0.0"})
+
+    # Await to get the new item.
+    func = functools.partial(ydl.extract_info, wp_url, download=False)
+    data = await loop.run_in_executor(None, func)
+
+    logging.getLogger("NavalBot").info("Fixed up track {}, got new URL: {}".format(wp_url,
+                                                                                   download_url != data.get("url")
+                                                                                   ))
+
+    return data.get("url")
+
+
 async def _oauth2_play_youtube(
         client: discord.Client,
         message: discord.Message,
@@ -101,6 +126,9 @@ async def _oauth2_play_youtube(
     """
     # Fix the voice client if we need to.
     vc = await _fix_voice(client, voice_client, voice_channel)
+    # Fix soundcloud.
+    download_url = await _fix_sc(download_url, info.get("webpage_url"))
+    # Create the player.
     player = vc.create_ffmpeg_player(download_url)
     # Declare voice params
     voice_params[message.server.id]["playing"] = True
