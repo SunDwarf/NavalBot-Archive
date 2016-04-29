@@ -147,3 +147,24 @@ async def add_role_override(client: discord.Client, message: discord.Message, ar
         conn.sadd("override:{}:{}".format(message.server.id, command_name), role)
 
     await client.send_message(message.channel, ":x: Added role override for command {}.".format(command_name))
+
+
+@cmds.command("deloverride")
+@util.with_permission("Admin")
+@util.enforce_args(2, error_msg=":x: You must provide a command a role.")
+async def remove_role_override(client: discord.Client, message: discord.Message, args: list):
+    """
+    Removes a role override from a command.
+    """
+    command_name = args[0]
+    if not command_name in cmds.commands:
+        await client.send_message(message.channel, ":x: You must provide a valid command.")
+        return
+
+    role = args[1]
+    # smse
+    async with (await util.get_pool()).get() as conn:
+        assert isinstance(conn, aioredis.Redis)
+        conn.srem("override:{}:{}".format(message.server.id, command_name), role)
+
+    await client.send_message(message.channel, ":x: Deleted role override for command {}.".format(command_name))
