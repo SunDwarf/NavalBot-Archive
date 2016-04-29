@@ -88,7 +88,7 @@ async def weather(client: discord.Client, message: discord.Message, args: list):
     """
     Displays the weather of a specified place.
     """
-    api_key = util.get_global_config("owm_api_key")
+    api_key = await db.get_key("owm_key")
     if not api_key:
         await client.send_message(message.channel, ":exclamation: You have not set the API key. Set it with `setcfg "
                                                    "owm_api_key <your_api_key>`.")
@@ -180,7 +180,7 @@ async def search_youtube(client: discord.Client, message: discord.Message, args:
     # Join up the args
     to_search = " ".join(args)
     # Get the API key
-    api_key = util.get_global_config("youtube_api_key")
+    api_key = await db.get_key("youtube_api_key")
     if not api_key:
         await client.send_message(message.channel,
                                   ':x: The YouTube Data API v3 key has not been set!\n'
