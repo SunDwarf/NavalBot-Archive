@@ -24,6 +24,8 @@ import asyncio
 import os
 import shlex
 
+import aioredis
+
 import db
 import discord
 
@@ -121,3 +123,27 @@ async def changename(client: discord.Client, message: discord.Message, args: lis
     name = args[0]
     await client.edit_profile(username=name)
     await client.send_message(message.channel, 'Username got changed!')
+
+
+@cmds.command("addoverride")
+@util.with_permission("Admin")
+@util.enforce_args(2, error_msg=":x: You must provide a command and a role.")
+async def add_role_override(client: discord.Client, message: discord.Message, args: list):
+    """
+    Adds a role override to a command.
+    This allows anybody with the role specified to run this command.
+    You can enable a command for everybody by adding a role override for `@ everybody` (without the space.).
+    """
+
+    command_name = args[0]
+    if not command_name in cmds.commands:
+        await client.send_message(message.channel, ":x: You must provide a valid command.")
+        return
+
+    role = args[1]
+    # Set in aioredis
+    async with (await util.get_pool()).get() as conn:
+        assert isinstance(conn, aioredis.Redis)
+        conn.sadd("override:{}:{}".format(message.server.id, command_name), role)
+
+    await client.send_message(message.channel, ":x: Added role override for command {}.".format(command_name))
