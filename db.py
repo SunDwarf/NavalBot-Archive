@@ -53,7 +53,7 @@ async def set_config(server_id: str, key: str, value: str):
         conn.set(built, value)
 
 
-async def get_key(key: str):
+async def get_key(key: str) -> str:
     pool = await util.get_pool()
     async with pool.get() as conn:
-        return conn.get(key)
+        return (await conn.get(key)).decode()
