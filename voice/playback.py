@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 import asyncio
+import copy
 import functools
 from math import trunc
 
@@ -306,7 +307,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
 
     # Use fallback for soundcloud, if possible
     ydl = youtube_dl.YoutubeDL({
-        "format": '[format_id=fallback]/webm[abr>0]/bestaudio/best', "ignoreerrors": True, "playlistend": qsize,
+        "format": '[format_id=fallback]/best', "ignoreerrors": True, "playlistend": qsize,
         "default_search": "ytsearch", "source_address": "0.0.0.0"})
     func = functools.partial(ydl.extract_info, vidname, download=False)
     # Set the download lock.
@@ -342,14 +343,6 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
         is_playlist = False
         title = info.get('title')
         download_url = info['url']
-
-        # Override soundcloud URLs.
-        if 'formats' in info:
-            for fmt in info["formats"]:
-                if 'api.soundcloud' in fmt.get("url", ""):
-                    # Use that url.
-                    download_url = fmt.get("url")
-                    break
 
         pl_data = None
 
