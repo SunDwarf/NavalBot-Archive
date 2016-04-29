@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import json
 import os
 
+import asyncio
+
 import db
 import discord
 
@@ -135,6 +137,7 @@ async def delete(client: discord.Client, message: discord.Message):
     if count is None:
         return
     async for msg in client.logs_from(message.channel, count + 1):
+        await asyncio.sleep(0.25)
         await client.delete_message(msg)
     if count == 1:
         await client.send_message(message.channel, ':wastebasket: **{} message deleted by {}**'
