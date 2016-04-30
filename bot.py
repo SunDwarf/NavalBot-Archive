@@ -54,6 +54,7 @@ importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
 importlib.import_module("cmds.version")
+importlib.import_module("cmds.factoids")
 
 # =============== End commands
 
@@ -133,7 +134,7 @@ else:
     client = discord.Client()
 
 # Factoid matcher compiled
-factoid_matcher = re.compile(r'(.*?) is (.*)')
+factoid_matcher = re.compile(r'(\S*?) is (\S*)')
 
 # Pre-load the blacklist.
 if os.path.exists("blacklist.json"):
@@ -286,7 +287,7 @@ async def help(client: discord.Client, message: discord.Message, args: list):
     doc = '\n'.join(doc)
     await client.send_message(message.channel, doc)
 
-
+# region factoids
 async def default(client: discord.Client, message: discord.Message):
     prefix = await db.get_config(message.server.id, "command_prefix", "?")
     data = message.content[len(prefix):]
@@ -296,10 +297,12 @@ async def default(client: discord.Client, message: discord.Message):
         # Set the factoid
         name = matches.groups()[0]
         fac = matches.groups()[1]
+        if not (len(name) > 0 and len(fac) > 0):
+            return
         # Check if it's locked.
-        locked = await db.get_config(message.server.id, "fac:{}:locked".format(fac), type_=int, default=None)
+        locked = await db.get_config(message.server.id, "fac:{}:locked".format(name), default=None)
         if locked and locked != message.author.id:
-            await client.send_message(message.channel, ":x: Factoid is locked.")
+            await client.send_message(message.channel, ":x: Cannot edit, factoid is locked to ID `{}`.".format(locked))
             return
         assert isinstance(fac, str)
         if fac.startswith("http") and 'youtube' not in fac:
@@ -327,6 +330,7 @@ async def default(client: discord.Client, message: discord.Message):
             return
         await client.send_message(message.channel, content)
 
+# endregion
 
 def main():
     init_logging()

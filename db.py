@@ -53,7 +53,19 @@ async def set_config(server_id: str, key: str, value: str):
         conn.set(built, value)
 
 
+async def delete_config(server_id: str, key: str):
+    """
+    Deletes a val in the redis DB.
+    """
+    pool = await util.get_pool()
+    # Set config:server_id:key.
+    built = "config:{sid}:{key}".format(sid=server_id, key=key)
+    async with pool.get() as conn:
+        conn.delete(built)
+
+
 async def get_key(key: str) -> str:
     pool = await util.get_pool()
     async with pool.get() as conn:
         return (await conn.get(key)).decode()
+

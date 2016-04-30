@@ -168,3 +168,11 @@ async def remove_role_override(client: discord.Client, message: discord.Message,
         conn.srem("override:{}:{}".format(message.server.id, command_name), role)
 
     await client.send_message(message.channel, ":x: Deleted role override for command {}.".format(command_name))
+
+
+@cmds.command("cmdinfo")
+@util.enforce_args(1, ":x: You must provide a command to view.")
+async def cmdinfo(client: discord.Client, message: discord.Message, args: list):
+    """
+    Provides internal information about the task.
+    """
