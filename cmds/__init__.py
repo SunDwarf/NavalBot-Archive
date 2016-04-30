@@ -32,6 +32,10 @@ def command(name):
 
     def __decorator(func):
         commands[name] = func
+        # Update __methods.
+        if hasattr(func, "__methods"):
+            for k, v in func.__methods.items():
+                setattr(func, k, v)
         return func
 
     return __decorator

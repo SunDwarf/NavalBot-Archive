@@ -138,3 +138,12 @@ async def redis_get(client: discord.Client, message: discord.Message):
         if k:
             k = k.decode()
         await client.send_message(message.channel, "`{}`".format(k))
+
+
+@cmds.command("_finfo")
+@util.owner
+@util.enforce_args(2)
+async def finfo(client: discord.Client, message: discord.Message, args: list):
+    mod = sys.modules[args[0]]
+    f = getattr(mod, args[1])
+    await client.send_message(message.channel, "`{}`".format(await f.get_roles(message.server.id)))
