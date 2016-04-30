@@ -86,13 +86,6 @@ async def get_config(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "`{}` -> `{}`".format(name, val))
 
 
-async def get_stdout_and_return_code(cmd: str):
-    proc = await asyncio.create_subprocess_exec(*cmd.split(), stdout=asyncio.subprocess.PIPE)
-    stdout, stderr = await proc.communicate()
-    returncode = await proc.wait()
-    return stdout, stderr, returncode
-
-
 @cmds.command("avatar")
 @util.owner
 @util.enforce_args(1, error_msg='You need to provide a link')
