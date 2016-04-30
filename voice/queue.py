@@ -138,18 +138,21 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
 
     qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
-    s = "**Currently queued: ({}/{})**".format(len(queue), qsize)
-    if not queue or len(queue) == 0:
-        s += "\n`Nothing is queued.`"
-        await client.send_message(message.channel, s)
-        return
-
-    if start_pos + 1 > len(queue):
+    if len(queue) != 0 and start_pos + 1 > len(queue):
         await client.send_message(message.channel, ":x: Queue is not as long as that.")
         return
     if start_pos < 0:
         await client.send_message(message.channel, ":x: Cannot check queue for negative numbers.")
         return
+
+    song_str = ""
+    # Set total duration.
+    total_dur = 0
+
+    # First loop over items to get the duration
+    for i in queue:
+        if isinstance(i[1], dict):
+            total_dur += i[1].get("duration", 0)
 
     for item in range(start_pos, start_pos + len(queue) if len(queue) < 10 else start_pos + 10):
         try:
@@ -164,10 +167,27 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
             # get duration
             dm, ds = divmod(i[1].get("duration"), 60)
             df = "`[{:02d}:{:02d}]`".format(trunc(dm), trunc(ds))
-        s += "\n{}. `{}` `{}`".format(item + 1, title, df)
+        song_str += "\n{}. `{}` `{}`".format(item + 1, title, df)
 
     if len(queue) > start_pos + 10:
-        s += "\n(Omitted {} queued items.)".format((len(queue) - 10) - start_pos)
+        song_str += "\n(Omitted {} queued items.)".format((len(queue) - 10) - start_pos)
+
+    # Divmod queue length
+    tm, ds = divmod(total_dur, 60)
+    print(total_dur)
+    dh, dm = divmod(tm, 60)
+
+    s = "**Currently queued: ({lq}/{mq})** `[{h:02d}:{m:02d}:{s:02d}]`"\
+        .format(lq=len(queue), mq=qsize,
+                h=trunc(dh), m=trunc(dm), s=trunc(ds))
+
+    if not queue or len(queue) == 0:
+        s += "\n`Nothing is queued.`"
+        await client.send_message(message.channel, s)
+        return
+
+    s += song_str
+
     await client.send_message(message.channel, s)
 
 
