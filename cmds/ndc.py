@@ -33,7 +33,8 @@ import discord
 import cmds
 import util
 
-getter = re.compile(r'`{1,3}(.*?)`{1,3}')
+getter = re.compile(r'`(?!`)(.*?)`')
+multi = re.compile(r'```(.*?)```')
 
 loop = asyncio.get_event_loop()
 
@@ -111,12 +112,18 @@ async def sql(client: discord.Client, message: discord.Message):
 @cmds.command("py")
 @util.owner
 async def py(client: discord.Client, message: discord.Message):
-    match = getter.findall(message.content)
-    if not match:
+    match_single = getter.findall(message.content)
+    match_multi = multi.findall(message.content)
+    if not match_single and not match_multi:
         return
     else:
-        result = eval(match[0])
-        await client.send_message(message.channel, "```{}```".format(result))
+        if not match_multi:
+            result = eval(match_single[0])
+            await client.send_message(message.channel, "```{}```".format(result))
+        else:
+            def r(v):
+                loop.create_task(client.send_message(message.channel, "```{}```".format(v)))
+            exec(match_multi[0])
 
 
 @cmds.command("rget")
