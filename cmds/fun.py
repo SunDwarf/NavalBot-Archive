@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 import asyncio
+from concurrent.futures.process import BrokenProcessPool
 import datetime
 import functools
 import os
@@ -95,7 +96,11 @@ async def weather(client: discord.Client, message: discord.Message, args: list):
         return
     try:
         userinput = ' '.join(args[0:])
-        wind, humidity, temp = await util.with_multiprocessing(functools.partial(_get_weather, api_key, userinput))
+        try:
+            wind, humidity, temp = await util.with_multiprocessing(functools.partial(_get_weather, api_key, userinput))
+        except BrokenProcessPool:
+            await client.send_message(message.channel, ":exclamation: Hit the rate limit. Please wait.")
+            return
         await client.send_message(
             message.channel,
             '☁_Weather for {}:_\n** Temperature:** {} °C **Humidity:** {} % **Wind:** {} m/s'
