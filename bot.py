@@ -296,6 +296,11 @@ async def default(client: discord.Client, message: discord.Message):
         # Set the factoid
         name = matches.groups()[0]
         fac = matches.groups()[1]
+        # Check if it's locked.
+        locked = await db.get_config(message.server.id, "fac:{}:locked".format(fac), type_=int, default=None)
+        if locked and locked != message.author.id:
+            await client.send_message(message.channel, ":x: Factoid is locked.")
+            return
         assert isinstance(fac, str)
         if fac.startswith("http") and 'youtube' not in fac:
             # download as a file
@@ -303,7 +308,7 @@ async def default(client: discord.Client, message: discord.Message):
             client.loop.create_task(get_file((client, message), url=fac, name=file))
             fac = "file:{}".format(file)
         await db.set_config(message.server.id, "fac:{}".format(name), fac)
-        await client.send_message(message.channel, "Factoid `{}` is now `{}`".format(name, fac))
+        await client.send_message(message.channel, ":heavy_check_mark: Factoid `{}` is now `{}`".format(name, fac))
     else:
         # Load content
         content = await db.get_config(message.server.id, "fac:{}".format(data))
