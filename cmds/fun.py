@@ -323,11 +323,13 @@ async def urban(client: discord.Client, message: discord.Message, args: list):
 
 
 def _get_sr_data(arg):
-    submissions = list(r.get_subreddit(arg).get_hot(limit=30))
+    subreddit = r.get_subreddit(arg)
+    if not subreddit or subreddit.over18:
+        return
+    submissions = list(subreddit.get_hot(limit=30))
     # shuffle
     random.shuffle(submissions)
     sub = submissions[0]
-    assert isinstance(sub, praw.objects.Submission)
     return sub.url
 
 
@@ -338,4 +340,7 @@ async def subreddit(client: discord.Client, message: discord.Message, args: list
     Fetches random post from subreddit's front page.
     """
     sr_link = await util.with_multiprocessing(functools.partial(_get_sr_data, args[0]))
+    if not sr_link:
+        await client.send_message(message.channel, ":x: Subreddit either doesn't exist or is NSFW.")
+        return
     await client.send_message(message.channel, sr_link)
