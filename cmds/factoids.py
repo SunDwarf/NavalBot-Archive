@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import discord
 
-import db
 import cmds
+import db
 import util
 
 
@@ -93,3 +93,13 @@ async def unlock(client: discord.Client, message: discord.Message, args: list):
         return
     await db.delete_config(message.server.id, "fac:{}:locked".format(to_ulock))
     await client.send_message(message.channel, ":heavy_check_mark: Factoid `{}` unlocked.".format(to_ulock))
+
+
+@cmds.command("factoid")
+async def factoid(client: discord.Client, message: discord.Message):
+    """
+    Displays help on how to create a factoid.
+    """
+    prefix = await db.get_config(message.server.id, "command_prefix", "?")
+    await client.send_message(message.channel,
+                              "You can create a factoid by typing `{}<factoid_name> is <answer>`".format(prefix))

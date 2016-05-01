@@ -22,22 +22,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 import asyncio
-from concurrent.futures.process import BrokenProcessPool
 import datetime
 import functools
 import os
 import random
+from concurrent.futures.process import BrokenProcessPool
 
-import db
 import discord
+import praw
 import psutil
 import pyowm
 import urbandict
-import praw
 from google import search
 from googleapiclient.discovery import build
 
 import cmds
+import db
 import util
 
 loop = asyncio.get_event_loop()
@@ -173,7 +173,7 @@ async def stats(client: discord.Client, message: discord.Message):
         "Currently running on `{}` server(s). Processed `{}` messages since startup.\n"
         "Connected to `{}` voice channels, with `{}` streams currently playing.\n"
         "Using `{}MB` of memory."
-            .format(server_count, msgcount, voice_clients, streams, used_memory))
+        .format(server_count, msgcount, voice_clients, streams, used_memory))
 
 
 @cmds.command("searchyt")
@@ -298,16 +298,6 @@ async def echo(client: discord.Client, message: discord.Message, args: list):
         return
 
     await client.send_message(channel, args[2])
-
-
-@cmds.command("factoid")
-async def factoid(client: discord.Client, message: discord.Message):
-    """
-    Displays help on how to create a factoid.
-    """
-    prefix = await db.get_config(message.server.id, "command_prefix", "?")
-    await client.send_message(message.channel,
-                              "You can create a factoid by typing `{}<factoid_name> is <answer>`".format(prefix))
 
 
 def _get_urban(get):

@@ -96,6 +96,7 @@ if sys.platform == "win32":
     else:
         found = False
     has_setproctitle = False
+
 else:
     found = find_library("opus")
     has_setproctitle = True
