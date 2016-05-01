@@ -315,8 +315,11 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
 
     voice_channel = await find_voice_channel(message.server)
     if not voice_channel:
-        await client.send_message(message.channel, content=":x: Cannot find voice channel for playing music! (channel "
-                                                           "must be named `Music` or `NavalBot`.)")
+        await client.send_message(
+            message.channel,
+            content=":x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`, "
+                    "however you can override this with by running `{}setcfg voice_channel <your channel>`."
+                    .format(await util.get_prefix(message.server.id)))
         return
 
     if message.server.id not in voice_locks:
