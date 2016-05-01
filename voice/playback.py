@@ -335,7 +335,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     if re.match(r'http[s]://', vidname):
         if await db.get_config(message.server.id, "limit_urls", default=True, type_=bool):
             # Only allow youtube/soundcloud links
-            if not re.match(r'(youtube.com|youtu.be|soundcloud.com)', vidname):
+            if not re.match(r'.*?(youtube.com|youtu.be|soundcloud.com).*?', vidname):
                 await client.send_message(
                     message.channel, ":x: This link is not in the link whitelist."
                                      "To turn this off, use `{}setcfg limit_urls False`."
