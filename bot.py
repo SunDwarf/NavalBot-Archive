@@ -47,6 +47,7 @@ from cmds import commands
 # Fuck off PyCharm
 import importlib
 
+from exceptions import StopProcessing
 from util import get_file, sanitize
 
 importlib.import_module("cmds.cfg")
@@ -249,7 +250,10 @@ async def on_message(message: discord.Message):
 
     # Run on_message hooks
     for hook in cmds.message_hooks.values():
-        await hook(client, message)
+        try:
+            await hook(client, message)
+        except StopProcessing:
+            return
 
     if message.content.startswith(prefix):
         cmd_content = message.content[len(prefix):]
