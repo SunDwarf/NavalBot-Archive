@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The main entry point of NavalBot.
 
@@ -22,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-import argparse
 import asyncio
 import json
 import logging
@@ -33,9 +33,12 @@ import time
 import traceback
 from ctypes.util import find_library
 
-import discord
 import requests
-from colorama import init, Fore, Back, Style
+import shutil
+
+import db
+import discord
+import yaml
 
 # =============== Commands
 import cmds
@@ -44,40 +47,31 @@ from cmds import commands
 # Fuck off PyCharm
 import importlib
 
-from util import db, cursor, get_file, sanitize
-
-init()
-
+from exceptions import StopProcessing
+from util import get_file, sanitize
 
 importlib.import_module("cmds.cfg")
 importlib.import_module("cmds.fun")
 importlib.import_module("cmds.moderation")
 importlib.import_module("cmds.ndc")
 importlib.import_module("cmds.version")
+importlib.import_module("cmds.factoids")
+
+try:
+    importlib.import_module("cmds.weebshit")
+except (ImportError, NameError):
+    pass
 
 # =============== End commands
 
 loop = asyncio.get_event_loop()
 
-# =============== Argparse
+# Load config.
+if not os.path.exists("config.yml"):
+    shutil.copyfile("config.example.yml", "config.yml")
 
-if __name__ != "__zipdep":
-    parser = argparse.ArgumentParser(description="The best discord bot in the world!")
-
-    oauth_group = parser.add_argument_group(title="OAuth2")
-    oauth_group.add_argument("--oauth-bot-id", help="OAuth2 Bot ID", type=int)
-    oauth_group.add_argument("--oauth-bot-secret", help="OAuth2 Bot secret token")
-
-    ep_group = parser.add_argument_group(title="E-Mail/Password")
-    ep_group.add_argument("--ep-email", help="Bot account's email")
-    ep_group.add_argument("--ep-password", help="Bot account's password")
-
-    args = parser.parse_args()
-
-# =============== Version information
-
-VERSION = "3.0.0"
-VERSIONT = tuple(int(i) for i in VERSION.split("."))
+with open("config.yml", "r") as f:
+    global_config = yaml.load(f)
 
 
 # ===============
@@ -107,8 +101,12 @@ if sys.platform == "win32":
         found = "libopus"
     else:
         found = False
+    has_setproctitle = False
+
 else:
     found = find_library("opus")
+    has_setproctitle = True
+    import setproctitle
 if found:
     print(">> Loaded libopus from {}".format(found))
     discord.opus.load_opus(found)
@@ -122,7 +120,7 @@ else:
             to_dl = 'x86'
         r = requests.get("https://github.com/SexualRhinoceros/MusicBot/raw/develop/libopus-0.{}.dll".format(to_dl),
                          stream=True)
-        # Save it as opus.dll
+        # Save it as libopus.dll
         with open("libopus.dll", 'wb') as f:
             for chunk in r.iter_content(256):
                 f.write(chunk)
@@ -133,28 +131,17 @@ else:
         del found
 
 # Create a client.
-client = discord.Client()
-
-# Get DB
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS factoids (
-  id INTEGER PRIMARY KEY, name VARCHAR, content VARCHAR, locked INTEGER, locker VARCHAR, server VARCHAR
-);
-""")
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS configuration (
-  id INTEGER PRIMARY KEY,
-  name VARCHAR,
-  value VARCHAR,
-  server VARCHAR
-)
-""")
+# Also, use shards as appropriate.
+if global_config.get("shards", {}).get("enable_sharding"):
+    # Todo -> Auto shards
+    shards = global_config["shards"]["shard_max"]
+    my_shard = global_config["shards"]["shard_id"]
+    client = discord.Client(shard_count=int(shards), shard_id=int(my_shard))
+else:
+    client = discord.Client()
 
 # Factoid matcher compiled
-factoid_matcher = re.compile(r'(.*?) is (.*)')
-
-attrdict = type("AttrDict", (dict,), {"__getattr__": dict.__getitem__, "__setattr__": dict.__setitem__})
+factoid_matcher = re.compile(r'(\S*?) is (.*)')
 
 # Pre-load the blacklist.
 if os.path.exists("blacklist.json"):
@@ -171,11 +158,11 @@ else:
 async def on_ready():
     # Get the OAuth2 URL, or something
     if client.user.bot:
-        bot_id = args.oauth_bot_id
+        bot_id = global_config.get("client", {}).get("oauth_client_id")
         permissions = discord.Permissions.all_channel()
         oauth_url = discord.utils.oauth_url(str(bot_id), permissions=permissions)
         if bot_id is None:
-            logger.critical("You didn't set the bot ID using --oauth-bot-id. Your bot cannot be invited anywhere.")
+            logger.critical("You didn't set the bot ID in config.yml. Your bot cannot be invited anywhere.")
             sys.exit(1)
         logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
     else:
@@ -185,13 +172,13 @@ async def on_ready():
     if isinstance(client.voice, dict):
         if client.user.bot:
             logger.info("Using upstream voice module.")
-            from cmds import voice_bot as voice
+            from voice import voice_main as voice
         else:
             logger.error("Using modified discord.py without a bot account! Cannot continue.")
             sys.exit(3)
     else:
         logger.warning("Using queue-based voice module. This is not ideal.")
-        from cmds import voice_queue as voice
+        from cmds import voice_old as voice
     # print ready msg
     logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
     # make file dir
@@ -207,6 +194,11 @@ async def on_ready():
     # Set the game.
     await client.change_status(discord.Game(name="Type ?info for help!"))
 
+    if has_setproctitle:
+        setproctitle.setproctitle("NavalBot - {bot_id}".format(
+            bot_id = global_config.get("client", {}).get("oauth_client_id", "???"))
+        )
+
 
 @client.event
 async def on_message(message: discord.Message):
@@ -214,13 +206,13 @@ async def on_message(message: discord.Message):
     util.msgcount += 1
 
     if not isinstance(message.channel, discord.PrivateChannel):
-        #print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
+        # print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
         #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
         logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
         logger.info(" On channel: #{message.channel.name}".format(message=message))
 
     # Check if it matches the command prefix.
-    if message.author.name == client.user.name:
+    if message.author.id == client.user.id:
         logger.info("Not processing own message.")
         return
 
@@ -247,8 +239,8 @@ async def on_message(message: discord.Message):
 
     # Check for a valid server.
     if message.server is not None:
-        prefix = util.get_config(message.server.id, "command_prefix", "?")
-        autodelete = True if util.get_config(message.server.id, "autodelete") == "True" else False
+        prefix = await db.get_config(message.server.id, "command_prefix", "?")
+        autodelete = True if await db.get_config(message.server.id, "autodelete") == "True" else False
         if autodelete and message.content.startswith(prefix):
             await client.delete_message(message)
         logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
@@ -261,9 +253,17 @@ async def on_message(message: discord.Message):
         logger.info("Ignoring (presumably) image-only message.")
         return
 
+    # Run on_message hooks
+    for hook in cmds.message_hooks.values():
+        logger.info("Running hook {}".format(hook.__name__))
+        try:
+            await hook(client, message)
+        except StopProcessing:
+            return
+
     if message.content.startswith(prefix):
         cmd_content = message.content[len(prefix):]
-        cmd_word = cmd_content.split(" ")[0]
+        cmd_word = cmd_content.split(" ")[0].lower()
         try:
             coro = commands[cmd_word](client, message)
         except KeyError as e:
@@ -272,10 +272,7 @@ async def on_message(message: discord.Message):
         try:
             await coro
         except Exception as e:
-            if isinstance(e, discord.HTTPException):
-                pass
-            else:
-                await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
+            await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
 
 
 # ============= Built-in commands.
@@ -301,50 +298,37 @@ async def help(client: discord.Client, message: discord.Message, args: list):
     doc = '\n'.join(doc)
     await client.send_message(message.channel, doc)
 
-
+# region factoids
 async def default(client: discord.Client, message: discord.Message):
-    data = message.content[1:]
+    prefix = await db.get_config(message.server.id, "command_prefix", "?")
+    data = message.content[len(prefix):]
     # Check if it matches a factoid creation
     matches = factoid_matcher.match(data)
     if matches:
         # Set the factoid
         name = matches.groups()[0]
         fac = matches.groups()[1]
+        if not (len(name) > 0 and len(fac) > 0):
+            return
+        # Check if it's locked.
+        locked = await db.get_config(message.server.id, "fac:{}:locked".format(name), default=None)
+        if locked and locked != message.author.id:
+            await client.send_message(message.channel, ":x: Cannot edit, factoid is locked to ID `{}`.".format(locked))
+            return
         assert isinstance(fac, str)
         if fac.startswith("http") and 'youtube' not in fac:
             # download as a file
             file = sanitize(fac.split('/')[-1])
             client.loop.create_task(get_file((client, message), url=fac, name=file))
             fac = "file:{}".format(file)
-        # check if locked
-        cursor.execute("SELECT locked, locker FROM factoids "
-                       "WHERE factoids.name = ?"
-                       "AND factoids.server = ?", (name, message.server.id))
-        row = cursor.fetchone()
-        if row:
-            locked, locker = row
-            if locked and locker != message.author.id and int(message.author.id) not in cmds.RCE_IDS:
-                await client.send_message(message.channel, "Cannot change factoid `{}` locked by `{}`"
-                                          .format(name, locker))
-                return
-        cursor.execute("""INSERT OR REPLACE
-                       INTO factoids (id, name, content, server)
-                       VALUES (
-                       (SELECT id FROM factoids WHERE name = ? AND server = ?),
-                       ?, ?, ?)""", (name, message.server.id, name, fac, message.server.id))
-        db.commit()
-        await client.send_message(message.channel, "Factoid `{}` is now `{}`".format(name, fac))
+        await db.set_config(message.server.id, "fac:{}".format(name), fac)
+        await client.send_message(message.channel, ":heavy_check_mark: Factoid `{}` is now `{}`".format(name, fac))
     else:
-        # Get factoid
-        cursor.execute("SELECT (content) FROM factoids "
-                       "WHERE factoids.name = ? "
-                       "AND factoids.server = ?", (data, message.server.id))
-        rows = cursor.fetchone()
-        if not rows:
-            return
         # Load content
-        content = rows[0]
-        assert isinstance(content, str)
+        content = await db.get_config(message.server.id, "fac:{}".format(data))
+        if not content:
+            return
+        print(content)
         # Check if it's a file
         if content.startswith("file:"):
             fname = content.split("file:")[1]
@@ -357,18 +341,17 @@ async def default(client: discord.Client, message: discord.Message):
             return
         await client.send_message(message.channel, content)
 
+# endregion
 
 def main():
     init_logging()
     # Switch login method based on args.
-    if args.oauth_bot_id is not None:
-        login = (args.oauth_bot_secret,)
-    elif args.ep_email is not None:
-        login = (args.ep_email, args.ep_password)
+    use_oauth = global_config.get("client", {}).get("use_oauth", False)
+    if use_oauth:
+        login = (global_config.get("client", {}).get("oauth_bot_token", ""),)
     else:
-        logger.error("You must use one login method!")
-        sys.exit(1)
-
+        login = (global_config.get("client", {}).get("old_bot_user", "lol"),
+                 global_config.get("client", {}).get("old_bot_pw", "aaaa"))
     try:
         loop.run_until_complete(client.login(*login))
     except discord.errors.HTTPException as e:

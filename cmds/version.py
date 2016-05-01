@@ -25,11 +25,10 @@ import discord
 
 # =============== Commands
 import cmds
-from bot import VERSION, VERSIONT
 
 
 def read_version(data):
-    regexp = re.compile(r"^VERSION\W*=\W*([\d.abrc]+)")
+    regexp = re.compile(r"^\W*?VERSION\W*=\W*([\d.abrc]+)")
 
     for line in data:
         match = regexp.match(line)
@@ -44,6 +43,13 @@ async def version(client: discord.Client, message: discord.Message):
     """
     Checks for the latest stable version of NavalBot.
     """
+    # region VERSION
+    VERSION = "4.1.1"
+    VERSIONT = tuple(int(i) for i in VERSION.split("."))
+    # endregion
+
+    # Version info is defined above so it can be reloaded as required.
+
     await client.send_message(
         message.channel,
         "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
@@ -51,10 +57,11 @@ async def version(client: discord.Client, message: discord.Message):
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
-        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/stable/bot.py")
+        s = await sess.get("https://raw.githubusercontent.com/SunDwarf/NavalBot/develop/cmds/version.py")
         assert isinstance(s, aiohttp.ClientResponse)
         data = await s.read()
         data = data.decode().split('\n')
+
     version = read_version(data)
     if not version:
         await client.send_message(message.channel, ":grey_exclamation: Could not download version information.")

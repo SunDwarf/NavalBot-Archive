@@ -20,30 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+# Chain file to import the other commands.
+from . import misc
+from . import playback
+from . import queue
 
-commands = {}
-message_hooks = {}
-
-
-def command(*names):
-    """
-    Register a new command.
-    """
-
-    def __decorator(func):
-        for name in names:
-            commands[name] = func
-        # Update __methods.
-        if hasattr(func, "__methods"):
-            for k, v in func.__methods.items():
-                setattr(func, k, v)
-        return func
-
-    return __decorator
-
-
-def message_hook(func):
-    """
-    Registers an on_message hook.
-    """
-    message_hooks[func.__name__] = func

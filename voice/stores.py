@@ -3,7 +3,6 @@
 
 This file is part of NavalBot.
 Copyright (C) 2016 Isaac Dickinson
-Copyright (C) 2016 Nils Theres
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,29 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-commands = {}
-message_hooks = {}
+# Declare variables, inside try to prevent overwrites on reload.
+try:
+    voice_params
+except NameError:
+    voice_params = {}
+
+try:
+    voice_locks
+except NameError:
+    voice_locks = {}
 
 
-def command(*names):
-    """
-    Register a new command.
-    """
-
-    def __decorator(func):
-        for name in names:
-            commands[name] = func
-        # Update __methods.
-        if hasattr(func, "__methods"):
-            for k, v in func.__methods.items():
-                setattr(func, k, v)
-        return func
-
-    return __decorator
-
-
-def message_hook(func):
-    """
-    Registers an on_message hook.
-    """
-    message_hooks[func.__name__] = func

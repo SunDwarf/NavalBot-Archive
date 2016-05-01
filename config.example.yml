@@ -1,0 +1,34 @@
+# Client info.
+client:
+  # Use OAuth2?
+  use_oauth: true
+  # Bot token
+  oauth_bot_token: aaaa
+  # Client ID
+  oauth_client_id: 1234
+
+  # If not, use these values.
+  old_bot_username: quqwbdn
+  old_bot_pw: hunter2
+
+# Owner.
+RCE_ID: 0
+
+# Define redis data.
+redis:
+  ip: 127.0.0.2
+  port: 6379
+  # Uncomment and set if you have a password.
+  #password: hunter2
+  # Uncomment and set if you want a DB that isn't 0.
+  #db: 0
+
+# Shards.
+shards:
+  # Should we enable sharding?
+  enable_sharding: false
+  # What is our shard ID?
+  shard_id: 0
+  # What is the maximum number of shards?
+  # This MUST be the same accross all bots.
+  shard_max: 0

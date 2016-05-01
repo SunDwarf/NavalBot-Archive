@@ -22,25 +22,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # Owner commands.
+import asyncio
+import importlib
+import logging
+import re
 import sys
 
 import discord
-import importlib
-import subprocess
-import asyncio
-import re
 
-# RCE ids
 import cmds
 import util
 
-getter = re.compile(r'`{1,3}(.*?)`{1,3}')
+getter = re.compile(r'`(?!`)(.*?)`')
+multi = re.compile(r'```(.*?)```')
 
 loop = asyncio.get_event_loop()
 
+logger = logging.getLogger("NavalBot")
+
 
 @cmds.command("reload")
-@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
+@util.owner
 @util.enforce_args(1, "You must pick a file to reload.")
 async def reload_f(client: discord.Client, message: discord.Message, args: list):
     """
@@ -48,8 +50,11 @@ async def reload_f(client: discord.Client, message: discord.Message, args: list)
     """
     mod = args[0]
     if mod not in sys.modules:
-        await client.send_message(message.channel, ":x: Module is not loaded.")
-        return
+        if 'cmds.' + mod not in sys.modules:
+            await client.send_message(message.channel, ":x: Module is not loaded.")
+            return
+        else:
+            mod = 'cmds.' + mod
     # Reload using importlib.
     new_mod = importlib.reload(sys.modules[mod])
     # Update sys.modules
@@ -57,22 +62,78 @@ async def reload_f(client: discord.Client, message: discord.Message, args: list)
     await client.send_message(message.channel, ":heavy_check_mark: Reloaded module.")
 
 
-@cmds.command("sql")
-@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
-async def sql(client: discord.Client, message: discord.Message):
-    sql_cmd = getter.findall(message.content)
-    if not sql_cmd:
+@cmds.command("reloadall")
+@util.owner
+async def reload_all(client: discord.Client, message: discord.Message):
+    """
+    Reloads all modules.
+    """
+    # Reload util
+    importlib.reload(sys.modules["util"])
+    for mod in sys.modules:
+        if mod.startswith("cmds."):
+            # Reload it.
+            logger.info("Reloading module: {}".format(mod))
+            importlib.reload(sys.modules[mod])
+            logger.info("Reloaded module.")
+
+    await client.send_message(message.channel, ":heavy_check_mark: Reloaded all.")
+
+
+@cmds.command("reloadvoice")
+@util.owner
+async def reload_voice(client: discord.Client, message: discord.Message):
+    """
+    Reloads new voice.
+    """
+    if not client.user.bot:
         return
-    util.cursor.execute(sql_cmd[0])
-    await client.send_message(message.channel, "`{}`".format(util.cursor.fetchall()))
+
+    for mod in sys.modules:
+        if mod.startswith("voice."):
+            # Reload it.
+            logger.info("Reloading module: {}".format(mod))
+            importlib.reload(sys.modules[mod])
+            logger.info("Reloaded module.")
+
+    await client.send_message(message.channel, ":heavy_check_mark: Reloaded voice.")
 
 
 @cmds.command("py")
-@util.only(util.get_config(None, "RCE_ID", default=0, type_=int))
+@util.owner
 async def py(client: discord.Client, message: discord.Message):
-    match = getter.findall(message.content)
-    if not match:
+    match_single = getter.findall(message.content)
+    match_multi = multi.findall(message.content)
+    if not match_single and not match_multi:
         return
     else:
-        result = eval(match[0])
-        await client.send_message(message.channel, "```{}```".format(result))
+        if not match_multi:
+            result = eval(match_single[0])
+            await client.send_message(message.channel, "```{}```".format(result))
+        else:
+            def r(v):
+                loop.create_task(client.send_message(message.channel, "```{}```".format(v)))
+            exec(match_multi[0])
+
+
+@cmds.command("rget")
+@util.owner
+async def redis_get(client: discord.Client, message: discord.Message):
+    key = getter.findall(message.content)
+    if not key:
+        return
+    pool = await util.get_pool()
+    async with pool.get() as conn:
+        k = await conn.get(key[0])
+        if k:
+            k = k.decode()
+        await client.send_message(message.channel, "`{}`".format(k))
+
+
+@cmds.command("_finfo")
+@util.owner
+@util.enforce_args(2)
+async def finfo(client: discord.Client, message: discord.Message, args: list):
+    mod = sys.modules[args[0]]
+    f = getattr(mod, args[1])
+    await client.send_message(message.channel, "`{}`".format(await f.get_roles(message.server.id)))

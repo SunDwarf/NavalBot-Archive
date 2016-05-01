@@ -23,6 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import json
 import os
 
+import asyncio
+
+import db
 import discord
 
 import cmds
@@ -52,7 +55,7 @@ async def mute(client: discord.Client, message: discord.Message):
             await client.send_message('Not enough permissions to mute user {}'.format(message.mentions[0].name))
             raise CommandError('Not enough permissions to mute user : {}'.format(message.mentions[0].name))
     else:
-        prefix = util.get_config(message.server.id, "command_prefix", "?")
+        prefix = await db.get_config(message.server.id, "command_prefix", "?")
         await client.send_message(message.channel, "Usage: {}mute @UserName".format(prefix))
 
 
@@ -77,7 +80,7 @@ async def unmute(client: discord.Client, message: discord.Message):
             await client.send_message('Not enough permissions to unmute user {}'.format(message.mentions[0].name))
             raise CommandError('Not enough permissions to unmute user : {}'.format(message.mentions[0].name))
     else:
-        prefix = util.get_config(message.server.id, "command_prefix", "?")
+        prefix = await db.get_config(message.server.id, "command_prefix", "?")
         await client.send_message(message.channel, "Usage: {}unmute @UserName".format(prefix))
 
 
@@ -121,7 +124,7 @@ async def kick(client: discord.Client, message: discord.Message):
 
 @cmds.command("delete")
 @util.with_permission("Admin", "Bot Commander")
-async def delete(client: discord.Client, message: discord.Message, count=None):
+async def delete(client: discord.Client, message: discord.Message):
     """
     Prunes a certain number of messages from the server.
     """
@@ -129,12 +132,19 @@ async def delete(client: discord.Client, message: discord.Message, count=None):
         count = int(' '.join(message.content.split(" ")[1:]))
     except ValueError:
         await client.send_message(message.channel, "This is not a number")
+        return
+
+    if count is None:
+        return
     async for msg in client.logs_from(message.channel, count + 1):
+        await asyncio.sleep(0.25)
         await client.delete_message(msg)
     if count == 1:
-        await client.send_message(message.channel, '**{} message deleted by {}**💣'.format(count, message.author))
+        await client.send_message(message.channel, ':wastebasket: **{} message deleted by {}**'
+                                  .format(count, message.author))
     else:
-        await client.send_message(message.channel, '**{} messages deleted by {}** 💣'.format(count, message.author))
+        await client.send_message(message.channel, ':wastebasket: **{} messages deleted by {}**'
+                                  .format(count, message.author))
 
 
 @cmds.command("invite")
@@ -145,10 +155,11 @@ async def invite(client: discord.Client, message: discord.Message):
 
     if client.user.bot:
         await client.send_message(":X: Cannot accept invite as a bot account.")
+        return
     try:
         invite = message.content.split(" ")[1]
     except IndexError:
-        prefix = util.get_config(message.server.id, "command_prefix", "?")
+        prefix = await db.get_config(message.server.id, "command_prefix", "?")
         await client.send_message(message.channel, "Usage: {}invite [link]".format(prefix))
         return
 
@@ -157,7 +168,7 @@ async def invite(client: discord.Client, message: discord.Message):
 
 
 @cmds.command("banned")
-@util.only(cmds.RCE_IDS)
+@util.owner
 async def banned(client: discord.Client, message: discord.Message):
     """
     Get a list of all currently banned users on a server.
@@ -212,7 +223,7 @@ async def unblacklist(client: discord.Client, message: discord.Message, _: list)
 
 
 @cmds.command("broadcast")
-@util.only(cmds.RCE_IDS)
+@util.owner
 async def broadcast(client: discord.Client, message: discord.Message):
     """
     Sends a message to all servers the bot is connected to.
