@@ -19,17 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import db
 import discord
 
 
 async def find_voice_channel(server: discord.Server):
-    # Search for a voice channel called 'Music' or 'NavalBot'.
+    # Search for a voice channel with the name specified in the config, and then Music/NavalBot as a fallback.
+    cfg_chan = await db.get_config(server.id, "voice_channel", default="")
     for channel in server.channels:
         assert isinstance(channel, discord.Channel)
         if not channel.type == discord.ChannelType.voice:
             continue
         # Check the name.
-        if channel.name.lower() in ['music', 'navalbot']:
+        if channel.name.lower() in [cfg_chan.lower(), 'music', 'navalbot']:
             chan = channel
             break
     else:
