@@ -25,13 +25,14 @@ commands = {}
 message_hooks = {}
 
 
-def command(name):
+def command(*names):
     """
     Register a new command.
     """
 
     def __decorator(func):
-        commands[name] = func
+        for name in names:
+            commands[name] = func
         # Update __methods.
         if hasattr(func, "__methods"):
             for k, v in func.__methods.items():
