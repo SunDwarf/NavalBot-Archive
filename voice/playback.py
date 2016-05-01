@@ -333,7 +333,9 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
 
     # Naive implementation of preventing naughtystuff
     if re.match(r'http[s]://', vidname):
-        if await db.get_config(message.server.id, "limit_urls", default=True, type_=bool):
+        limit = await db.get_config(message.server.id, "limit_urls", default=True, type_=bool)
+        limit = True if limit == "True" else False
+        if limit:
             # Only allow youtube/soundcloud links
             if not re.match(r'.*?(youtube.com|youtu.be|soundcloud.com).*?', vidname):
                 await client.send_message(
