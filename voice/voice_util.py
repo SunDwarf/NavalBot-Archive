@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import db
 import discord
 
+import util
+from .stores import voice_params
 
 async def find_voice_channel(server: discord.Server):
     # Search for a voice channel with the name specified in the config, and then Music/NavalBot as a fallback.
@@ -37,3 +39,35 @@ async def find_voice_channel(server: discord.Server):
     else:
         return None
     return chan
+
+
+def with_opus(func):
+    """
+    Ensures Opus is loaded before running the function.
+    """
+    async def __decorator(client: discord.Client, message: discord.Message):
+        if not discord.opus.is_loaded():
+            await client.send_message(message.channel, content=":x: Cannot load voice module.")
+            return
+        else:
+            await func(client, message)
+
+    __decorator = util.prov_dec_func(func, __decorator)
+
+    return __decorator
+
+
+def with_existing_server(func):
+    """
+    Ensures there's a server instance on the function.
+    """
+    async def __decorator(client: discord.Client, message: discord.Message):
+        if message.server.id not in voice_params:
+            await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+            return
+        else:
+            await func(client, message)
+
+    __decorator = util.prov_dec_func(func, __decorator)
+
+    return __decorator
