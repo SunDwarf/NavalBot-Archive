@@ -25,6 +25,7 @@ import functools
 import logging
 from math import trunc
 
+import re
 import youtube_dl
 
 import db
@@ -326,6 +327,17 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     if 'list' in vidname or 'playlist' in vidname:
         await client.send_message(message.channel, ":warning: If this is a playlist, it may take a long time to "
                                                    "download.")
+
+    # Naive implementation of preventing naughtystuff
+    if re.match(r'http[s]://', vidname):
+        if await db.get_config(message.server.id, "limit_urls", default=True, type_=bool):
+            # Only allow youtube/soundcloud links
+            if not re.match(r'(youtube.com|youtu.be|soundcloud.com)', vidname):
+                await client.send_message(
+                    message.channel, ":x: This link is not in the link whitelist."
+                                     "To turn this off, use `{}setcfg limit_urls False`."
+                                     .format(await db.get_config(message.server.id, "command_prefix", default="?")))
+                return
 
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
