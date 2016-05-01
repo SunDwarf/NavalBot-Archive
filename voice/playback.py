@@ -35,7 +35,7 @@ from cmds import command
 from voice.stores import voice_params, voice_locks
 
 # Get loop
-from voice.voice_util import find_voice_channel
+from voice.voice_util import find_voice_channel, with_existing_server, with_opus
 
 loop = asyncio.get_event_loop()
 
@@ -164,16 +164,10 @@ async def _oauth2_play_youtube(
 
 @command("np")
 @command("nowplaying")
+@with_opus
+@with_existing_server
 async def np(client: discord.Client, message: discord.Message):
     # Get the current player instance.
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
     playing = voice_params[message.server.id].get("playing")
     if not playing:
         await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
@@ -201,20 +195,13 @@ async def np(client: discord.Client, message: discord.Message):
 
 @command("stop")
 @util.with_permission("Bot Commander", "Voice", "Admin")
+@with_opus
+@with_existing_server
 async def stop_vid(client: discord.Client, message: discord.Message):
     """
     Stops the current track being played on the server.
     You must have the Voice or Bot Commander role to use this command.
     """
-    # Get the current player instance.
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
     playing = voice_params[message.server.id].get("playing")
     if not playing:
         await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
@@ -232,19 +219,12 @@ async def stop_vid(client: discord.Client, message: discord.Message):
 
 
 @command("pause")
+@with_opus
+@with_existing_server
 async def pause_vid(client: discord.Client, message: discord.Message):
     """
     Pauses the currently playing track. Use ?resume to continue playing.
     """
-    # Get the current player instance.
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
     playing = voice_params[message.server.id].get("playing")
     if not playing:
         await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
@@ -266,18 +246,12 @@ async def pause_vid(client: discord.Client, message: discord.Message):
 
 
 @command("resume")
+@with_opus
+@with_existing_server
 async def resume(client: discord.Client, message: discord.Message):
     """
     Resumes a paused track.
     """
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
     playing = voice_params[message.server.id].get("playing")
     if not playing:
         await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
@@ -297,9 +271,8 @@ async def resume(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, ":heavy_check_mark: Resumed playback.")
 
 
-@command("play")
-@command("playyt")
-@command("playyoutube")
+@command("play", "playyt", "playyoutube")
+@with_opus
 @util.enforce_args(1, ":x: You must pass a video!")
 async def play_youtube(client: discord.Client, message: discord.Message, args: list):
     """
@@ -309,10 +282,6 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     Use ?stop or ?skip to skip a song, ?queue to see the current queue of songs, ?np to see the currently playing
     track, and ?reset to fix the queue.
     """
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
     voice_channel = await find_voice_channel(message.server)
     if not voice_channel:
         await client.send_message(
