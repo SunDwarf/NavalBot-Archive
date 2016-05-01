@@ -99,16 +99,6 @@ async def reload_voice(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, ":heavy_check_mark: Reloaded voice.")
 
 
-@cmds.command("sql")
-@util.owner
-async def sql(client: discord.Client, message: discord.Message):
-    sql_cmd = getter.findall(message.content)
-    if not sql_cmd:
-        return
-    util.cursor.execute(sql_cmd[0])
-    await client.send_message(message.channel, "`{}`".format(util.cursor.fetchall()))
-
-
 @cmds.command("py")
 @util.owner
 async def py(client: discord.Client, message: discord.Message):
