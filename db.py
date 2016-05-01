@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 # This handles aioredis DB stuff.
 
-import aioredis
 import util
 
 async def get_config(server_id: str, key: str, default=None, type_: type=str) -> str:
