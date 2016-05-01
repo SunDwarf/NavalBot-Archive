@@ -57,6 +57,11 @@ importlib.import_module("cmds.ndc")
 importlib.import_module("cmds.version")
 importlib.import_module("cmds.factoids")
 
+try:
+    importlib.import_module("cmds.weebshit")
+except (ImportError, NameError):
+    pass
+
 # =============== End commands
 
 loop = asyncio.get_event_loop()
@@ -250,6 +255,7 @@ async def on_message(message: discord.Message):
 
     # Run on_message hooks
     for hook in cmds.message_hooks.values():
+        logger.info("Running hook {}".format(hook.__name__))
         try:
             await hook(client, message)
         except StopProcessing:
