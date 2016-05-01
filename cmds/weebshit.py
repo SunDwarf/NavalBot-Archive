@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 # WEEEEEEEB
 import aiohttp
 
+import db
 import discord
 
 from cmds import message_hook, command
@@ -53,6 +54,10 @@ async def on_chinese_cartoon(client: discord.Client, message: discord.Message):
     """
     Runs if the message begins with { and ends with }.
     """
+
+    if await db.get_config(message.server.id, "allow_anime", default=1, type_=int) == 0:
+        return
+
     assert isinstance(message.content, str)
     if not (message.content.startswith("{") and message.content.endswith("}")):
         return
