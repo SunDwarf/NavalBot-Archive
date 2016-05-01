@@ -141,7 +141,7 @@ else:
     client = discord.Client()
 
 # Factoid matcher compiled
-factoid_matcher = re.compile(r'(\S*?) is (\S*)')
+factoid_matcher = re.compile(r'(\S*?) is (.*)')
 
 # Pre-load the blacklist.
 if os.path.exists("blacklist.json"):
