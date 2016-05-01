@@ -31,24 +31,16 @@ import util
 from cmds import command
 
 from voice.stores import voice_params
-from voice.voice_util import find_voice_channel
+from voice.voice_util import find_voice_channel, with_opus, with_existing_server
 
 
 @command("again")
+@with_opus
+@with_existing_server
 async def again(client: discord.Client, message: discord.Message):
     """
     Adds this item to the queue again.
     """
-
-    # Standard checks.
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
     # Get the item from the queue.
     i = voice_params[message.server.id].get("curr_coro")
     if not i:
@@ -71,18 +63,12 @@ async def again(client: discord.Client, message: discord.Message):
 
 @command("shuffle")
 @util.with_permission("Bot Commander", "Voice", "Admin")
+@with_opus
+@with_existing_server
 async def shuffle(client: discord.Client, message: discord.Message):
     """
     Shuffles the queue.
     """
-    # Standard checks.
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
 
     queue = voice_params[message.server.id].get("queue")
     if not queue:
@@ -114,17 +100,10 @@ async def shuffle(client: discord.Client, message: discord.Message):
 
 @command("queued")
 @command("queue")
+@with_opus
+@with_existing_server
 async def get_queued_vids(client: discord.Client, message: discord.Message):
     # STILL HORRIBLE
-
-    # Get the current player instance.
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
 
     queue = voice_params[message.server.id].get('queue', [])
     if queue:
@@ -193,18 +172,12 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
 
 @command("skip")
 @util.with_permission("Bot Commander", "Voice", "Admin")
+@with_opus
+@with_existing_server
 async def skip(client: discord.Client, message: discord.Message):
     """
     Skips ahead one or more tracks.
     """
-    # Get the current player instance.
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
 
     playing = voice_params[message.server.id].get("playing")
     if not playing:
@@ -281,18 +254,12 @@ async def skip(client: discord.Client, message: discord.Message):
 
 
 @command("voteskip")
+@with_opus
+@with_existing_server
 async def voteskip(client: discord.Client, message: discord.Message):
     """
     Starts a vote to skip the currently playing track.
     """
-    # Get the current player instance.
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
 
     playing = voice_params[message.server.id].get("playing")
     if not playing:
@@ -362,17 +329,12 @@ async def voteskip(client: discord.Client, message: discord.Message):
 
 @command("move")
 @util.enforce_args(2, error_msg=":x: You must provide two numbers: The original position, and the new position.")
+@with_opus
+@with_existing_server
 async def move(client: discord.Client, message: discord.Message, args: list):
     """
     Moves a song in the queue from position <x> to position <y>.
     """
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
 
     queue = voice_params[message.server.id].get("queue")
     if not queue:
@@ -420,19 +382,13 @@ async def move(client: discord.Client, message: discord.Message, args: list):
 
 @command("remove")
 @util.with_permission("Bot Commander", "Voice", "Admin")
+@with_opus
+@with_existing_server
 @util.enforce_args(1, error_msg=":x: You must give an index to remove.")
 async def remove_vid(client: discord.Client, message: discord.Message, args: list):
     """
     Removes a video at a specific index from the queue.
     """
-    if not discord.opus.is_loaded():
-        await client.send_message(message.channel, content=":x: Cannot load voice module.")
-        return
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
     queue = voice_params[message.server.id].get("queue")
     if not queue:
         # ???
