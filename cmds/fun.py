@@ -350,7 +350,7 @@ async def aesthetic(client: discord.Client, message: discord.Message, args: list
     final_c = ""
     pre_c = ' '.join(args)
     for char in pre_c:
-        if not ord(char) in range(65, 123):
+        if not ord(char) in range(33, 127):
             final_c += char
             continue
         # Add 65248 to the ord() value to get the fullwidth counterpart.
