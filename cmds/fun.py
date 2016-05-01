@@ -22,22 +22,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 import asyncio
+from concurrent.futures.process import BrokenProcessPool
 import datetime
 import functools
 import os
 import random
-from concurrent.futures.process import BrokenProcessPool
 
+import db
 import discord
-import praw
 import psutil
 import pyowm
 import urbandict
+import praw
 from google import search
 from googleapiclient.discovery import build
 
 import cmds
-import db
 import util
 
 loop = asyncio.get_event_loop()
@@ -173,7 +173,7 @@ async def stats(client: discord.Client, message: discord.Message):
         "Currently running on `{}` server(s). Processed `{}` messages since startup.\n"
         "Connected to `{}` voice channels, with `{}` streams currently playing.\n"
         "Using `{}MB` of memory."
-        .format(server_count, msgcount, voice_clients, streams, used_memory))
+            .format(server_count, msgcount, voice_clients, streams, used_memory))
 
 
 @cmds.command("searchyt")
@@ -339,3 +339,20 @@ async def subreddit(client: discord.Client, message: discord.Message, args: list
         await client.send_message(message.channel, ":x: Subreddit either doesn't exist or is NSFW.")
         return
     await client.send_message(message.channel, sr_link)
+
+
+@cmds.command("fullwidth")
+@util.enforce_args(1, error_msg=":x: You must provide at least one word to fullwidth.")
+async def aesthetic(client: discord.Client, message: discord.Message, args: list):
+    """
+    ﻿Ｆｕｌｌｗｉｄｔｈｓ  ｓｏｍｅ  ｔｅｘｔ．
+    """
+    final_c = ""
+    pre_c = ' '.join(args)
+    for char in pre_c:
+        if not ord(char) in range(65, 123):
+            final_c += char
+            continue
+        # Add 65248 to the ord() value to get the fullwidth counterpart.
+        final_c += chr(ord(char) + 65248)
+    await client.send_message(message.channel, final_c)
