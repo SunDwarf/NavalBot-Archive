@@ -67,7 +67,6 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
         except Exception:
             # Tried to send on a closed web socket. We can safely ignore this
             pass
-        del client.voice[channel.server.id]
         new_vc = await client.join_voice_channel(channel)
         return new_vc
     else:
@@ -388,13 +387,12 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
             await client.send_message(message.channel, ":x: Timed out trying to connect to server. Try ?reset")
             return
     else:
-        voice_client = client.voice[message.server.id]
+        voice_client = client.voice_client_in(message.server)
         assert isinstance(voice_client, discord.VoiceClient)
         if not voice_client.is_connected():
             # Re-create the voice client.
             try:
                 voice_client = await client.join_voice_channel(channel=voice_channel)
-                client.voice[message.server.id] = voice_client
             except discord.ClientException:
                 await client.send_message(message.channel, ":x: Error happened on connecting to voice.")
                 return

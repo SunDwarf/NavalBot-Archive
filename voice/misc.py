@@ -63,7 +63,6 @@ async def reset_voice(client: discord.Client, message: discord.Message):
         vc = message.server.voice_client
         if hasattr(vc, 'ws'):
             if vc.ws.open and vc.is_connected():
-                await client.voice[message.server.id].disconnect()
-        del client.voice[message.server.id]
+                await vc.disconnect()
 
     await client.send_message(message.channel, ":heavy_check_mark: Reset voice parameters.")

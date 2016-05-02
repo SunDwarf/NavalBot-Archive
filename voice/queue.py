@@ -273,7 +273,7 @@ async def voteskip(client: discord.Client, message: discord.Message):
         return
 
     # Get the client
-    voiceclient = client.voice[message.server.id]
+    voiceclient = client.voice_client_in(message.server)
 
     # Calculate the required voteskips.
     channel = voiceclient.channel

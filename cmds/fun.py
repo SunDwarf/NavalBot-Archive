@@ -155,10 +155,7 @@ async def stats(client: discord.Client, message: discord.Message):
     """
     server_count = len(client.servers)
     msgcount = util.msgcount
-    if isinstance(client.voice, dict):
-        voice_clients = len(client.voice)
-    else:
-        voice_clients = 1 if client.is_voice_connected() else 0
+    voice_clients = len(client.voice_clients)
     streams = sum([1 for proc in psutil.process_iter() if proc.name() == "ffmpeg"])
     # Memory stats
     used_memory = psutil.Process().memory_info().rss
