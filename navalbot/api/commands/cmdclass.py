@@ -23,6 +23,7 @@ import inspect, shlex
 
 import discord
 
+from navalbot.api import util
 from navalbot.api.util import has_permissions_with_override
 from navalbot import exceptions
 
@@ -72,8 +73,10 @@ class Command(object):
                 self._roles = set(roles)
 
         # ID restriction
-        if kwargs.get("ids"):
-            self._ids = kwargs.get("ids")
+        if kwargs.get("owner"):
+            self._only_owner = kwargs["owner"]
+        else:
+            self._only_owner = False
 
     def help(self):
         """
@@ -86,6 +89,15 @@ class Command(object):
         Invoke the function.
         """
         # Do the checks before running the coroutine.
+        # Owner check.
+
+        if self._only_owner:
+            owner = util.get_global_config("RCE_ID", default=0, type_=int)
+            u_id = int(message.author.id)
+            # Check if it is in the ids specified.
+            if not u_id == owner:
+                await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
+                return
         # Role check.
 
         # Get the user's roles.
