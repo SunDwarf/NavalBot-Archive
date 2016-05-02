@@ -24,6 +24,7 @@ import shlex
 
 import discord
 
+from api import util
 from navalbot.api.util import has_permissions_with_override, _get_overrides, prov_dec_func, get_global_config
 
 
