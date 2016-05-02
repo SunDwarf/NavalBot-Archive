@@ -150,7 +150,7 @@ class Command(object):
                                 args.append(False if arg == "False" else True)
                             else:
                                 try:
-                                    args.append(type(arg))
+                                    args.append(ann(arg))
                                 except ValueError:
                                     await client.send_message(message.channel, ":x: One of your arguments was the "
                                                                                "wrong type.")
