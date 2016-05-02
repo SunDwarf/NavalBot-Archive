@@ -22,10 +22,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import os
+
 import discord
+import re
 
 from navalbot.api.commands import command, commands
 from navalbot.api import decorators, db
+from navalbot.api.util import sanitize, get_file
+
+
+# Factoid matcher compiled
+factoid_matcher = re.compile(r'(\S*?) is (.*)')
 
 
 @command("help")

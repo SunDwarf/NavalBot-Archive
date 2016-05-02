@@ -28,13 +28,11 @@ import importlib
 import json
 import logging
 import os
-import re
 import sys
 import time
 
 import discord
 # =============== Commands
-import cmds
 from navalbot.api import util, db
 from navalbot.api.commands import commands
 from navalbot import builtins
@@ -66,9 +64,6 @@ def init_logging():
 logger = logging.getLogger("NavalBot")
 logger.setLevel(logging.DEBUG)
 
-
-# Factoid matcher compiled
-factoid_matcher = re.compile(r'(\S*?) is (.*)')
 
 # Pre-load the blacklist.
 if os.path.exists("blacklist.json"):
@@ -122,8 +117,6 @@ def run(client, config):
         else:
             logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
 
-        # Change voice module as applicable.
-        from voice import voice_main as voice
         # print ready msg
         logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
         # make file dir
@@ -131,10 +124,6 @@ def run(client, config):
             os.makedirs(os.path.join(os.getcwd(), "files"))
         except FileExistsError:
             pass
-        # load the voice handler
-        if hasattr(voice, "play_music_from_queue"):
-            logger.warning("Using old queue-based music player!")
-            loop.create_task(voice.play_music_from_queue())
 
         # Set the game.
         await client.change_status(discord.Game(name="Type ?info for help!"))
@@ -193,12 +182,12 @@ def run(client, config):
             return
 
         # Run on_message hooks
-        for hook in cmds.message_hooks.values():
-            logger.info("Running hook {}".format(hook.__name__))
-            try:
-                await hook(client, message)
-            except StopProcessing:
-                return
+        #for hook in cmds.message_hooks.values():
+        #    logger.info("Running hook {}".format(hook.__name__))
+        #    try:
+        #        await hook(client, message)
+        #    except StopProcessing:
+        #        return
 
         if message.content.startswith(prefix):
             cmd_content = message.content[len(prefix):]
@@ -207,7 +196,7 @@ def run(client, config):
                 coro = commands[cmd_word](client, message)
             except KeyError as e:
                 logger.warning("-> No such command: " + str(e))
-                coro = default(client=client, message=message)
+                coro = builtins.default(client=client, message=message)
             try:
                 await coro
             except Exception as e:
