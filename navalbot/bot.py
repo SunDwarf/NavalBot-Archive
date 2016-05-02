@@ -35,7 +35,7 @@ import traceback
 import discord
 # =============== Commands
 from navalbot.api import util, db
-from navalbot.api.commands import commands
+from navalbot.api.commands import commands, Command
 from navalbot import builtins
 
 # =============== End commands
@@ -210,12 +210,15 @@ def run(client, config):
             cmd_content = message.content[len(prefix):]
             cmd_word = cmd_content.split(" ")[0].lower()
             try:
-                coro = commands[cmd_word](client, message)
+                coro = commands[cmd_word]
             except KeyError as e:
                 logger.warning("-> No such command: " + str(e))
                 coro = builtins.default(client=client, message=message)
             try:
-                await coro
+                if isinstance(coro, Command):
+                    await coro.invoke(client, message)
+                else:
+                    await coro(client, message)
             except Exception as e:
                 await client.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
 

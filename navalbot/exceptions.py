@@ -30,3 +30,7 @@ class CommandError(Exception):
 
 class StopProcessing(Exception):
     pass
+
+
+class BadCommandException(Exception):
+    pass
