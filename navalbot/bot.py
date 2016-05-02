@@ -94,7 +94,7 @@ def load_plugins(client):
             modules[mod.__name__] = mod
             logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
         except Exception as e:
-            logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(mod.__name__))
+            logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
             traceback.print_exc()
             return
 
