@@ -48,11 +48,16 @@ async def help(client: discord.Client, message: discord.Message, args: list):
         await client.send_message(message.channel, ":no_entry: That function does not exist!")
         return
 
-    # Format __doc__
-    if not func.__doc__:
-        await client.send_message(message.channel, ":x: This function doesn't have help.")
-        return
-    doc = func.__doc__.split("\n")
+    if hasattr(func, "help"):
+        help = func.help()
+    else:
+        # Format __doc__
+        if not func.__doc__:
+            await client.send_message(message.channel, ":x: This function doesn't have help.")
+            return
+        help = func.__doc__
+
+    doc = help.split("\n")
     doc = [d.lstrip() for d in doc if d.lstrip()]
     doc = '\n'.join(doc)
     await client.send_message(message.channel, doc)
