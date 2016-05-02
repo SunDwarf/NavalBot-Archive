@@ -45,3 +45,18 @@ def oldcommand(*names):
         return func
 
     return __decorator
+
+
+def command(*names, **kwargs):
+    """
+    Register a new command.
+    """
+    def __decorator(func):
+        # Create the class.
+        cls = Command(func, *names, **kwargs)
+        for name in names:
+            commands[name] = cls
+
+        return cls
+
+    return __decorator
