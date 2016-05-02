@@ -32,11 +32,9 @@ import sys
 import time
 
 import discord
-
-import db
 # =============== Commands
 import cmds
-from navalbot.api import util
+from navalbot.api import util, db
 from cmds import commands
 
 from exceptions import StopProcessing

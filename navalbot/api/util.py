@@ -24,20 +24,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import asyncio
 import datetime
 import os
-import shlex
+import shutil
 import time
 from concurrent import futures
 from math import floor
 
 import aiohttp
 import aioredis
-import shutil
-
+import discord
 import yaml
 
-import discord
-
-import db
+from navalbot.api import db
 
 startup = datetime.datetime.fromtimestamp(time.time())
 
