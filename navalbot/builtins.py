@@ -27,7 +27,7 @@ import os
 import discord
 import re
 
-from navalbot.api.commands import command, commands
+from navalbot.api.commands import oldcommand, commands
 from navalbot.api import decorators, db
 from navalbot.api.util import sanitize, get_file
 
@@ -36,7 +36,7 @@ from navalbot.api.util import sanitize, get_file
 factoid_matcher = re.compile(r'(\S*?) is (.*)')
 
 
-@command("help")
+@oldcommand("help")
 @decorators.enforce_args(1, error_msg=":x: You must provide a command for help!")
 async def help(client: discord.Client, message: discord.Message, args: list):
     """
