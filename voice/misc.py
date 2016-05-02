@@ -59,8 +59,8 @@ async def reset_voice(client: discord.Client, message: discord.Message):
         # Set the dictionary again.
         del voice_params[message.server.id]
     # Disconnect from voice
-    if message.server.id in client.voice:
-        vc = client.voice[message.server.id]
+    if client.is_voice_connected(message.server):
+        vc = message.server.voice_client
         if hasattr(vc, 'ws'):
             if vc.ws.open and vc.is_connected():
                 await client.voice[message.server.id].disconnect()
