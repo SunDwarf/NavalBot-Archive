@@ -76,10 +76,12 @@ def load_plugins(client):
         return
     # Loop over things in plugins/
     for entry in os.scandir("plugins/"):
+        if entry.name == "__pycache__" or entry.name == "__init__.py":
+            continue
         if entry.name.endswith(".py"):
             name = entry.name.split(".")[0]
         else:
-            if os.path.isdir(entry.path):
+            if os.path.isdir(entry.path) or os.path.islink(entry.path):
                 name = entry.name
             else:
                 continue
@@ -90,30 +92,28 @@ def load_plugins(client):
             if hasattr(mod, "load_plugin"):
                 mod.load_plugin(client)
             modules[mod.__name__] = mod
-            logging.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__path__))
+            logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
         except Exception as e:
-            logger.error("Error upon loading plugin `{}`! Cannot continue loading.")
+            logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(mod.__name__))
             traceback.print_exc()
-            sys.exit(1)
+            return
 
 # ============= Built-in commands.
+
+# Pre-load the blacklist.
+if os.path.exists("blacklist.json"):
+    with open("blacklist.json") as f:
+        bl = json.load(f)
+        bl_mtime = os.stat(f.fileno()).st_mtime
+else:
+    bl = []
+    bl_mtime = time.time()
 
 
 def run(client, config):
     """
     The main running point.
     """
-
-    bl_mtime = 0
-
-    # Pre-load the blacklist.
-    if os.path.exists("blacklist.json"):
-        with open("blacklist.json") as f:
-            bl = json.load(f)
-            bl_mtime = os.stat(f.fileno()).st_mtime
-    else:
-        bl = []
-        bl_mtime = time.time()
 
     # Base events.
     @client.event
@@ -168,6 +168,7 @@ def run(client, config):
             if mtime > bl_mtime:
                 logger.debug("Blacklist file changed, reloading...")
                 # Update mtime
+                global bl_mtime
                 bl_mtime = mtime
                 # Reload blacklist
                 with open("blacklist.json") as f:
