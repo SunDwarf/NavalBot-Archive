@@ -24,7 +24,7 @@ import shlex
 
 import discord
 
-from navalbot.api.util import has_permissions_with_override, _get_overrides, prov_dec_func
+from navalbot.api.util import has_permissions_with_override, _get_overrides, prov_dec_func, get_global_config
 
 
 def with_permission(*role: str):
@@ -98,3 +98,25 @@ def enforce_args(count: int, error_msg: str = None):
         return __fake_enforcing_func
 
     return __decorator
+
+
+def owner(func):
+    """
+    Only allows owner to run the command.
+    """
+
+    owner = util.get_global_config("RCE_ID", default=0, type_=int)
+
+    async def __fake_permission_func(client: discord.Client, message: discord.Message):
+        # Get the ID.
+        u_id = int(message.author.id)
+        # Check if it is in the ids specified.
+        if u_id == owner:
+            await func(client, message)
+        else:
+            await client.send_message(message.channel,
+                                      ":no_entry: This command is restricted to bot owners!")
+
+    __fake_permission_func = prov_dec_func(func, __fake_permission_func)
+
+    return __fake_permission_func
