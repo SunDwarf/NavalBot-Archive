@@ -79,7 +79,10 @@ def load_plugins(client):
         if entry.name.endswith(".py"):
             name = entry.name.split(".")[0]
         else:
-            name = entry.name
+            if os.path.isdir(entry.path):
+                name = entry.name
+            else:
+                continue
         import_name = "plugins." + name
         # Import using importlib.
         try:
@@ -87,6 +90,7 @@ def load_plugins(client):
             if hasattr(mod, "load_plugin"):
                 mod.load_plugin(client)
             modules[mod.__name__] = mod
+            logging.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__path__))
         except Exception as e:
             logger.error("Error upon loading plugin `{}`! Cannot continue loading.")
             traceback.print_exc()

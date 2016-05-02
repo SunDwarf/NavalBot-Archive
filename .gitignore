@@ -110,3 +110,5 @@ files/
 *.db
 praw.ini
 bot.py.zipdep.py
+
+plugins/*
