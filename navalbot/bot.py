@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 import asyncio
+import importlib
 import json
 import logging
 import os
@@ -35,7 +36,8 @@ import discord
 # =============== Commands
 import cmds
 from navalbot.api import util, db
-from cmds import commands
+from navalbot.api.commands import commands
+from navalbot import builtins
 
 from exceptions import StopProcessing
 
@@ -82,7 +84,18 @@ def load_plugins():
     """
     Loads plugins from plugins/.
     """
-
+    if not os.path.exists(os.path.join(os.getcwd(), "plugins/")):
+        logger.critical("No plugins directory exists. Your bot is effectively useless.")
+        return
+    # Loop over things in plugins/
+    for entry in os.scandir("plugins/"):
+        if entry.name.endswith(".py"):
+            name = entry.name.split(".")[0]
+        else:
+            name = entry.name
+        import_name = "plugins." + name
+        # Import using importlib.
+        importlib.import_module(import_name)
 
 
 # ============= Built-in commands.
