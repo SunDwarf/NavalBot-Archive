@@ -169,16 +169,7 @@ async def on_ready():
         logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
 
     # Change voice module as applicable.
-    if isinstance(client.voice, dict):
-        if client.user.bot:
-            logger.info("Using upstream voice module.")
-            from voice import voice_main as voice
-        else:
-            logger.error("Using modified discord.py without a bot account! Cannot continue.")
-            sys.exit(3)
-    else:
-        logger.warning("Using queue-based voice module. This is not ideal.")
-        from cmds import voice_old as voice
+    from voice import voice_main as voice
     # print ready msg
     logger.info("Loaded NavalBot, logged in as `{}`.".format(client.user.name))
     # make file dir

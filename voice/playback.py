@@ -381,7 +381,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, args: l
     queue = voice_params[message.server.id]["queue"]
 
     # Get the voice client.
-    if message.server.id not in client.voice:
+    if not client.is_voice_connected(message.server):
         try:
             voice_client = await client.join_voice_channel(channel=voice_channel)
         except discord.ClientException:
