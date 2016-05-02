@@ -24,17 +24,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import discord
 
-from navalbot.api.commands import command
+from navalbot.api.commands import command, commands
+from navalbot.api import decorators, db
 
 
 @command("help")
-@util.enforce_args(1, error_msg=":x: You must provide a command for help!")
+@decorators.enforce_args(1, error_msg=":x: You must provide a command for help!")
 async def help(client: discord.Client, message: discord.Message, args: list):
     """
     ಠ_ಠ
     """
     # Get the function
-    func = cmds.commands.get(args[0])
+    func = commands.get(args[0])
     if not func:
         await client.send_message(message.channel, ":no_entry: That function does not exist!")
         return
