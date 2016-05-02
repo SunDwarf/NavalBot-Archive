@@ -120,7 +120,8 @@ class Command(object):
                     raise exceptions.BadCommandException("Arg count of {} differs from number of requested args ({})"
                                                          .format(len(func_sig.parameters), 2 + self._args_count))
                 # Get the annotations, if applicable.
-                annotations = [f.annotation for f in func_sig.parameters[2:]]
+                params = list(func_sig.parameters.values())
+                annotations = [f.annotation for f in params[2:]]
                 temp_args = shlex.split(message.content)[1:]
                 if len(temp_args) != self._args_count:
                     await client.send_message(message.channel, self._arg_error_msg)

@@ -213,7 +213,7 @@ def run(client, config):
                 coro = commands[cmd_word]
             except KeyError as e:
                 logger.warning("-> No such command: " + str(e))
-                coro = builtins.default(client=client, message=message)
+                coro = builtins.default
             try:
                 if isinstance(coro, Command):
                     await coro.invoke(client, message)
@@ -253,7 +253,6 @@ def run(client, config):
             logger.error("Session appears to have errored. Exiting.")
             return
         except Exception:
-            import traceback
             traceback.print_exc()
             logger.error("Crashed. Don't know how, don't care. Continuing..")
             continue
