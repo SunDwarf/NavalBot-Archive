@@ -125,6 +125,9 @@ def run(client, config):
         except FileExistsError:
             pass
 
+        # Load plugins
+        load_plugins()
+
         # Set the game.
         await client.change_status(discord.Game(name="Type ?info for help!"))
 
