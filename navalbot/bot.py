@@ -100,6 +100,8 @@ def run(client, config):
     The main running point.
     """
 
+    bl_mtime = 0
+
     # Pre-load the blacklist.
     if os.path.exists("blacklist.json"):
         with open("blacklist.json") as f:
@@ -158,10 +160,10 @@ def run(client, config):
         if os.path.exists("blacklist.json"):
             # Get the time
             mtime = os.stat("blacklist.json").st_mtime
+            global bl_mtime
             if mtime > bl_mtime:
                 logger.debug("Blacklist file changed, reloading...")
                 # Update mtime
-                global bl_mtime
                 bl_mtime = mtime
                 # Reload blacklist
                 with open("blacklist.json") as f:
