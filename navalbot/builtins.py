@@ -27,7 +27,7 @@ import os
 import discord
 import re
 
-from navalbot.api.commands import oldcommand, commands
+from navalbot.api.commands import oldcommand, commands, command
 from navalbot.api import decorators, db
 from navalbot.api.util import sanitize, get_file
 
@@ -36,20 +36,22 @@ from navalbot.api.util import sanitize, get_file
 factoid_matcher = re.compile(r'(\S*?) is (.*)')
 
 
-@oldcommand("help")
-@decorators.enforce_args(1, error_msg=":x: You must provide a command for help!")
-async def help(client: discord.Client, message: discord.Message, args: list):
+@command("help", argcount=1, argerror=":x: You must provide a function to check help of.")
+async def help(client: discord.Client, message: discord.Message, cmd_name: str):
     """
     ಠ_ಠ
     """
     # Get the function
-    func = commands.get(args[0])
+    func = commands.get(cmd_name)
     if not func:
         await client.send_message(message.channel, ":no_entry: That function does not exist!")
         return
 
     if hasattr(func, "help"):
         help = func.help()
+        if not help:
+            await client.send_message(message.channel, ":x: This function doesn't have help.")
+            return
     else:
         # Format __doc__
         if not func.__doc__:
