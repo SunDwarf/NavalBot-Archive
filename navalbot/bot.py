@@ -30,6 +30,7 @@ import logging
 import os
 import sys
 import time
+import traceback
 
 import discord
 # =============== Commands
@@ -37,11 +38,10 @@ from navalbot.api import util, db
 from navalbot.api.commands import commands
 from navalbot import builtins
 
-from exceptions import StopProcessing
-
 # =============== End commands
 
 loop = asyncio.get_event_loop()
+
 
 # ===============
 
@@ -64,18 +64,10 @@ def init_logging():
 logger = logging.getLogger("NavalBot")
 logger.setLevel(logging.DEBUG)
 
-
-# Pre-load the blacklist.
-if os.path.exists("blacklist.json"):
-    with open("blacklist.json") as f:
-        bl = json.load(f)
-        bl_mtime = os.stat(f.fileno()).st_mtime
-else:
-    bl = []
-    bl_mtime = time.time()
+modules = {}
 
 
-def load_plugins():
+def load_plugins(client):
     """
     Loads plugins from plugins/.
     """
@@ -90,18 +82,33 @@ def load_plugins():
             name = entry.name
         import_name = "plugins." + name
         # Import using importlib.
-        importlib.import_module(import_name)
-
+        try:
+            mod = importlib.import_module(import_name)
+            if hasattr(mod, "load_plugin"):
+                mod.load_plugin(client)
+            modules[mod.__name__] = mod
+        except Exception as e:
+            logger.error("Error upon loading plugin `{}`! Cannot continue loading.")
+            traceback.print_exc()
+            sys.exit(1)
 
 # ============= Built-in commands.
 
-
-# endregion
 
 def run(client, config):
     """
     The main running point.
     """
+
+    # Pre-load the blacklist.
+    if os.path.exists("blacklist.json"):
+        with open("blacklist.json") as f:
+            bl = json.load(f)
+            bl_mtime = os.stat(f.fileno()).st_mtime
+    else:
+        bl = []
+        bl_mtime = time.time()
+
     # Base events.
     @client.event
     async def on_ready():
@@ -126,7 +133,7 @@ def run(client, config):
             pass
 
         # Load plugins
-        load_plugins()
+        load_plugins(client)
 
         # Set the game.
         await client.change_status(discord.Game(name="Type ?info for help!"))
@@ -185,7 +192,7 @@ def run(client, config):
             return
 
         # Run on_message hooks
-        #for hook in cmds.message_hooks.values():
+        # for hook in cmds.message_hooks.values():
         #    logger.info("Running hook {}".format(hook.__name__))
         #    try:
         #        await hook(client, message)
