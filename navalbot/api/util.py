@@ -44,6 +44,7 @@ msgcount = 0
 loop = asyncio.get_event_loop()
 
 multi = futures.ProcessPoolExecutor()
+threaded = futures.ThreadPoolExecutor()
 
 # Declare redis pool
 redis_pool = None
@@ -61,6 +62,13 @@ async def with_multiprocessing(func):
     Runs a func inside a Multiprocessing executor
     """
     return await loop.run_in_executor(multi, func)
+
+
+async def with_threading(func):
+    """
+    Runs a func inside a Threaded executor.
+    """
+    return await loop.run_in_executor(threaded, func)
 
 
 def format_timedelta(value, time_format="{days} days, {hours2}:{minutes2}:{seconds2}"):
