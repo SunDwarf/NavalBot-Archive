@@ -27,13 +27,16 @@ import os
 import discord
 import re
 
-from navalbot.api.commands import oldcommand, commands, command
+from navalbot.api.commands import commands, command, Command
 from navalbot.api import decorators, db
 from navalbot.api.util import sanitize, get_file
 
 
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(\S*?) is (.*)')
+
+# Command matcher compiled
+command_matcher = re.compile(r'{(.*?)}')
 
 
 @command("help", argcount=1, argerror=":x: You must provide a function to check help of.")
@@ -94,6 +97,26 @@ async def default(client: discord.Client, message: discord.Message):
         content = await db.get_config(message.server.id, "fac:{}".format(data))
         if not content:
             return
+        # Check if it's an inline command.
+        inline_cmd = command_matcher.match(content)
+        if inline_cmd:
+            # Run the inline command.
+            sp = inline_cmd.groups()[0]
+            first_word = sp.split(" ")[0]
+            prefix = await db.get_config(message.server.id, "command_prefix", "?")
+            if first_word.startswith(prefix):
+                first_word = first_word[len(prefix):]
+            # load it from commands
+            print(first_word, commands)
+            if first_word not in commands:
+                await client.send_message(message.channel, ":x: Inline command `{}` does not exist".format(first_word))
+                return
+            # Get it, and invoke.
+            message.content = sp
+            command = commands[first_word]
+            await command.invoke(client, message)
+            return
+
         # Check if it's a file
         if content.startswith("file:"):
             fname = content.split("file:")[1]
