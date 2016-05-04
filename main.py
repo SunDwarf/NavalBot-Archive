@@ -29,9 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import asyncio
 import uvloop
 
-# Force use UVLoop.
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
 import os
 import sys
 from ctypes.util import find_library
@@ -39,11 +36,15 @@ from ctypes.util import find_library
 import discord
 import requests
 
-from navalbot import bot
-
 # Load config.
 import shutil
 import yaml
+
+from navalbot.api import botcls
+
+# Force use UVLoop.
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
 
 if not os.path.exists("config.yml"):
     shutil.copyfile("config.example.yml", "config.yml")
@@ -92,9 +93,9 @@ if global_config.get("shards", {}).get("enable_sharding"):
     # Todo -> Auto shards
     shards = global_config["shards"]["shard_max"]
     my_shard = global_config["shards"]["shard_id"]
-    client = discord.Client(shard_count=int(shards), shard_id=int(my_shard))
+    client = botcls.NavalClient(shard_count=int(shards), shard_id=int(my_shard))
 else:
-    client = discord.Client()
+    client = botcls.NavalClient()
 
 # Update process title.
 if has_setproctitle:
@@ -104,4 +105,4 @@ if has_setproctitle:
 
 # Invoke bot.run().
 if __name__ == '__main__':
-    bot.run(client, global_config)
+    client.navalbot()
