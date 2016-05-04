@@ -35,3 +35,4 @@ shards:
 
 # Enable liuv?
 # Faster at the cost of broken voice player.
+use_libuv: false
