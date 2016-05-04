@@ -32,3 +32,6 @@ shards:
   # What is the maximum number of shards?
   # This MUST be the same accross all bots.
   shard_max: 0
+
+# Enable liuv?
+# Faster at the cost of broken voice player.

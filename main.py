@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 import asyncio
-import uvloop
 
 import os
 import sys
@@ -42,15 +41,17 @@ import yaml
 
 from navalbot.api import botcls
 
-# Force use UVLoop.
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
-
 if not os.path.exists("config.yml"):
     shutil.copyfile("config.example.yml", "config.yml")
 
 with open("config.yml", "r") as f:
     global_config = yaml.load(f)
+
+if global_config.get("use_libuv", False) == True:
+    print("WARNING: Using libuv faster event loop for NavalBot.")
+    print("Voice modules will not work properly.")
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # Load opus
 if sys.platform == "win32":
