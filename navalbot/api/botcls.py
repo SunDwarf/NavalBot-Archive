@@ -109,7 +109,7 @@ class NavalClient(discord.Client):
         if self._raven_client:
             self._raven_client.captureException()
         else:
-            logger.error("Caught error in {}".format(event_method.__name__))
+            logger.error("Caught error in {}".format(event_method))
             traceback.print_exc()
 
     def load_plugins(self):
