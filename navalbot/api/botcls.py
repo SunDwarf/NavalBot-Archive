@@ -27,15 +27,14 @@ import json
 import os
 import logging
 import traceback
-
 import shutil
-
 import sys
-
 import time
 
 import yaml
 import discord
+from raven import Client
+from raven_aiohttp import AioHttpTransport
 
 from navalbot import builtins
 from navalbot.api import db
@@ -93,6 +92,25 @@ class NavalClient(discord.Client):
         else:
             self.bl = []
             self.bl_mtime = time.time()
+
+        # Create a client if the config says so.
+        if self.config.get("use_sentry"):
+            logger.info("Using Sentry for error reporting.")
+            self._raven_client = Client(dsn=self.config.get("sentry_dsn"), transport=AioHttpTransport)
+        else:
+            self._raven_client = None
+
+    async def on_error(self, event_method, *args, **kwargs):
+        """
+        Send the error to Sentry if applicable.
+
+        Otherwise, just traceback it.
+        """
+        if self._raven_client:
+            self._raven_client.captureException()
+        else:
+            logger.error("Caught error in {}".format(event_method.__name__))
+            traceback.print_exc()
 
     def load_plugins(self):
         """
@@ -225,6 +243,8 @@ class NavalClient(discord.Client):
                     await coro(self, message)
             except Exception as e:
                 await self.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
+                # Allow it to fall through.
+                raise
 
     def navalbot(self):
         # Switch login method based on args.

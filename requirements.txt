@@ -24,5 +24,7 @@ ws4py==0.3.4
 youtube-dl>=2016.4.19
 google-api-python-client>=1.5.0
 setproctitle
-PyYAML
+PyYAML>=3.11
 aioredis>=0.2.6
+raven>=5.4.0
+raven-aiohttp
