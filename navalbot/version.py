@@ -18,5 +18,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-VERSION = "5.0.0"
+VERSION = "5.0.1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
