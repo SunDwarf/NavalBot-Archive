@@ -121,7 +121,10 @@ class Command(object):
         if hasattr(self, "_args_type"):
             if self._args_type == 0:
                 # Split out the args into a list.
-                args = shlex.split(message.content)[1:]
+                try:
+                    args = shlex.split(message.content)[1:]
+                except ValueError:
+                    args = message.content.split(" ")[1:]
                 if len(args) < 1:
                     await client.send_message(message.channel, self._arg_error_msg)
                     return
