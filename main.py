@@ -26,6 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
+import asyncio
+import uvloop
+
+# Force use UVLoop.
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
 import os
 import sys
 from ctypes.util import find_library
@@ -44,7 +50,6 @@ if not os.path.exists("config.yml"):
 
 with open("config.yml", "r") as f:
     global_config = yaml.load(f)
-
 
 # Load opus
 if sys.platform == "win32":
@@ -80,7 +85,6 @@ else:
     else:
         print(">> Cannot load opus library - cannot use voice.")
         del found
-
 
 # Create a client.
 # Also, use shards as appropriate.
