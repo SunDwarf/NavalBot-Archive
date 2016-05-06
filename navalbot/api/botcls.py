@@ -197,13 +197,6 @@ class NavalClient(discord.Client):
                 with open("blacklist.json") as f:
                     self.bl = json.load(f)
 
-        if message.server.id in self.bl:
-            bb = self.bl[message.server.id]
-            if message.author.id in bb:
-                # Ignore message
-                logger.warn("Ignoring message, as user is on the blacklist.")
-                return
-
         # Check for a valid server.
         if message.server is not None:
             prefix = await db.get_config(message.server.id, "command_prefix", "?")
@@ -215,6 +208,14 @@ class NavalClient(discord.Client):
             # No DMs
             await self.send_message(message.channel, "I don't accept private messages.")
             return
+
+        if message.server.id in self.bl:
+            bb = self.bl[message.server.id]
+            if message.author.id in bb:
+                # Ignore message
+                logger.warn("Ignoring message, as user is on the blacklist.")
+                return
+
 
         if len(message.content) == 0:
             logger.info("Ignoring (presumably) image-only message.")
