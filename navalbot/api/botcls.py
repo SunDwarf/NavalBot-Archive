@@ -174,6 +174,10 @@ class NavalClient(discord.Client):
         # Increment the message count.
         util.msgcount += 1
 
+        if message.author.bot:
+            logger.info("Ignoring message from bot account.")
+            return
+
         if not isinstance(message.channel, discord.PrivateChannel):
             # print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
             #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
@@ -215,7 +219,6 @@ class NavalClient(discord.Client):
                 # Ignore message
                 logger.warn("Ignoring message, as user is on the blacklist.")
                 return
-
 
         if len(message.content) == 0:
             logger.info("Ignoring (presumably) image-only message.")
