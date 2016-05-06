@@ -47,10 +47,11 @@ if not os.path.exists("config.yml"):
 with open("config.yml", "r") as f:
     global_config = yaml.load(f)
 
-if global_config.get("use_libuv", False) == True:
+if global_config.get("use_libuv", False):
     print("WARNING: Using libuv faster event loop for NavalBot.")
     print("Voice modules will not work properly.")
     import uvloop
+
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # Load opus
