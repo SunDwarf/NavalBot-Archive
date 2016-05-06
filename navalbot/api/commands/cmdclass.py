@@ -37,6 +37,7 @@ class Command(object):
 
     Commands are invoked with .invoke(), but this is only used in on_message.
     """
+
     def __init__(self, to_wrap, *names, **kwargs):
         # Declare everything
         self.names = names
