@@ -185,8 +185,20 @@ def prov_dec_func(func1, func2):
     return func2
 
 
-def get_global_config(key, default=0, type_: type=str):
-    return type_(global_config.get(key, default))
+def get_global_config(key, default=0, type_: type=None):
+    if type_ is not None:
+        return type_(global_config.get(key, default))
+    else:
+        return global_config.get(key, default)
+
+
+async def _wraps_fut(fut, coro):
+        loop.run_until_complete()
+
+def blocking(coro):
+    """
+    Runs a coroutine as a blocking coro.
+    """
 
 
 async def get_file(client: tuple, url, name):
