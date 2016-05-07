@@ -101,6 +101,19 @@ class NavalClient(discord.Client):
         else:
             self._raven_client = None
 
+    def __del__(self):
+        # Fuck off asyncio
+        self.loop.set_exception_handler(lambda *args, **kwargs: None)
+
+    async def on_socket_response(self, raw_data: json):
+        """
+        Recieves raw JSON data.
+
+        This is only used to dispatch to hooks.
+        """
+        for hook in self.hooks.get("on_recv", []):
+            self.loop.create_task(hook(raw_data))
+
     async def on_error(self, event_method, *args, **kwargs):
         """
         Send the error to Sentry if applicable.
