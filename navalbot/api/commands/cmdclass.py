@@ -19,13 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-import inspect, shlex
+import inspect
+import shlex
 
 import discord
 
+from navalbot import exceptions
 from navalbot.api import util
 from navalbot.api.util import has_permissions_with_override
-from navalbot import exceptions
 
 
 class Command(object):

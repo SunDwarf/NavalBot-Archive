@@ -23,9 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 # Hooks file.
 # This allows adding hooks to `on_message`, and generic events.
+import logging
 import types
 import typing
-import logging
 
 import discord
 
