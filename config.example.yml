@@ -36,3 +36,8 @@ shards:
 # Enable liuv?
 # Faster at the cost of broken voice player.
 use_libuv: false
+
+# Graylog data.
+graylog:
+  addr: 127.0.0.1
+  port: 5000

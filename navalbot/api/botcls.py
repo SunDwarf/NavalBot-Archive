@@ -31,6 +31,7 @@ import shutil
 import sys
 import time
 
+import asyncio
 import yaml
 import discord
 from raven import Client
@@ -130,7 +131,7 @@ class NavalClient(discord.Client):
         for hook in self.hooks.get("on_error", []):
             self.loop.create_task(hook(event_method, *args, **kwargs))
 
-    def load_plugins(self):
+    async def load_plugins(self):
         """
         Loads plugins from plugins/.
         """
@@ -153,7 +154,7 @@ class NavalClient(discord.Client):
             try:
                 mod = importlib.import_module(import_name)
                 if hasattr(mod, "load_plugin"):
-                    mod.load_plugin(self)
+                    await mod.load_plugin(self)
                 self.modules[mod.__name__] = mod
                 logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
             except Exception as e:
@@ -183,7 +184,7 @@ class NavalClient(discord.Client):
             pass
 
         # Load plugins
-        self.load_plugins()
+        await self.load_plugins()
 
         # Set the game.
         await self.change_status(discord.Game(name="Type ?info for help!"))
