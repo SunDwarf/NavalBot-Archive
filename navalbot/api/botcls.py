@@ -113,6 +113,10 @@ class NavalClient(discord.Client):
             logger.error("Caught error in {}".format(event_method))
             traceback.print_exc()
 
+        # Run error hooks.
+        for hook in self.hooks.get("on_error", []):
+            self.loop.create_task(hook(event_method, *args, **kwargs))
+
     def load_plugins(self):
         """
         Loads plugins from plugins/.
@@ -232,6 +236,10 @@ class NavalClient(discord.Client):
         #        await hook(client, message)
         #    except StopProcessing:
         #        return
+
+        # Run on_message hooks.
+        for hook in self.hooks.get("on_message", []):
+            self.loop.create_task(hook(self, message))
 
         if message.content.startswith(prefix):
             cmd_content = message.content[len(prefix):]
