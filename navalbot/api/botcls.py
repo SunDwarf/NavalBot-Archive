@@ -77,6 +77,7 @@ class NavalClient(discord.Client):
         super().__init__(*args, **kwargs)
 
         self.modules = {}
+        self.hooks = {}
 
         if not os.path.exists("config.yml"):
             shutil.copyfile("config.example.yml", "config.yml")
