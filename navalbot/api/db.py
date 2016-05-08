@@ -38,7 +38,7 @@ async def get_config(server_id: str, key: str, default=None, type_: type=str) ->
             data = await conn.get(built)
             try:
                 return type_(data.decode())
-            except ValueError:
+            except (ValueError, AttributeError):
                 return default
 
 async def set_config(server_id: str, key: str, value: str):
