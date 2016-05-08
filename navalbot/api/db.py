@@ -66,5 +66,8 @@ async def delete_config(server_id: str, key: str):
 async def get_key(key: str) -> str:
     pool = await util.get_pool()
     async with pool.get() as conn:
-        return (await conn.get(key)).decode()
+        try:
+            return (await conn.get(key)).decode()
+        except AttributeError:
+            return None
 
