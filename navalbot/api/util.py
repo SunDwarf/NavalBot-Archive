@@ -43,7 +43,6 @@ msgcount = 0
 
 loop = asyncio.get_event_loop()
 
-multi = futures.ProcessPoolExecutor()
 threaded = futures.ThreadPoolExecutor()
 
 # Declare redis pool
@@ -55,14 +54,6 @@ if not os.path.exists("config.yml"):
 
 with open("config.yml", "r") as f:
     global_config = yaml.load(f)
-
-
-async def with_multiprocessing(func):
-    """
-    Runs a func inside a Multiprocessing executor
-    """
-    return await loop.run_in_executor(multi, func)
-
 
 async def with_threading(func):
     """
@@ -190,15 +181,6 @@ def get_global_config(key, default=0, type_: type=None):
         return type_(global_config.get(key, default))
     else:
         return global_config.get(key, default)
-
-
-async def _wraps_fut(fut, coro):
-        loop.run_until_complete()
-
-def blocking(coro):
-    """
-    Runs a coroutine as a blocking coro.
-    """
 
 
 async def get_file(client: tuple, url, name):
