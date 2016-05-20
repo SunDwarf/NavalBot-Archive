@@ -42,6 +42,8 @@ from navalbot.api import db
 from navalbot.api.commands import commands, Command
 from navalbot.api import util
 
+from navalbot.voice import voiceclient
+
 logger = logging.getLogger("NavalBot")
 
 
@@ -64,6 +66,67 @@ class NavalClient(discord.Client):
         consoleHandler = logging.StreamHandler()
         consoleHandler.setFormatter(formatter)
         root.addHandler(consoleHandler)
+
+    def vc_factory(self):
+        """
+        Method to return a new voice client class.
+        """
+        return voiceclient.NavalVoiceClient
+
+    async def join_voice_channel(self, channel):
+        """
+        Override function for discord.py's join_voice_channel that allows me to specify a class to construct.
+        """
+        if isinstance(channel, discord.Object):
+            channel = self.get_channel(channel.id)
+
+        if getattr(channel, 'type', discord.ChannelType.text) != discord.ChannelType.voice:
+            raise discord.InvalidArgument('Channel passed must be a voice channel')
+
+        server = channel.server
+
+        if self.is_voice_connected(server):
+            raise discord.ClientException('Already connected to a voice channel in this server')
+
+        logger.info('attempting to join voice channel {0.name}'.format(channel))
+
+        def session_id_found(data):
+            user_id = data.get('user_id')
+            return user_id == self.user.id
+
+        # register the futures for waiting
+        session_id_future = self.ws.wait_for('VOICE_STATE_UPDATE', session_id_found)
+        voice_data_future = self.ws.wait_for('VOICE_SERVER_UPDATE', lambda d: True)
+
+        # request joining
+        await self.ws.voice_state(server.id, channel.id)
+        session_id_data = await asyncio.wait_for(session_id_future, timeout=10.0, loop=self.loop)
+        data = await asyncio.wait_for(voice_data_future, timeout=10.0, loop=self.loop)
+
+        kwargs = {
+            'user': self.user,
+            'channel': channel,
+            'data': data,
+            'loop': self.loop,
+            'session_id': session_id_data.get('session_id'),
+            'main_ws': self.ws
+        }
+
+        klass = self.vc_factory()
+
+        voice = klass(**kwargs)
+        try:
+            await voice.connect()
+        except asyncio.TimeoutError as e:
+            try:
+                await voice.disconnect()
+            except:
+                # we don't care if disconnect failed because connection failed
+                pass
+            raise e  # re-raise
+
+        self.connection._add_voice_client(server.id, voice)
+        return voice
 
     def __new__(cls, *args, **kwargs):
         """
