@@ -424,3 +424,14 @@ class NavalVoiceClient(discord.VoiceClient):
         self._play_queue = new_queue
 
         return ":heavy_check_mark: Shuffled queue."
+
+    async def reset(self):
+        """
+        Reset the voice player.
+        """
+        self.player.stop()
+        await self.disconnect()
+        self.playing = False
+        self.player = None
+        if self.curr_task:
+            self.curr_task.cancel()

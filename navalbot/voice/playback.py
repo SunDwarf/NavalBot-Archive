@@ -37,9 +37,10 @@ from navalbot.voice.voiceclient import NavalVoiceClient
 from .stores import voice_params, voice_locks
 
 # Get loop
-from .voice_util import find_voice_channel, with_existing_server, with_opus
+from .voice_util import find_voice_channel, with_existing_server, with_opus, author_is_valid
 
 loop = asyncio.get_event_loop()
+
 
 async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: discord.Channel):
     """
@@ -60,6 +61,24 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
         return vc
 
 
+@command("reset", "disconnect", roles={"Admin", "Bot Commander", "Voice"})
+async def reset(client: discord.Client, message: discord.Message):
+    vc = client.voice_client_in(message.server)
+    if not vc:
+        await client.send_message(message.channel, ":x: Not currently connected in this server.")
+        return
+
+    # Reset the voice client
+    channels = [vc.channel, find_voice_channel(message.server), message.author.voice_channel]
+
+    if not author_is_valid(message.author, channels):
+        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
+        return
+
+    await vc.reset()
+    await client.send_message(message.channel, ":heavy_check_mark: Reset voice.")
+
+
 @command("np", "nowplaying")
 async def np(client: discord.Client, message: discord.Message):
     """
@@ -69,8 +88,6 @@ async def np(client: discord.Client, message: discord.Message):
     if not vc:
         await client.send_message(message.channel, ":x: Not currently connected in this server.")
         return
-
-    assert isinstance(vc, NavalVoiceClient)
 
     # Return the output of `cmd_np`.
     await client.send_message(message.channel, vc.cmd_np())
@@ -91,7 +108,7 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
             message.channel,
             content=":x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`, "
                     "however you can override this with by running `{}setcfg voice_channel <your channel>`."
-                    .format(await util.get_prefix(message.server.id)))
+                .format(await util.get_prefix(message.server.id)))
         return
 
     if message.server.id not in voice_locks:
