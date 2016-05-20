@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import asyncio
 import json
 import os
+import re
 
 import discord
 
@@ -30,7 +31,7 @@ from navalbot.api import db
 from navalbot.api.commands import command
 from navalbot.exceptions import CommandError
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 
 @command("mute", roles={"Admin", "Bot Commander"})
@@ -212,3 +213,25 @@ async def broadcast(client: discord.Client, message: discord.Message):
     text = message.content.split(" ")[1]
     for servers in client.servers:
         await client.send_message(servers, "*Broadcast message:* {}".format(text))
+
+
+@command("changecolor", roles={"Bot Commander"}, argcount=1, argerror="You must provide a hex color")
+async def colour(client: discord.Client, message: discord.Message, hexa: str):
+    """
+    Changes the color of a user. The color needs to be supplied in a hexadecimal format without the `#`!
+    """
+
+    def find_role():
+        for i, val in enumerate(message.author.roles):
+            if re.search('_colour', str(val)):
+                return str(val)
+
+    try:
+        color = discord.Colour(int(hexa, 16))
+        role = discord.utils.get(message.server.roles, name=str(find_role()))
+        await client.edit_role(message.server, role, colour=color)
+        await client.send_message(message.channel, "Color got changed!")
+    except discord.Forbidden:
+        await client.send_message('Not enough permissions to change color')
+    except ValueError:
+        await client.send_message(message.channel, "Please provide a valid hexadecimal number without the `#`!")
