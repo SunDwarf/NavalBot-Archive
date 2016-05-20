@@ -28,9 +28,9 @@ import discord
 
 from navalbot.api.commands import oldcommand, command
 from navalbot.api import db
-from navalbot.api import util, decorators
+from navalbot.voice.voice_util import author_is_valid, find_voice_channel
+from navalbot.voice.voiceclient import NavalVoiceClient
 from .stores import voice_params
-from .voice_util import with_opus, with_existing_server
 
 
 @command("again")
@@ -67,41 +67,20 @@ async def shuffle(client: discord.Client, message: discord.Message):
     """
     Shuffles the queue.
     """
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+    vc = client.voice_client_in(message.server)
+    if not vc:
+        await client.send_message(message.channel, ":x: Not currently connected on this server.")
         return
 
-    queue = voice_params[message.server.id].get("queue")
-    if not queue:
-        await client.send_message(message.channel, ":x: There is no queue for this server.")
-        # this never happens
-        return
+    channels = [vc.channel, find_voice_channel(message.server), message.author.voice_channel]
 
-    if message.author.voice_channel is None or (message.author.deaf or message.author.self_deaf):
+    if not author_is_valid(message.author, channels):
         await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
         return
 
-    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
+    s = await vc.cmd_shuffle()
 
-    new_queue = asyncio.Queue(maxsize=qsize)
-    assert isinstance(queue, asyncio.Queue)
-    deq = list(queue._queue)
-
-    # shuffle deq
-    random.shuffle(deq)
-
-    # append all items
-    for i in deq:
-        try:
-            new_queue.put_nowait(i)
-        except asyncio.QueueFull:
-            # wat
-            break
-
-    # set the new queue
-    voice_params[message.server.id]["queue"] = new_queue
-
-    await client.send_message(message.channel, ":heavy_check_mark: Shuffled queue.")
+    await client.send_message(message.channel, s)
 
 
 @command("queue", "queued")
@@ -110,72 +89,18 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
     Get the current playback queue for this server.
     """
     # STILL HORRIBLE
-
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
-    queue = voice_params[message.server.id].get('queue', [])
-    if queue:
-        queue = queue._queue
-
-    # Get the start pos.
     try:
         start_pos = int(message.content.split(" ")[1])
     except (ValueError, IndexError):
         start_pos = 0
 
-    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
-
-    if len(queue) != 0 and start_pos + 1 > len(queue):
-        await client.send_message(message.channel, ":x: Queue is not as long as that.")
-        return
-    if start_pos < 0:
-        await client.send_message(message.channel, ":x: Cannot check queue for negative numbers.")
+    vc = client.voice_client_in(message.server)
+    if not vc:
+        await client.send_message(message.channel, ":x: Not currently connected on this server.")
         return
 
-    song_str = ""
-    # Set total duration.
-    total_dur = 0
-
-    # First loop over items to get the duration
-    for i in queue:
-        if isinstance(i[1], dict):
-            total_dur += i[1].get("duration", 0)
-
-    for item in range(start_pos, start_pos + len(queue) if len(queue) < 10 else start_pos + 10):
-        try:
-            i = queue[item]
-        except IndexError:
-            break
-        if isinstance(i[1], str):
-            title = i[1]
-            df = "??:??"
-        else:
-            title = i[1].get("title")
-            # get duration
-            dm, ds = divmod(i[1].get("duration"), 60)
-            df = "`[{:02d}:{:02d}]`".format(trunc(dm), trunc(ds))
-        song_str += "\n{}. `{}` `{}`".format(item + 1, title, df)
-
-    if len(queue) > start_pos + 10:
-        song_str += "\n(Omitted {} queued items.)".format((len(queue) - 10) - start_pos)
-
-    # Divmod queue length
-    tm, ds = divmod(total_dur, 60)
-    print(total_dur)
-    dh, dm = divmod(tm, 60)
-
-    s = "**Currently queued: ({lq}/{mq})** `[{h:02d}:{m:02d}:{s:02d}]`"\
-        .format(lq=len(queue), mq=qsize,
-                h=trunc(dh), m=trunc(dm), s=trunc(ds))
-
-    if not queue or len(queue) == 0:
-        s += "\n`Nothing is queued.`"
-        await client.send_message(message.channel, s)
-        return
-
-    s += song_str
+    # Get the queue text.
+    s = await vc.cmd_queue(start_pos)
 
     await client.send_message(message.channel, s)
 
@@ -185,27 +110,17 @@ async def skip(client: discord.Client, message: discord.Message):
     """
     Skips ahead one or more tracks.
     """
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+
+    vc = client.voice_client_in(message.server)
+    if not vc:
+        await client.send_message(message.channel, ":x: Not currently connected on this server.")
         return
 
-    playing = voice_params[message.server.id].get("playing")
-    if not playing:
-        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
-        return
+    channels = [vc.channel, find_voice_channel(message.server), message.author.voice_channel]
 
-    player = voice_params[message.server.id].get("player")
-    if not player:
-        # ???
-        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
-        return
-
-    if message.author.voice_channel is None or (message.author.deaf or message.author.self_deaf):
+    if not author_is_valid(message.author, channels):
         await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
         return
-
-    # Get the max queue size
-    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
 
     try:
         aaa = message.content.split(" ")
@@ -219,52 +134,10 @@ async def skip(client: discord.Client, message: discord.Message):
     except ValueError:
         to_skip = 1
 
-    # Re-arrange the queue.
-    queue = voice_params[message.server.id].get("queue")
-    if not queue:
-        # what
-        await client.send_message(message.channel, content=":x: This kills the bot")
-        return
-    assert isinstance(queue, asyncio.Queue)
+    # Await cmd_skip
+    s = await vc.cmd_skip(to_skip)
 
-    if to_skip == 1:
-        # Just stop the player.
-        player.stop()
-        await client.send_message(message.channel, content=":heavy_check_mark: Skipped current song.")
-        return
-
-    # Remove 1 off of to_skip to represent the current song
-    to_skip -= 1
-
-    player.stop()
-
-    internal_queue = list(queue._queue)
-    if len(internal_queue) < to_skip:
-        del voice_params[message.server.id]["queue"]
-        player.stop()
-        await client.send_message(message.channel, ":x: Reached end of queue - stopped playing.")
-        # Kill the task.
-        ts = voice_params[message.server.id]["task"]
-        if ts:
-            assert isinstance(ts, asyncio.Task)
-            ts.cancel()
-        del voice_params[message.server.id]["task"]
-        # Kill the player.
-        del voice_params[message.server.id]["player"]
-        del voice_params[message.server.id]["playing"]
-        return
-
-    # Put things from index: onto the queue.
-    new_queue = asyncio.Queue(maxsize=qsize)
-    for i in internal_queue[to_skip:]:
-        try:
-            new_queue.put_nowait(i)
-        except asyncio.QueueFull:
-            # if the queue-size was shrunk between playing and a skip, this might happen
-            pass
-
-    voice_params[message.server.id]["queue"] = new_queue
-    await client.send_message(message.channel, ":heavy_check_mark: Skipped {} items.".format(to_skip + 1))
+    await client.send_message(message.channel, s)
 
 
 @command("voteskip")
@@ -272,74 +145,19 @@ async def voteskip(client: discord.Client, message: discord.Message):
     """
     Starts a vote to skip the currently playing track.
     """
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
-    playing = voice_params[message.server.id].get("playing")
-    if not playing:
-        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
-        return
-
-    player = voice_params[message.server.id].get("player")
-    if not player:
-        # ???
-        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
-        return
-
     # Get the client
     voiceclient = client.voice_client_in(message.server)
-
-    # Calculate the required voteskips.
-    channel = voiceclient.channel
-    if not channel:
-        # ???
-        await client.send_message(message.channel, content=":x: ??? This kills the bot, somehow.")
+    if not voiceclient:
+        await client.send_message(message.channel, ":x: Not currently connected on this server.")
         return
 
-    # Count the members.
-    voice_members = channel.voice_members
-    vc_count = 0
-
-    if message.author.id not in [_.id for _ in voice_members] or (message.author.deaf or message.author.self_deaf):
-        await client.send_message(message.channel, content=":x: You are not in the correct channel.")
+    # Check if in voice.
+    channels = [voiceclient.channel, find_voice_channel(message.server), message.author.voice_channel]
+    if not author_is_valid(message.author, channels):
+        await client.send_message(message.channel, ":x: You must be in the same channel as the bot and not deafened.")
         return
 
-    for member in voice_members:
-        if member.deaf or member.self_deaf:
-            continue
-        elif member.id == client.user.id:
-            continue
-        else:
-            vc_count += 1
-
-    # Divide it by two.
-    required = int(ceil(vc_count / 2))
-
-    # Check the voice_params
-    if 'voteskips' not in voice_params[message.server.id]:
-        voice_params[message.server.id]['voteskips'] = []
-
-    voteskips = voice_params[message.server.id]['voteskips']
-
-    if message.author.id not in voteskips:
-        voteskips.append(message.author.id)
-        if len(voteskips) != required:
-            await client.send_message(message.channel, ":heavy_check_mark: Voteskip acknowledged. `{}` more "
-                                                       "votes required.".format(required - len(voteskips)))
-        # Update the list
-        voice_params[message.server.id]['voteskips'] = voteskips
-    elif len(voteskips) < required:
-        # They're in the list, and there's not enough votes. Ignore them.
-        await client.send_message(message.channel, content=":x: You have already voted.")
-        return
-
-    # Skip as appropriate.
-    # Also skip if there's only one person required.
-    if len(voteskips) >= required or required == 1:
-        player.stop()
-        await client.send_message(message.channel, content=":heavy_check_mark: Skipped current song.")
-        return
+    await client.send_message(message.channel, voiceclient.cmd_voteskip(message.author.id))
 
 
 @command("move", argcount=2, argerror=":x: You must provide two numbers: The original position, and the new position.")
@@ -347,101 +165,45 @@ async def move(client: discord.Client, message: discord.Message, fr: int, to: in
     """
     Moves a song in the queue from position <x> to position <y>.
     """
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-
-    queue = voice_params[message.server.id].get("queue")
-    if not queue:
-        # ???
-        return
-
-    if message.author.voice_channel is None or (message.author.deaf or message.author.self_deaf):
-        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
-        return
+    vc = client.voice_client_in(message.server)
+    if not vc:
+        await client.send_message(message.channel, ":x: Not currently connected on this server.")
 
     fr, to = fr - 1, to - 1
 
-    assert isinstance(queue, asyncio.Queue)
+    s = await vc.cmd_move(fr, to)
 
-    # Turn into list, pop from index, insert at index.
-    internal_queue = list(queue._queue)
-    try:
-        got = internal_queue.pop(fr)
-        internal_queue.insert(to, got)
-    except IndexError as e:
-        await client.send_message(message.channel, ":x: Could not find track at index `{}`.".format(fr))
-        return
-
-    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
-
-    # Re-create queue, blah blah blah
-    new_queue = asyncio.Queue(maxsize=qsize)
-
-    for i in internal_queue:
-        try:
-            new_queue.put_nowait(i)
-        except asyncio.QueueFull:
-            pass
-
-    # Set new queue.
-    voice_params[message.server.id]["queue"] = new_queue
-    if isinstance(got[1], str):
-        title = got[1]
-    else:
-        title = got[1].get("title")
-
-    await client.send_message(message.channel, ":heavy_check_mark: Moved item `{}` to position `{}`.".format(title,
-                                                                                                             to + 1))
+    await client.send_message(message.channel, s)
 
 
 @command("remove", roles={"Bot Commander", "Voice", "Admin"},
-         argcount=1, argerror=":x: You must give an index to remove.")
-async def remove_vid(client: discord.Client, message: discord.Message, args: list):
+         argcount="?", argerror=":x: You must give an index to remove.")
+async def remove_vid(client: discord.Client, message: discord.Message, *args: list):
     """
     Removes a video at a specific index from the queue.
     """
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+    vc = client.voice_client_in(message.server)
+    if not vc:
+        await client.send_message(message.channel, ":x: Not currently connected on this server.")
         return
 
-    queue = voice_params[message.server.id].get("queue")
-    if not queue:
-        # ???
-        return
-
-    if message.author.voice_channel is None or (message.author.deaf or message.author.self_deaf):
-        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
-        return
-
-    assert isinstance(queue, asyncio.Queue)
-
-    # Standard prodecure - turn deque into a list
-    internal_queue = list(queue._queue)
-    try:
-        removed = internal_queue.pop(int(args[0]) - 1)
-    except IndexError:
-        await client.send_message(message.channel, ":x: No track at index `{}`".format(args[0]))
-        return
-    except ValueError:
-        await client.send_message(message.channel, ":x: Not a valid index.")
-        return
-
-    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
-
-    # Re-create queue, blah blah blah
-    new_queue = asyncio.Queue(maxsize=qsize)
-
-    for i in internal_queue:
+    if len(args) == 2:
         try:
-            new_queue.put_nowait(i)
-        except asyncio.QueueFull:
-            pass
+            fr = int(args[0])
+            end = int(args[1])
+        except ValueError as e:
+            await client.send_message(message.channel, ":x: {}".format(e.args[0]))
+            return
 
-    if isinstance(removed[1], str):
-        title = removed[1]
     else:
-        title = removed[1].get("title")
+        try:
+            fr = int(args[0])
+            end = None
+        except ValueError as e:
+            await client.send_message(message.channel, ":x: {}".format(e.args[0]))
+            return
 
-    voice_params[message.server.id]["queue"] = new_queue
-    await client.send_message(message.channel, ":heavy_check_mark: Deleted item {} `({})`.".format(args[0], title))
+    # Call cmd_remove
+    s = await vc.cmd_remove(fr, end)
+
+    await client.send_message(message.channel, s)

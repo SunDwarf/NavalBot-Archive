@@ -33,27 +33,13 @@ from navalbot.api.commands import oldcommand, command
 from navalbot.api import db
 from navalbot.api import decorators
 from navalbot.api import util
+from navalbot.voice.voiceclient import NavalVoiceClient
 from .stores import voice_params, voice_locks
 
 # Get loop
 from .voice_util import find_voice_channel, with_existing_server, with_opus
 
 loop = asyncio.get_event_loop()
-
-async def _await_queue(server_id: str):
-    # Awaits new songs on the queue.
-    while True:
-        queue = voice_params[server_id]["queue"]
-        if not queue:
-            return
-        try:
-            items = await queue.get()
-        except RuntimeError:
-            return
-        # Place the current coroutine on the voice_params
-        voice_params[server_id]["curr_coro"] = items[0]
-        # Await the playing coroutine.
-        await items[0]
 
 async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: discord.Channel):
     """
@@ -74,126 +60,20 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
         return vc
 
 
-async def _fix_sc(download_url: str, wp_url: str) -> str:
-    """
-    Fix video links, on long playlists.
-    """
-    if not wp_url:
-        logging.getLogger("NavalBot").info("No need to fix up track {}...".format(wp_url))
-        return download_url
-
-    logging.getLogger("NavalBot").info("Fixing up track {}...".format(wp_url))
-
-    ydl = youtube_dl.YoutubeDL(
-        {"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "source_address": "0.0.0.0"})
-
-    # Await to get the new item.
-    func = functools.partial(ydl.extract_info, wp_url, download=False)
-    data = await loop.run_in_executor(None, func)
-
-    logging.getLogger("NavalBot").info("Fixed up track {}, got new URL: {}".format(wp_url,
-                                                                                   download_url != data.get("url")
-                                                                                   ))
-
-    return data.get("url")
-
-
-async def _oauth2_play_youtube(
-        client: discord.Client,
-        message: discord.Message,
-        voice_client: discord.VoiceClient,
-        voice_channel: discord.Channel,
-        download_url: str,
-        info: dict
-):
-    """
-    Co-routine that is used for the message queue.
-
-    Parameters:
-        client:
-            The client instance.
-
-        message:
-            The message object used to queue, with ?play.
-
-        voice_client:
-            The voice client to use to play with.
-
-        voice_channel:
-            The channel to join.
-
-        info:
-            The youtube_dl information dict.
-    """
-    # Fix the voice client if we need to.
-    vc = await _fix_voice(client, voice_client, voice_channel)
-    # Fix soundcloud.
-    download_url = await _fix_sc(download_url, info.get("webpage_url"))
-    # Create the player.
-    player = vc.create_ffmpeg_player(download_url)
-    # Declare voice params
-    voice_params[message.server.id]["playing"] = True
-    voice_params[message.server.id]["title"] = info.get("title", "???")
-    voice_params[message.server.id]["player"] = player
-    voice_params[message.server.id]["progress"] = 0
-    voice_params[message.server.id]["duration"] = info.get("duration")
-    voice_params[message.server.id]["voteskips"] = []
-    if 'voteskips' in voice_params[message.server.id]:
-        del voice_params[message.server.id]['voteskips']
-    await client.send_message(message.channel, ":heavy_check_mark: Now playing: `{}`".format(info.get("title", "???")))
-    assert isinstance(player, discord.voice_client.ProcessPlayer)
-    # Start playing
-    player.start()
-    # Check ever 0.5 seconds if we're done or not.
-    # 0.5 is non-noticable delay, but doesn't kill the CPU.
-    while True:
-        if player.is_done():
-            break
-        else:
-            if player.is_playing():
-                # TODO: Use time.time instead
-                voice_params[message.server.id]["progress"] += 0.5
-            await asyncio.sleep(0.5)
-    # Reset everything after it's done.
-    voice_params[message.server.id]["playing"] = False
-    voice_params[message.server.id]["title"] = ""
-    voice_params[message.server.id]["player"] = None
-    voice_params[message.server.id]["progress"] = None
-    voice_params[message.server.id]["duration"] = None
-
-
 @command("np", "nowplaying")
 async def np(client: discord.Client, message: discord.Message):
     """
     Get the currently playing track.
     """
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-        return
-    # Get the current player instance.
-    playing = voice_params[message.server.id].get("playing")
-    if not playing:
-        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
+    vc = client.voice_client_in(message.server)
+    if not vc:
+        await client.send_message(message.channel, ":x: Not currently connected in this server.")
         return
 
-    player = voice_params[message.server.id].get("player")
-    if not player:
-        # ???
-        await client.send_message(message.channel, content=":x: No song is currently playing on this server.")
-        return
+    assert isinstance(vc, NavalVoiceClient)
 
-    title = voice_params[message.server.id].get("title", "??? Internal error")
-    # progress/duration
-    m, s = divmod(voice_params[message.server.id]["progress"], 60)
-    if voice_params[message.server.id]["duration"]:
-        dm, ds = divmod(voice_params[message.server.id]["duration"], 60)
-    else:
-        dm, ds = 0, 0
-    playing = "" if player.is_playing() else "`[PAUSED]`"
-    print(m, s, dm, ds)
-    d_str = "[{:02d}:{:02d} / {:02d}:{:02d}]".format(trunc(m), trunc(s), trunc(dm), trunc(ds))
-    await client.send_message(message.channel,
-                              content="Currently playing: `{}` `{}` {}".format(title, d_str, playing))
+    # Return the output of `cmd_np`.
+    await client.send_message(message.channel, vc.cmd_np())
 
 
 @command("stop", roles={"Bot Commander", "Voice", "Admin"})
@@ -280,7 +160,7 @@ async def resume(client: discord.Client, message: discord.Message):
 
 
 @command("play", "playyt", "playyoutube", argcount="?", argerror=":x: You must pass a video!")
-async def play_youtube(client: discord.Client, message: discord.Message, *args: list):
+async def play(client: discord.Client, message: discord.Message, *args: list):
     """
     Plays a video from any valid streaming source that `youtube-dl` can download from.
     This includes things such as YouTube (obviously) and SoundCloud.
@@ -295,10 +175,6 @@ async def play_youtube(client: discord.Client, message: discord.Message, *args: 
             content=":x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`, "
                     "however you can override this with by running `{}setcfg voice_channel <your channel>`."
                     .format(await util.get_prefix(message.server.id)))
-        return
-
-    if message.author.voice_channel != voice_channel or (message.author.deaf or message.author.self_deaf):
-        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
         return
 
     if message.server.id not in voice_locks:
@@ -380,17 +256,6 @@ async def play_youtube(client: discord.Client, message: discord.Message, *args: 
     # 2. Places the coroutine on the server-specific queue.
     # 3. Checks to see if there is a looping task running for fetching new songs off of the queue for that server.
     #    If there isn't, it will create a new one, store it, and so on.
-
-    # Check for the queue.
-    if message.server.id not in voice_params:
-        # Nope!
-        voice_params[message.server.id] = {}
-    if 'queue' not in voice_params[message.server.id]:
-        voice_params[message.server.id]["queue"] = asyncio.Queue(maxsize=qsize)
-
-    queue = voice_params[message.server.id]["queue"]
-
-    # Get the voice client.
     if not client.is_voice_connected(message.server):
         try:
             voice_client = await client.join_voice_channel(channel=voice_channel)
@@ -399,7 +264,7 @@ async def play_youtube(client: discord.Client, message: discord.Message, *args: 
             return
     else:
         voice_client = client.voice_client_in(message.server)
-        assert isinstance(voice_client, discord.VoiceClient)
+        assert isinstance(voice_client, NavalVoiceClient)
         if not voice_client.is_connected():
             try:
                 del client.connection._voice_clients[message.server.id]
@@ -412,6 +277,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, *args: 
             except (discord.ClientException, TimeoutError, asyncio.TimeoutError):
                 await client.send_message(message.channel, ":x: Error happened on connecting to voice.")
                 return
+
+    queue = voice_client._play_queue
 
     # Get the number of songs on the queue.
     items = queue.qsize()
@@ -426,12 +293,8 @@ async def play_youtube(client: discord.Client, message: discord.Message, *args: 
             await client.send_message(message.channel, ":heavy_check_mark: You are next in the queue.")
 
         try:
-            queue.put_nowait((_oauth2_play_youtube(
-                client, message,
-                voice_client, voice_channel,
-                download_url, info
-
-            ), info))
+            # Put the coroutine on the queue.
+            queue.put_nowait((voice_client.oauth2_play(client, message, download_url, info), info))
         except asyncio.QueueFull:
             await client.send_message(message.channel,
                                       ":no_entry: There are too many songs on the queue. Cannot start "
@@ -455,11 +318,9 @@ async def play_youtube(client: discord.Client, message: discord.Message, *args: 
                 break
             # Add it to the queue.
             try:
-                queue.put_nowait((_oauth2_play_youtube(
+                queue.put_nowait((voice_client.oauth2_play(
                     client, message,
-                    voice_client, voice_channel,
-                    item["url"], item
-                ), item))
+                    item["url"], item), item))
             except asyncio.QueueFull:
                 await client.send_message(
                     message.channel, ":no_entry: There are too many songs on the queue. "
@@ -477,8 +338,5 @@ async def play_youtube(client: discord.Client, message: discord.Message, *args: 
 
         await client.send_message(message.channel, ":heavy_check_mark: Added {} track(s) to queue.".format(num + 1))
 
-    # Create a new task, if applicable.
-    if 'task' not in voice_params[message.server.id] or voice_params[message.server.id]["task"].cancelled():
-        # Create the new task.
-        task = loop.create_task(_await_queue(message.server.id))
-        voice_params[message.server.id]["task"] = task
+    # Create a new task for the VC, as appropriate.
+    voice_client.ensure_playlist_task()

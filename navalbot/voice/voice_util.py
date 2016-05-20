@@ -41,10 +41,21 @@ async def find_voice_channel(server: discord.Server):
     return chan
 
 
+def author_is_valid(author: discord.Member, valid_channels: list):
+    """
+    Check if an author is valid for skipping.
+    """
+    in_voice = author.voice_channel is not None
+    in_one_of = author.voice_channel in valid_channels
+    deafened = (author.deaf or author.self_deaf)
+    return in_voice and in_one_of and not deafened
+
+
 def with_opus(func):
     """
     Ensures Opus is loaded before running the function.
     """
+
     async def __decorator(client: discord.Client, message: discord.Message):
         if not discord.opus.is_loaded():
             await client.send_message(message.channel, content=":x: Cannot load voice module.")
@@ -61,6 +72,7 @@ def with_existing_server(func):
     """
     Ensures there's a server instance on the function.
     """
+
     async def __decorator(client: discord.Client, message: discord.Message):
         if message.server.id not in voice_params:
             await client.send_message(message.channel, content=":x: Not currently connected on this server.")
