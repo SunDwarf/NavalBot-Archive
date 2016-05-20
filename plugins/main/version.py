@@ -24,8 +24,8 @@ import aiohttp
 import discord
 
 # =============== Commands
-from navalbot.api.commands import oldcommand, command
-from navalbot.version import VERSION, VERSIONT
+from navalbot.api.commands import command
+from navalbot.version import VERSION, VERSIONT, VERSUFF
 
 
 def read_version(data):
@@ -50,7 +50,7 @@ async def version(client: discord.Client, message: discord.Message):
     await client.send_message(
         message.channel,
         "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-            .format(VERSION)
+            .format(VERSION + VERSUFF)
     )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
