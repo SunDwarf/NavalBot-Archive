@@ -25,8 +25,14 @@ import shlex
 import discord
 
 from navalbot import exceptions
-from navalbot.api import util
+from navalbot.api import util, db
 from navalbot.api.util import has_permissions_with_override
+
+
+class NavalRole:
+    ADMIN = 1
+    BOT_COMMANDER = 2
+    VOICE = 4
 
 
 class Command(object):
@@ -61,11 +67,6 @@ class Command(object):
                 self._args_type = 1
                 self._args_count = int(kwargs["argcount"])
 
-            self._arg_error_msg = kwargs.get(
-                "argerror",
-                ":x: You must have at least {} arguments. Use `\"\"` for arguments with spaces in them."
-                    .format(1 if not self._args_type else self._args_count))
-
         # Role restrictions.
         if kwargs.get("roles"):
             roles = kwargs.get("roles")
@@ -84,7 +85,24 @@ class Command(object):
         """
         Get the help for a specific function.
         """
-        return self._wrapped_coro.__doc__
+        doc = self._wrapped_coro.__doc__.split("\n")
+        doc = [d.lstrip() for d in doc if d.lstrip()]
+        doc = '\n'.join(doc)
+
+        return doc
+
+    async def _construct_arg_error_msg(self, server: discord.Server):
+        prefix = await db.get_config(server.id, "command_prefix", default="?")
+        base = """```{}({})""".format(prefix, '|'.join(self.names))
+
+        if self._args_type == 0:
+            base += " <1 or more arguments>\n\n"
+        elif self._args_type == 1:
+            base += " <{} arguments>\n\n".format(self._args_count)
+
+        base += self.help() + "\n```"
+
+        return base
 
     async def invoke(self, client: discord.Client, message: discord.Message):
         """
@@ -128,7 +146,7 @@ class Command(object):
                 except ValueError:
                     args = message.content.split(" ")[1:]
                 if len(args) < 1:
-                    await client.send_message(message.channel, self._arg_error_msg)
+                    await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
                     return
             elif self._args_type == 1:
                 # Check the function for annotations.
