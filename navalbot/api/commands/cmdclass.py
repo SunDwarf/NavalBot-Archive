@@ -29,10 +29,28 @@ from navalbot.api import util, db
 from navalbot.api.util import has_permissions_with_override
 
 
+class _RoleProxy:
+    def __init__(self, order, name, val):
+        self.name = name
+        self.val = val
+
+        self.order = order
+
+
 class NavalRole:
-    ADMIN = 1
-    BOT_COMMANDER = 2
-    VOICE = 4
+    ADMIN = _RoleProxy(999, "ADMIN", "Admin")
+    BOT_COMMANDER = _RoleProxy(100, "BOT_COMMANDER", "Bot Commander")
+    VOICE = _RoleProxy(1, "VOICE", "Voice")
+
+    def __init__(self, server_id: str):
+        self.server_id = server_id
+
+    async def load_role(self, rl: _RoleProxy):
+        """
+        Loads a role name, allowing for DB name overrides.
+        """
+        got = await db.get_config(self.server_id, "role:{}".format(rl.name), default=rl.val)
+        return got
 
 
 class Command(object):
@@ -51,6 +69,8 @@ class Command(object):
         self._wrapped_coro = to_wrap
 
         self._parse_kwargs(**kwargs)
+
+        self.role_loader = None
 
     def _parse_kwargs(self, **kwargs):
         """
@@ -108,6 +128,10 @@ class Command(object):
         """
         Invoke the function.
         """
+        # Set up the role loader.
+        if not self.role_loader:
+            self.role_loader = NavalRole(message.server.id)
+
         # Do the checks before running the coroutine.
         # Owner check.
 
@@ -128,11 +152,21 @@ class Command(object):
             except AssertionError:
                 await client.send_message(message.channel, ":no_entry: Cannot determine your role!")
                 return
-            if not await has_permissions_with_override(message.author, allowed_roles, message.server.id,
+
+            # Load roles correctly.
+            new_roles = set()
+            for role in allowed_roles:
+                assert isinstance(role, _RoleProxy), "Role should be a NavalRole member in {}".format(
+                    self._wrapped_coro.__name__)
+                rn = await self.role_loader.load_role(role)
+                new_roles.add(rn)
+
+            if not await has_permissions_with_override(message.author, new_roles, message.server.id,
                                                        self._wrapped_coro.__name__):
                 await client.send_message(
                     message.channel,
-                    ":no_entry: You do not have any of the required roles: `{}`!".format(allowed_roles)
+                    ":no_entry: You do not have any of the required roles: `{}`!"
+                        .format({role.val for role in allowed_roles})
 
                 )
                 return
@@ -159,7 +193,7 @@ class Command(object):
                 annotations = [f.annotation for f in params[2:]]
                 temp_args = shlex.split(message.content)[1:]
                 if len(temp_args) != self._args_count:
-                    await client.send_message(message.channel, self._arg_error_msg)
+                    await client.send_message(message.channel, self._construct_arg_error_msg(message.server))
                     return
                 args = []
                 # match the annotations
