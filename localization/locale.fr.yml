@@ -19,14 +19,14 @@ help.None: |
         Cette commande ne dispose d'aucune aide dans cette langue.
 
 help.set_config: |
-        Sets a server-specific configuration value.
+        Modifie un réglage du bot spécifique au serveur.
 
-        If you have spaces in either of your arguments, they must be surrounded by "quotation marks".
+        Si l'un de vos deux arguments contiennent un espace, ils doivent être entourés de "quotes".
 
 help.get_config: |
-        Gets a server specific configuration value.
+        Renvoie un réglage du bot spécifique au serveur.
 
-        If you have a space in your argument, it must be surrounded by "quotation marks".
+        Si votre argument contient un espace, il doit être entouré de "quotes".
 
 help.avatar: |
         Change l'avatar du bot.
@@ -50,9 +50,9 @@ help.remove_role_override: |
         This takes the command, and the role, as an argument.
 
 help.lock: |
-        Locks a factoid so that nobody can edit it but the owner.
+        Vérouille un alias pour que seul le propriétaire puisse l'éditer.
 
-        Please note that admins can still unlock and edit the factoids even when locked.
+        À noter que les admins peuvent toujours déverouiller et éditer les alias même verouillés.
 
 help.delete_factoid: |
         Supprime un alias.
@@ -63,10 +63,9 @@ help.unlock: |
         Déverouille un alias pour que tout le monde puisse l'éditer.
 
 help.factoids: |
-        Shows factoids matching a specific pattern.
         Affiche les alias correspondant à un motif spécifique.
 
-        Ce motif est un Redis scan search pattern. For more information, see http://redis.io/commands/scan
+        Ce motif est une commande Scan de Redis. Pour plus d'informations, voir http://redis.io/commands/scan
 
 help.factoid: |
         Explique simplement comment créer un alias.
