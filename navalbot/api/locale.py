@@ -85,7 +85,7 @@ class LocaleLoader:
             with open(self._default_path) as f:
                 self._default_data = yaml.load(f)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> str:
         """
         Load the key from the locale DB
         """
