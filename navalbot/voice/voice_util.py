@@ -49,37 +49,3 @@ def author_is_valid(author: discord.Member, valid_channels: list):
     in_one_of = author.voice_channel in valid_channels
     deafened = (author.deaf or author.self_deaf)
     return in_voice and in_one_of and not deafened
-
-
-def with_opus(func):
-    """
-    Ensures Opus is loaded before running the function.
-    """
-
-    async def __decorator(client: discord.Client, message: discord.Message):
-        if not discord.opus.is_loaded():
-            await client.send_message(message.channel, content=":x: Cannot load voice module.")
-            return
-        else:
-            await func(client, message)
-
-    __decorator = util.prov_dec_func(func, __decorator)
-
-    return __decorator
-
-
-def with_existing_server(func):
-    """
-    Ensures there's a server instance on the function.
-    """
-
-    async def __decorator(client: discord.Client, message: discord.Message):
-        if message.server.id not in voice_params:
-            await client.send_message(message.channel, content=":x: Not currently connected on this server.")
-            return
-        else:
-            await func(client, message)
-
-    __decorator = util.prov_dec_func(func, __decorator)
-
-    return __decorator
