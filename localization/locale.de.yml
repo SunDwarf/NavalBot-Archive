@@ -20,7 +20,7 @@ perms.cannot_determine_role: ":no_entry: Konnte Role nicht bestimmen!"
 perms.bad_role: ":no_entry: Du hast keine der erforderten Rollen!: `{roles}`!"
 
 # Sprach-Schlüssel
-voice.not_connected: ":x: Momentan nicht verbunden mit dem Server."
+voice.not_connected: ":x: Momentan nicht mit dem Server verbunden."
 voice.cant_control: ":x: Du musst dich im Sprach-Chat befinden und nicht auf taub geschaltet sein."
 
 voice.reset.success: ":heavy_check_mark: Sprachparamter wurden zurückgesetzt."
