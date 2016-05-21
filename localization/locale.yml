@@ -207,7 +207,7 @@ voice.voteskip.already_voted: ":no_entry: You have already voted."
 voice.mv.could_not_find: ":x: Could not find track at position `{index}`."
 voice.mv.moved: ":heavy_check_mark: Moved item `{title}` to position `{index}`."
 
-voice.remove.start_lt_end: ":x: Start must be larger than end position."
+voice.remove.start_lt_end: ":x: Start must be smaller than end position."
 voice.remove.deleted_one: ":heavy_check_mark: Deleted item {index} `({title})`."
 voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."
 
