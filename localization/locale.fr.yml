@@ -1,0 +1,282 @@
+#####################################################
+# This is the localization database for NavalBot.
+# This is used to localize messages.
+#
+# locale.yml is the default file, where keys are loaded from if they do not exist
+# locale.<lang>.yml is used for loading locale from language-specific files.
+#
+# When localizing a file, DO NOT REPLACE ANYTHING INSIDE { } OR ANYTHING INSIDE :_:.
+# These are used by the bot to build up the strings automatically.
+# You can re-order them for the sentences to make sense, but they must stay in the sentence.
+#####################################################
+
+# Generic keys.
+generic.not_int: ":x: Value {val} is not a valid integer."
+generic.file_too_big: ":x: File {fname} is too big to download."
+
+# Help keys.
+help.None: |
+        This command does not have help in this language.
+
+help.set_config: |
+        Sets a server-specific configuration value.
+
+        If you have spaces in either of your arguments, they must be surrounded by "quotation marks".
+
+help.get_config: |
+        Gets a server specific configuration value.
+
+        If you have a space in your argument, it must be surrounded by "quotation marks".
+
+help.avatar: |
+        Changes the avatar of the bot.
+        You must give one argument providing the URL of the avatar to change to.
+        This command is owner-only.
+
+help.changename: |
+        Changes the **username** of the bot.
+        Takes the name as an argument.
+        This command is owner-only.
+
+help.add_role_override: |
+        Adds a role override to a command.
+        This takes the command and the role as an argument.
+        This allows anybody with the role specified to run this command.
+        You can enable a command for everybody by adding a role override for `@ everybody` (without the space.).
+
+help.remove_role_override: |
+        Removes a role override from a command.
+        This takes the command, and the role, as an argument.
+
+help.lock: |
+        Locks a factoid so that nobody can edit it but the owner.
+
+        Please note that admins can still unlock and edit the factoids even when locked.
+
+help.delete_factoid: |
+        Deletes a factoid.
+
+        If the factoid is locked, only the owner or an admin can delete it.
+
+help.unlock: |
+        Unlocks a factoid so it is editable by anybody.
+
+help.factoids: |
+        Shows factoids matching a specific pattern.
+
+        This pattern is a Redis scan search pattern. For more information, see http://redis.io/commands/scan
+
+help.factoid: |
+        Just shows how to create a factoid.
+
+help.version: |
+        Shows the current version of the bot.
+
+help.again: |
+        Adds the currently playing track to the end of the queue again.
+
+help.shuffle: |
+        Shuffles the current queue.
+
+help.get_queued_vids: |
+        Shows the current track queue.
+
+        This takes an optional second parameter: the number of which to start. The command will output the queue from that position onwards.
+
+help.skip: |
+        Skips tracks.
+
+        This takes an optional second parameter: the number of tracks to skip.
+        This will skip the current track, then <num - 1> tracks in the queue.
+        If this is not supplied, it will only skip the current track.
+
+help.voteskip: |
+        Starts a vote to skip the currently playing track.
+
+help.move: |
+        Moves a track in the queue from position <x> to position <y>.
+
+        Both numbers must be integers.
+
+help.remove_vid: |
+        Removes a track or range of tracks.
+
+        Takes a start position and an optional end position to remove.
+        If the remove position is not specified, it will only remove one item.
+
+help.reset: |
+        Disconnects the bot from voice, and resets the voice client.
+
+help.np: |
+        Displays the currently playing track.
+
+help.play: |
+        Plays a track.
+
+        This takes either the URL to a video, or a search query.
+        This URL can be from most sites; the bot will try and download it correctly.
+
+
+help.choice: |
+        Makes that hard choice for you.
+
+        Surround your options with "quotation marks" if they have spaces in them.
+
+help.google: |
+        Search google for the top result of your search query.
+
+help.weather: |
+        Look up the weather for a place.
+
+help.commands: |
+        Display where to get help about a command.
+
+help.whois: |
+        Look up information about a user.
+
+        You must provide the author via a @mention.
+
+help.uptime: |
+        Display the uptime of the bot.
+
+
+# Permissions keys
+perms.not_owner: ":no_entry: This command is restricted to the bot owner."
+perms.cannot_determine_role: ":no_entry: Cannot determine your role!"
+perms.bad_role: ":no_entry: You do not have any of the required roles: `{roles}`!"
+
+# Voice keys.
+voice.not_connected: ":x: Not currently connected on this server."
+voice.cant_control: ":x: You must be in voice and not deafened to control me."
+
+voice.reset.success: ":heavy_check_mark: Reset voice."
+
+voice.no_song: ":x: No song is currently playing."
+voice.curr_playing: "Currently playing: `{title}` `{d_str}`"
+
+voice.playback.no_channel: >
+        :x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`,
+        however you can override this with by running `{prefix}setcfg voice_channel <your channel>`.
+
+voice.playback.pl_warning: ":warning: If this is a playlist, it may take a long time to download."
+voice.playback.bad_url: >
+        :x: This link is not in the link whitelist. To turn this off, use `{prefix}setcfg limit_urls False`.
+
+voice.playback.wait_for: >
+        :hourglass: Something else is downloading. Waiting for that to finish.
+
+voice.playback.downloading: ":hourglass: Downloading video information..."
+voice.playback.ytdl_error: ":no_entry: Something went horribly wrong. Error: {err}"
+voice.playback.bad_info: >
+        :no_entry: Something went horribly wrong. Could not get video information.
+
+voice.playback.timeout: ":x: Timed out trying to connect to server."
+voice.playback.connection_error: ":x: Error happened on connecting to voice."
+
+voice.playback.queue_num: ":heavy_check_mark: You are number {pos} in the queue."
+voice.playback.queue_next: ":heavy_check_mark: You are next in the queue."
+
+voice.playback.np: ":heavy_check_mark: Now playing: `{title}`"
+voice.playback.queue_full: ":no_entry: The queue is full."
+voice.playback.pl_queue_full: ":no_entry: There are too many songs on the queue. Limiting playlist to {limit}."
+voice.playback.pl_error: ":x: Search returned nothing, or playlist errored."
+voice.playback.pl_added: ":heavy_check_mark: Added {num} track(s) to queue."
+
+voice.play_again: ":heavy_check_mark: Playing `{title}` again."
+
+voice.shuffled: ":heavy_check_mark: Shuffled queue."
+
+voice.queue_too_short: ":x: Queue is not as long as that. (`{num}`)"
+voice.queue_negative: ":x: Cannot use a negative number with the queue."
+
+voice.queue.ommitted: "Omitted {num} queued items."
+voice.queue.curr_queued: >
+          **Currently queued: ({queue_length}/{max_queue_length})**
+          `[{hour:02d}:{minute:02d}:{second:02d}]`
+voice.queue.nothing_queued: "`Nothing is queued.`"
+
+voice.bad_state: ":x: Inconsistent internal state - resetting connection. Blame Discord, probably."
+
+voice.skip.one: ":heavy_check_mark: Skipped current song."
+voice.skip.all: ":heavy_check_mark: Skipped all songs."
+voice.skip.many: ":heavy_check_mark: Skipped {num} items."
+
+voice.voteskip.vote: ":heavy_check_mark: Voteskip acknowledged. `{left}` more votes required."
+voice.voteskip.already_voted: ":no_entry: You have already voted."
+
+voice.mv.could_not_find: ":x: Could not find track at position `{index}`."
+voice.mv.moved: ":heavy_check_mark: Moved item `{title}` to position `{index}`."
+
+voice.remove.start_lt_end: ":x: Start must be larger than end position."
+voice.remove.deleted_one: ":heavy_check_mark: Deleted item {index} `({title})`."
+voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."
+
+# core strings
+core.cfg.setcfg_updated: ":heavy_check_mark: Config updated: `{name}` -> `{val}`"
+core.cfg.avatar_changed: ":heavy_check_mark: Updated bot avatar."
+core.cfg.avatar_invalid: ":x: Avatar was not valid."
+core.cfg.name_changed: ":heavy_check_mark: Changed name to `{name}`."
+
+core.cfg.bad_override: ":x: You must provide an existing command."
+
+core.cfg_added_role_override: ":heavy_check_mark: Added role override for command {cmd}."
+core.cfg_removed_role_override: ":heavy_check_mark: Removed role override for command {cmd}."
+
+core.version.base: "Version **{ver}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
+core.version.no_dl: ":grey_exclamation: Could not download version information."
+core.version.new_ver: ":exclamation: *New version available:* **{ver}**"
+core.version.local_newer: ":grey_exclamation: *You are running a newer version than the one available online ({ver}).*"
+core.version.same: ":grey_exclamation: *You are running the latest version.*"
+
+core.factoids.nonexistant: ":x: Factoid `{fac}` does not exist."
+core.factoids.nexist_or_nlock: ":x: Factoid `{fac}` does not exist or is not locked."
+core.factoids.cannot_edit: ":x: Cannot edit factoid {fac}, it is locked to user `{u}`."
+
+core.factoids.locked: ":heavy_check_mark: Factoid `{fac}` locked to user `{u}`."
+core.factoids.deleted: ":heavy_check_mark: Factoid `{fac}` deleted."
+core.factoids.unlocked: ":heavy_check_mark: Factoid `{fac}` unlocked."
+
+core.factoids.match.header: "Matched factoids:"
+core.factoids.match.none: "`Nothing found using that pattern.`"
+
+# fun strings
+# ech
+fun.chosen: "My choice was: `{choice}`"
+
+fun.weather.bad_api_key: ":exclamation: No API key has been installed into the bot. Pester the owner to install it."
+fun.weather.rate_limit: ":exclamation: Hit the rate limit. Please wait."
+fun.weather.result: |
+        :cloud: _Weather for {place}:_
+        **Temperature:** {temp} °C **Humidity:** {hum} % **Wind:** {wind} m/s
+fun.weather.no_such_place: ":x: {place} does not seem to exist."
+
+fun.commands: "**See https://github.com/SunDwarf/NavalBot/wiki for more info.**"
+
+fun.whois.bad_command: ":x: You must mention at a user."
+fun.whois.response: |
+        :mag_right: Whois for {author.name}:
+        ```
+        Name: {author.name}#{author.discriminator}
+        Nickname: {author.nick}
+        ID: {author.id}
+        Created at: {author.created_at}
+        Colour: {author.colour}
+        Avatar URL: {author.avatar_url}
+        ```
+
+fun.uptime.time_fmt: "`{hours_total} hours, {minutes} minutes, {seconds} seconds`"
+fun.uptime.response: "Bot has been running for {time} since startup of process `#{pid}`"
+
+fun.stats.shard: "Currently shard `{shard_id}/{shard_count}\n"
+fun.stats.response: |
+        {shardm}Currently running on `{servcount}` server(s). Processed `{msgcount}` messages since startup.
+        Connected to `{vcount}` voice channels, with `{scount}` streams currently playing.
+        Using `{memcount}MB` of memory.
+
+fun.urban: |
+  **Your search for `{search}` returned the following:
+
+  *Definition:*** {definition}
+  ***Example:*** {example}
+
+fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
