@@ -51,7 +51,7 @@ class LocaleLoader:
             self._locale_data = {}
             self.path = ""
         else:
-            self.path = os.path.join(LOCALE_ROOT, LOCALE_FILE_BUILDER.format(self.lang))
+            self.path = os.path.join(LOCALE_ROOT, LOCALE_FILE_BUILDER.format(lang=self.lang))
             if not os.path.exists(self.path):
                 logger.warning("No such locale: `{}`".format(self.lang))
                 self._last_load = 2147483647
