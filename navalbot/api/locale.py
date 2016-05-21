@@ -97,6 +97,16 @@ class LocaleLoader:
         else:
             return key
 
+    def get(self, key):
+        """
+        Loads the key from the locale DB, but returns None if the key doesn't exist.
+        """
+        i = self[key]
+        if i == key:
+            return None
+        else:
+            return key
+
 
 def get_locale(lang: str) -> LocaleLoader:
     """
