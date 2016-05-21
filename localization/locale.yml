@@ -12,6 +12,110 @@
 
 # Generic keys.
 generic.not_int: ":x: Value {val} is not a valid integer."
+generic.file_too_big: ":x: File {fname} is too big to download."
+
+# Help keys.
+help.None: |
+        This command does not have help in this language.
+
+help.set_config: |
+        Sets a server-specific configuration value.
+
+        If you have spaces in either of your arguments, they must be surrounded by "quotation marks".
+
+help.get_config: |
+        Gets a server specific configuration value.
+
+        If you have a space in your argument, it must be surrounded by "quotation marks".
+
+help.avatar: |
+        Changes the avatar of the bot.
+        You must give one argument providing the URL of the avatar to change to.
+        This command is owner-only.
+
+help.changename: |
+        Changes the **username** of the bot.
+        Takes the name as an argument.
+        This command is owner-only.
+
+help.add_role_override: |
+        Adds a role override to a command.
+        This takes the command and the role as an argument.
+        This allows anybody with the role specified to run this command.
+        You can enable a command for everybody by adding a role override for `@ everybody` (without the space.).
+
+help.remove_role_override: |
+        Removes a role override from a command.
+        This takes the command, and the role, as an argument.
+
+help.lock: |
+        Locks a factoid so that nobody can edit it but the owner.
+
+        Please note that admins can still unlock and edit the factoids even when locked.
+
+help.delete_factoid: |
+        Deletes a factoid.
+
+        If the factoid is locked, only the owner or an admin can delete it.
+
+help.unlock: |
+        Unlocks a factoid so it is editable by anybody.
+
+help.factoids: |
+        Shows factoids matching a specific pattern.
+
+        This pattern is a Redis scan search pattern. For more information, see http://redis.io/commands/scan
+
+help.factoid: |
+        Just shows how to create a factoid.
+
+help.version: |
+        Shows the current version of the bot.
+
+help.again: |
+        Adds the currently playing track to the end of the queue again.
+
+help.shuffle: |
+        Shuffles the current queue.
+
+help.get_queued_vids: |
+        Shows the current track queue.
+
+        This takes an optional second parameter: the number of which to start. The command will output the queue from that position onwards.
+
+help.skip: |
+        Skips tracks.
+
+        This takes an optional second parameter: the number of tracks to skip.
+        This will skip the current track, then <num - 1> tracks in the queue.
+        If this is not supplied, it will only skip the current track.
+
+help.voteskip: |
+        Starts a vote to skip the currently playing track.
+
+help.move: |
+        Moves a track in the queue from position <x> to position <y>.
+
+        Both numbers must be integers.
+
+help.remove_vid: |
+        Removes a track or range of tracks.
+
+        Takes a start position and an optional end position to remove.
+        If the remove position is not specified, it will only remove one item.
+
+help.reset: |
+        Disconnects the bot from voice, and resets the voice client.
+
+help.np: |
+        Displays the currently playing track.
+
+help.play: |
+        Plays a track.
+
+        This takes either the URL to a video, or a search query.
+        This URL can be from most sites; the bot will try and download it correctly.
+
 
 # Permissions keys
 perms.not_owner: ":no_entry: This command is restricted to the bot owner."
@@ -83,3 +187,14 @@ voice.mv.moved: ":heavy_check_mark: Moved item `{title}` to position `{index}`."
 voice.remove.start_lt_end: ":x: Start must be larger than end position."
 voice.remove.deleted_one: ":heavy_check_mark: Deleted item {index} `({title})`."
 voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."
+
+# core strings
+core.cfg.setcfg_updated: ":heavy_check_mark: Config updated: `{name}` -> `{val}`"
+core.cfg.avatar_changed: ":heavy_check_mark: Updated bot avatar."
+core.cfg.avatar_invalid: ":x: Avatar was not valid."
+core.cfg.name_changed: ":heavy_check_mark: Changed name to `{name}`."
+
+core.cfg.bad_override: ":x: You must provide an existing command."
+
+core.cfg_added_role_override: ":heavy_check_mark: Added role override for command {cmd}."
+core.cfg_removed_role_override: ":heavy_check_mark: Removed role override for command {cmd}."

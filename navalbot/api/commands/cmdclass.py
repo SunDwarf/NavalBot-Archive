@@ -103,13 +103,18 @@ class Command(object):
         else:
             self._only_owner = False
 
-    def help(self):
+    async def help(self, server: discord.Server) -> str:
         """
         Get the help for a specific function.
         """
-        doc = self._wrapped_coro.__doc__.split("\n")
-        doc = [d.lstrip() for d in doc if d.lstrip()]
-        doc = '\n'.join(doc)
+        # load it from locale
+
+        loc = await db.get_config(server.id, "lang", default=None)
+        loc = get_locale(loc)
+
+        doc = loc.get("help.{}".format(self._wrapped_coro.__name__))
+        if not doc:
+            doc = loc["help.None"]
 
         return doc
 
@@ -122,7 +127,7 @@ class Command(object):
         elif self._args_type == 1:
             base += " <{} arguments>\n\n".format(self._args_count)
 
-        base += self.help() + "\n```"
+        base += await self.help(server) + "\n```"
 
         return base
 
@@ -193,6 +198,7 @@ class Command(object):
                 args = shlex.split(message.content)[1:]
                 if len(args) != self._args_count:
                     await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
+                    return
 
         # Create the context.
         ctx = CommandContext(client, message, locale=loc)
