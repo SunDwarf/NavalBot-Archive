@@ -58,6 +58,7 @@ class NavalVoiceClient(discord.VoiceClient):
         self.curr_task = None
 
         self.voteskips = []
+        self.curr_info = {}
 
         self.loop.create_task(self._fix_queue())
 
@@ -129,6 +130,9 @@ class NavalVoiceClient(discord.VoiceClient):
         self.player = player
         self.playing = True
         self.title = info.get("title", "???")
+
+        self.curr_info = info
+
         # Reset progress/duration
         self.progress = 0
         self.duration = info.get("duration")
@@ -157,6 +161,7 @@ class NavalVoiceClient(discord.VoiceClient):
         self.progress = 0
         self.voteskips = []
         self.title = None
+        self.curr_info = {}
 
     def cmd_np(self):
         """
