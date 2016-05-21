@@ -32,6 +32,7 @@ import functools
 import youtube_dl
 
 from navalbot.api import db
+from navalbot.api.commands.ctx import CommandContext
 
 logger = logging.getLogger("NavalBot::Voice")
 
@@ -120,8 +121,7 @@ class NavalVoiceClient(discord.VoiceClient):
 
         return data.get("url")
 
-    async def oauth2_play(self, client: discord.Client,
-                          message: discord.Message,
+    async def oauth2_play(self, ctx: CommandContext,
                           download_url: str, info: dict):
         """
         Co-routine that is used for the message queue.
@@ -143,8 +143,7 @@ class NavalVoiceClient(discord.VoiceClient):
         # Reset voteskips.
         self.voteskips = []
         # Send a now playing message.
-        await client.send_message(message.channel,
-                                  ":heavy_check_mark: Now playing: `{}`".format(info.get("title", "???")))
+        await ctx.reply("voice.playback.np", title=self.title)
         assert isinstance(player, discord.voice_client.ProcessPlayer)
 
         player.start()
@@ -167,24 +166,23 @@ class NavalVoiceClient(discord.VoiceClient):
         self.title = None
         self.curr_info = {}
 
-    def cmd_np(self):
+    async def cmd_np(self, ctx: CommandContext):
         """
         Returns the message for the currently playing track.
         """
         if not self.playing:
-            return ":x: No song is currently playing."
+            await ctx.reply("voice.no_song")
 
         m, s = divmod(self.progress, 60)
         if self.duration:
             dm, ds = divmod(self.duration, 60)
         else:
             dm, ds = 0, 0
-        playing = "" if self.player.is_playing() else "`[PAUSED]`"
 
         # Build the string
         d_str = "[{:02d}:{:02d} / {:02d}:{:02d}]".format(trunc(m), trunc(s), trunc(dm), trunc(ds))
-        b_str = "Currently playing: `{}` `{}` {}".format(self.title, d_str, playing)
-        return b_str
+        b_str = ctx.locale["voice.curr_playing"].format(self.title, d_str)
+        await ctx.client.send_message(ctx.message.channel, b_str)
 
     async def cmd_queue(self, start_pos: int = 0):
         """
@@ -329,7 +327,8 @@ class NavalVoiceClient(discord.VoiceClient):
             self.voteskips = []
             return ":heavy_check_mark: Skipped current track."
         else:
-            return ":heavy_check_mark: Voteskip acknowledged. `{}` more votes required.".format(required - len(self.voteskips))
+            return ":heavy_check_mark: Voteskip acknowledged. `{}` more votes required.".format(
+                required - len(self.voteskips))
 
     async def cmd_move(self, fr: int, to: int):
         """
@@ -359,7 +358,7 @@ class NavalVoiceClient(discord.VoiceClient):
 
         return ":heavy_check_mark: Moved item `{}` to position `{}`.".format(title, to)
 
-    async def cmd_remove(self, start: int, end: int=None):
+    async def cmd_remove(self, start: int, end: int = None):
         """
         Implementation for remove.
         """

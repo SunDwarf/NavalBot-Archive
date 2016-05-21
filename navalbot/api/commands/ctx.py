@@ -38,11 +38,11 @@ class CommandContext:
         self.locale = locale
         self.args = args
 
-    async def reply(self, key: str, fmt: str=""):
+    async def reply(self, key: str, **fmt):
         """
         Wrapper around self.locale["key"] and self.client.send_message(self.message.channel, whatever)
         """
         key = self.locale[key]
-        key = key.format(fmt)
+        key = key.format(**fmt)
         await self.client.send_message(self.message.channel, key)
         return key

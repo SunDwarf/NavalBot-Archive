@@ -21,24 +21,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import asyncio
 import functools
-import logging
 import re
-from math import trunc
 from concurrent.futures import TimeoutError
 
 import discord
 import youtube_dl
 
-from navalbot.api.commands import oldcommand, command
+from navalbot.api.commands import command
+from navalbot.api.commands.ctx import CommandContext
 from navalbot.api import db
-from navalbot.api import decorators
 from navalbot.api import util
 from navalbot.api.commands.cmdclass import NavalRole
-from navalbot.voice.voiceclient import NavalVoiceClient
-from .stores import voice_params, voice_locks
+from .stores import voice_locks
 
 # Get loop
-from .voice_util import find_voice_channel, with_existing_server, with_opus, author_is_valid
+from .voice_util import find_voice_channel, author_is_valid
 
 loop = asyncio.get_event_loop()
 
@@ -63,35 +60,35 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
 
 
 @command("reset", "disconnect", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE})
-async def reset(client: discord.Client, message: discord.Message):
-    vc = client.voice_client_in(message.server)
+async def reset(ctx: CommandContext):
+    vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
-        await client.send_message(message.channel, ":x: Not currently connected in this server.")
+        await ctx.reply("voice.not_connected")
         return
 
     # Reset the voice client
-    channels = [vc.channel, find_voice_channel(message.server), message.author.voice_channel]
+    channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
 
-    if not author_is_valid(message.author, channels):
-        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
+    if not author_is_valid(ctx.message.author, channels):
+        await ctx.reply("voice.cant_control")
         return
 
     await vc.reset()
-    await client.send_message(message.channel, ":heavy_check_mark: Reset voice.")
+    await ctx.reply("voice.reset.success")
 
 
 @command("np", "nowplaying")
-async def np(client: discord.Client, message: discord.Message):
+async def np(ctx: CommandContext):
     """
     Get the currently playing track.
     """
-    vc = client.voice_client_in(message.server)
+    vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
-        await client.send_message(message.channel, ":x: Not currently connected in this server.")
+        await ctx.reply("voice.not_connected")
         return
 
     # Return the output of `cmd_np`.
-    await client.send_message(message.channel, vc.cmd_np())
+    await vc.cmd_np(ctx)
 
 
 def coro_factory(coro, *args, **kwargs):
@@ -105,7 +102,7 @@ def coro_factory(coro, *args, **kwargs):
 
 
 @command("play", "playyt", "playyoutube", argcount="?", argerror=":x: You must pass a video!")
-async def play(client: discord.Client, message: discord.Message, *args: list):
+async def play(ctx: CommandContext):
     """
     Plays a video from any valid streaming source that `youtube-dl` can download from.
     This includes things such as YouTube (obviously) and SoundCloud.
@@ -113,42 +110,40 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
     Use ?stop or ?skip to skip a song, ?queue to see the current queue of songs, ?np to see the currently playing
     track, and ?reset to fix the queue.
     """
-    voice_channel = await find_voice_channel(message.server)
+    voice_channel = await find_voice_channel(ctx.message.server)
     if not voice_channel:
-        await client.send_message(
-            message.channel,
-            content=":x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`, "
-                    "however you can override this with by running `{}setcfg voice_channel <your channel>`."
-                .format(await util.get_prefix(message.server.id)))
+        #await client.send_message(
+        #    message.channel,
+        #    content=":x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`, "
+        #            "however you can override this with by running `{}setcfg voice_channel <your channel>`."
+        #        .format(await util.get_prefix(message.server.id)))
+        await ctx.reply("voice.playback.no_channel", prefix=await util.get_prefix(ctx.message.server.id))
         return
 
-    if message.server.id not in voice_locks:
-        voice_locks[message.server.id] = asyncio.Lock()
+    if ctx.message.server.id not in voice_locks:
+        voice_locks[ctx.message.server.id] = asyncio.Lock()
 
-    vidname = ' '.join(args)
+    vidname = ' '.join(ctx.args)
 
     if 'list' in vidname or 'playlist' in vidname:
-        await client.send_message(message.channel, ":warning: If this is a playlist, it may take a long time to "
-                                                   "download.")
+        await ctx.reply("voice.playback.pl_warning")
 
     # Naive implementation of preventing naughtystuff
-    if re.match(r'http[s]://', vidname):
-        limit = await db.get_config(message.server.id, "limit_urls", default="True", type_=str)
+    if re.match(r'.*http[s]://.*', vidname):
+        limit = await db.get_config(ctx.message.server.id, "limit_urls", default="True", type_=str)
         limit = True if limit == "True" else False
         if limit:
             # Only allow youtube/soundcloud links
             if not re.match(r'.*?(youtube.com|youtu.be|soundcloud.com).*?', vidname):
-                await client.send_message(
-                    message.channel, ":x: This link is not in the link whitelist."
-                                     "To turn this off, use `{}setcfg limit_urls False`."
-                        .format(await db.get_config(message.server.id, "command_prefix", default="?")))
+                await ctx.reply("voice.playback.bad_url",
+                                prefix=await db.get_config(ctx.message.server.id, "command_prefix", default="?"))
                 return
 
     # Do the same as play_file, but with a youtube streamer.
     # Play it via ffmpeg.
 
     # Get the max queue size
-    qsize = await db.get_config(message.server.id, "max_queue", default=99, type_=int)
+    qsize = await db.get_config(ctx.message.server.id, "max_queue", default=99, type_=int)
 
     # Use fallback for soundcloud, if possible
     ydl = youtube_dl.YoutubeDL({
@@ -156,24 +151,22 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
         "default_search": "ytsearch", "source_address": "0.0.0.0"})
     func = functools.partial(ydl.extract_info, vidname, download=False)
     # Set the download lock.
-    lock = voice_locks.get(message.server.id)
+    lock = voice_locks.get(ctx.message.server.id)
     assert isinstance(lock, asyncio.Lock)
     try:
         if lock.locked():
-            await client.send_message(message.channel, ":hourglass: Something else is downloading. Waiting for that "
-                                                       "to finish.")
+            await ctx.reply("voice.playback.wait_for")
         await lock.acquire()
-        await client.send_message(message.channel, ":hourglass: Downloading video information...")
+        await ctx.reply("voice.playback.downloading")
         info = await loop.run_in_executor(None, func)
         lock.release()
     except Exception as e:
-        await client.send_message(message.channel, ":no_entry: Something went horribly wrong. Error: {}".format(e))
+        await ctx.reply("voice.playback.ytdl_error", err=e)
         lock.release()
         return
 
     if not info:
-        await client.send_message(message.channel, ":no_entry: Something went horribly wrong. Could not get video "
-                                                   "information.")
+        await ctx.reply("voice.playback.bad_info")
         return
 
     # Check for a playlist.
@@ -201,26 +194,28 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
     # 2. Places the coroutine on the server-specific queue.
     # 3. Checks to see if there is a looping task running for fetching new songs off of the queue for that server.
     #    If there isn't, it will create a new one, store it, and so on.
-    if not client.is_voice_connected(message.server):
+    if not ctx.client.is_voice_connected(ctx.message.server):
         try:
-            voice_client = await client.join_voice_channel(channel=voice_channel)
+            voice_client = await ctx.client.join_voice_channel(channel=voice_channel)
         except (discord.ClientException, TimeoutError, asyncio.TimeoutError):
-            await client.send_message(message.channel, ":x: Timed out trying to connect to server.")
+            await ctx.reply("voice.playback.timeout")
             return
     else:
-        voice_client = client.voice_client_in(message.server)
-        assert isinstance(voice_client, NavalVoiceClient)
+        voice_client = ctx.client.voice_client_in(ctx.message.server)
+        # Check if we're connected anyway.
+        # This works around some weird bugs.
         if not voice_client.is_connected():
+            # Since we're not, delete the voice client and re-try.
             try:
-                del client.connection._voice_clients[message.server.id]
+                del ctx.client.connection._voice_clients[ctx.message.server.id]
             except Exception:
                 # lol what
                 pass
             # Re-create the voice client.
             try:
-                voice_client = await client.join_voice_channel(channel=voice_channel)
+                voice_client = await ctx.client.join_voice_channel(channel=voice_channel)
             except (discord.ClientException, TimeoutError, asyncio.TimeoutError):
-                await client.send_message(message.channel, ":x: Error happened on connecting to voice.")
+                await ctx.reply("voice.playback.connection_error")
                 return
 
     queue = voice_client._play_queue
@@ -232,20 +227,16 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
     if not is_playlist:
         # Send a helpful error message.
         if items != 0:
-            await client.send_message(message.channel,
-                                      ":heavy_check_mark: You are number {} in the queue.".format(items + 1))
+            await ctx.reply("voice.playback.queue_num", pos=items + 1)
         else:
-            await client.send_message(message.channel, ":heavy_check_mark: You are next in the queue.")
+            await ctx.reply("voice.playback.queue_next")
 
         try:
             # Create the factory.
-            fac = coro_factory(voice_client.oauth2_play, client, message, download_url, info)
+            fac = coro_factory(voice_client.oauth2_play, ctx, download_url, info)
             queue.put_nowait((fac, info))
         except asyncio.QueueFull:
-            await client.send_message(message.channel,
-                                      ":no_entry: There are too many songs on the queue. Cannot start "
-                                      "playing.")
-
+            await ctx.reply("voice.playback.queue_full")
     else:
         # If it's pretending to be a playlist, but there's nothing there, set num to -1 to prevent UnboundLocalError
         if not pl_data:
@@ -256,34 +247,25 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
                 continue
             # If the playlist is bigger than the queue, stop it from putting onto the queue.
             if num == qsize:
-                await client.send_message(
-                    message.channel,
-                    ":grey_exclamation: Cannot play more than {} "
-                    "songs from a playlist. Skipping the rest.".format(qsize)
-                )
+                # I'm not entirely sure this message will ever be seen.
+                await ctx.reply("skip_extra")
                 break
             # Add it to the queue.
             try:
                 # Create the coro factory
 
-                fac = coro_factory(voice_client.oauth2_play, client, message, item["url"], item)
+                fac = coro_factory(voice_client.oauth2_play, ctx, item["url"], item)
                 queue.put_nowait((fac, item))
             except asyncio.QueueFull:
-                await client.send_message(
-                    message.channel, ":no_entry: There are too many songs on the queue. "
-                                     "Limiting playlist to {}.".format(num)
-                )
+                await ctx.reply("voice.playback.pl_queue_full", limit=num)
                 break
 
         # See above, to see justification of num being -1.
         if num == -1:
-            await client.send_message(
-                message.channel,
-                ":x: Search returned nothing, or playlist errored."
-            )
+            await ctx.reply("voice.playlist.pl_error")
             return
 
-        await client.send_message(message.channel, ":heavy_check_mark: Added {} track(s) to queue.".format(num + 1))
+        await ctx.reply("voice.playlist.pl_added", num=num + 1)
 
     # Create a new task for the VC, as appropriate.
     voice_client.ensure_playlist_task()

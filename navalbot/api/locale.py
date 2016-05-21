@@ -79,7 +79,7 @@ class LocaleLoader:
                 with open(self.path) as f:
                     self._locale_data = yaml.load(f)
         # Do the same for default locale.
-        mtime = os.stat(self._default_path)
+        mtime = os.stat(self._default_path).st_mtime
         if mtime > self._default_last_load:
             # Reload the file
             with open(self._default_path) as f:

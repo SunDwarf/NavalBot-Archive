@@ -1,0 +1,48 @@
+#####################################################
+# This is the localization database for NavalBot.
+# This is used to localize messages.
+#
+# locale.yml is the default file, where keys are loaded from if they do not exist
+# locale.<lang>.yml is used for loading locale from language-specific files.
+#
+# When localizing a file, DO NOT REPLACE ANYTHING INSIDE { } OR ANYTHING INSIDE :_:.
+# These are used by the bot to build up the strings automatically.
+# You can re-order them for the sentences to make sense, but they must stay in the sentence.
+#####################################################
+
+# Voice keys.
+voice.not_connected: ":x: Not currently connected on this server."
+voice.cant_control: ":x: You must be in voice and not deafened to control me."
+
+voice.reset.success: ":heavy_check_mark: Reset voice."
+
+voice.no_song: ":x: No song is currently playing."
+voice.curr_playing: "Currently playing: `{title}` `{d_str}`"
+
+voice.playback.no_channel: >
+        :x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`,
+        however you can override this with by running `{}setcfg voice_channel <your channel>`.
+
+voice.playback.pl_warning: ":warning: If this is a playlist, it may take a long time to download."
+voice.playback.bad_url: >
+        :x: This link is not in the link whitelist. To turn this off, use `{prefix}setcfg limit_urls False`.
+
+voice.playback.wait_for: >
+        :hourglass: Something else is downloading. Waiting for that to finish.
+
+voice.playback.downloading: ":hourglass: Downloading video information..."
+voice.playback.ytdl_error: ":no_entry: Something went horribly wrong. Error: {err}"
+voice.playback.bad_info: >
+        :no_entry: Something went horribly wrong. Could not get video information.
+
+voice.playback.timeout: ":x: Timed out trying to connect to server."
+voice.playback.connection_error: ":x: Error happened on connecting to voice."
+
+voice.playback.queue_num: ":heavy_check_mark: You are number {pos} in the queue."
+voice.playback.queue_next: ":heavy_check_mark: You are next in the queue."
+
+voice.playback.np: ":heavy_check_mark: Now playing: `{title}`"
+voice.playback.queue_full: ":no_entry: There are too many songs on the queue. Cannot start playing."
+voice.playback.pl_queue_full: ":no_entry: There are too many songs on the queue. Limiting playlist to {limit}."
+voice.playback.pl_error: ":x: Search returned nothing, or playlist errored."
+voice.playback.pl_added: ":heavy_check_mark: Added {num} track(s) to queue."
