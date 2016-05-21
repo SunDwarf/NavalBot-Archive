@@ -96,3 +96,17 @@ class LocaleLoader:
             return self._default_data[key]
         else:
             return key
+
+
+def get_locale(lang: str) -> LocaleLoader:
+    """
+    Sanitize the language string, and load it from disk.
+    """
+    if lang:
+        safe_lang = "".join(x for x in lang if x.isalnum())
+    else:
+        safe_lang = None
+    if safe_lang not in locale_loaders:
+        locale_loaders[safe_lang] = LocaleLoader(safe_lang)
+
+    return locale_loaders[safe_lang]
