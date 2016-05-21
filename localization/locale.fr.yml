@@ -11,12 +11,12 @@
 #####################################################
 
 # Generic keys.
-generic.not_int: ":x: Value {val} is not a valid integer."
-generic.file_too_big: ":x: File {fname} is too big to download."
+generic.not_int: ":x: La valeur {val} n'est pas un nombre entier valide."
+generic.file_too_big: ":x: Le poids du fichier {fname} est trop élevé pour le télécharger."
 
 # Help keys.
 help.None: |
-        This command does not have help in this language.
+        Cette commande ne dispose d'aucune aide dans cette langue.
 
 help.set_config: |
         Sets a server-specific configuration value.
@@ -29,17 +29,18 @@ help.get_config: |
         If you have a space in your argument, it must be surrounded by "quotation marks".
 
 help.avatar: |
-        Changes the avatar of the bot.
-        You must give one argument providing the URL of the avatar to change to.
-        This command is owner-only.
+        Change l'avatar du bot.
+        Vous devez indiquer l'URL de l'avatar à utiliser à la place.
+        Seul le propriétaire du bot peut utiliser la commande.
 
 help.changename: |
-        Changes the **username** of the bot.
-        Takes the name as an argument.
-        This command is owner-only.
+        Change le **nom d'utilisateur** du bot.
+        Indiquez le nom à la suite de la commande.
+        Seul le propriétaire du bot peut utiliser la commande.
 
 help.add_role_override: |
         Adds a role override to a command.
+        
         This takes the command and the role as an argument.
         This allows anybody with the role specified to run this command.
         You can enable a command for everybody by adding a role override for `@ everybody` (without the space.).
@@ -70,89 +71,89 @@ help.factoid: |
         Just shows how to create a factoid.
 
 help.version: |
-        Shows the current version of the bot.
+        Affiche la version actuelle du bot.
 
 help.again: |
-        Adds the currently playing track to the end of the queue again.
+        Ajoute la piste en cours de lecture à la fin de la file d'attente à nouveau.
 
 help.shuffle: |
-        Shuffles the current queue.
+        Réordonne aléatoirement la file d'attente.
 
 help.get_queued_vids: |
-        Shows the current track queue.
+        Affiche la file d'attente actuelle.
 
         This takes an optional second parameter: the number of which to start. The command will output the queue from that position onwards.
 
 help.skip: |
-        Skips tracks.
+        Sauter des pistes.
 
         This takes an optional second parameter: the number of tracks to skip.
         This will skip the current track, then <num - 1> tracks in the queue.
         If this is not supplied, it will only skip the current track.
 
 help.voteskip: |
-        Starts a vote to skip the currently playing track.
+        Commence un vote pour sauter la piste en cours de lecture.
 
 help.move: |
-        Moves a track in the queue from position <x> to position <y>.
+        Déplace une piste de la file d'attente de la position <x> à la position <y>.
 
-        Both numbers must be integers.
+        Les deux nombres doivent être entiers.
 
 help.remove_vid: |
-        Removes a track or range of tracks.
+        Supprime une plage de pistes de la file d'attente.
 
-        Takes a start position and an optional end position to remove.
-        If the remove position is not specified, it will only remove one item.
+        Il faut une position de départ, et optionellement une position de fin.
+        Si la position de fin n'est pas spécifiée, seul une piste sera supprimée.
 
 help.reset: |
-        Disconnects the bot from voice, and resets the voice client.
+        Déconnecte le bot du serveur vocal et le réinitialise.
 
 help.np: |
-        Displays the currently playing track.
+        Affiche la piste en cours de lecture.
 
 help.play: |
-        Plays a track.
+        Joue une piste.
 
-        This takes either the URL to a video, or a search query.
-        This URL can be from most sites; the bot will try and download it correctly.
+        Vous pouvez spécifier l'URL d'une vidéo, ou une recherche de mots-clés.
+        Cette URL peut provenir de la plupart des sites, le bot essaiera de télécharger l'audio correctement.
 
 
 help.choice: |
-        Makes that hard choice for you.
+        Fait ce choix cornélien à votre place.
 
-        Surround your options with "quotation marks" if they have spaces in them.
+        Entourez vos options avec des "quotes" si elles contiennent des espaces.
 
 help.google: |
-        Search google for the top result of your search query.
+        Fait une recherche Google et affiche le premier résultat.
 
 help.weather: |
-        Look up the weather for a place.
+        Cherche la météo pour un endroit défini.
 
 help.commands: |
-        Display where to get help about a command.
+        Affiche l'endroit ou obtenir de l'aide à propos d'une commande.
 
 help.whois: |
-        Look up information about a user.
+        Recherche des informations concernant un utilisateur.
 
         You must provide the author via a @mention.
 
 help.uptime: |
-        Display the uptime of the bot.
+        Affiche la durée durant laquelle le bot opère depuis la dernière mise en ligne.
 
 
 # Permissions keys
-perms.not_owner: ":no_entry: This command is restricted to the bot owner."
+perms.not_owner: ":no_entry: Cette commande est réservée au propriétaire du bot."
 perms.cannot_determine_role: ":no_entry: Cannot determine your role!"
-perms.bad_role: ":no_entry: You do not have any of the required roles: `{roles}`!"
+perms.bad_role: ":no_entry: Vous ne possédez aucun des rôles nécessaires: `{roles}`!"
 
 # Voice keys.
-voice.not_connected: ":x: Not currently connected on this server."
-voice.cant_control: ":x: You must be in voice and not deafened to control me."
+voice.not_connected: ":x: Le bot n'est pas connecté sur ce serveur."
+voice.cant_control: ":x: Vous devez vous trouver dans un canal vocal et ne pas être sourd pour me contrôler."
 
-voice.reset.success: ":heavy_check_mark: Reset voice."
+voice.reset.success: ":heavy_check_mark: Fonction vocale réinitialisée."
 
-voice.no_song: ":x: No song is currently playing."
-voice.curr_playing: "Currently playing: `{title}` `{d_str}`"
+voice.no_song: ":x: Aucune piste n'est en cours de lecture."
+voice.curr_playing: "En cours de lecture: `{title}` `{d_str}`"
 
 voice.playback.no_channel: >
         :x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`,
@@ -160,24 +161,24 @@ voice.playback.no_channel: >
 
 voice.playback.pl_warning: ":warning: If this is a playlist, it may take a long time to download."
 voice.playback.bad_url: >
-        :x: This link is not in the link whitelist. To turn this off, use `{prefix}setcfg limit_urls False`.
+        :x: Ce lien n'est pas autorisé par la whitelist. Pour désactiver la whitelist, utilisez `{prefix}setcfg limit_urls False`.
 
 voice.playback.wait_for: >
-        :hourglass: Something else is downloading. Waiting for that to finish.
+        :hourglass: Quelque chose d'autre est en cours de téléchargement. Veuillez patienter, le temps que ce téléchargement se termine.
 
-voice.playback.downloading: ":hourglass: Downloading video information..."
-voice.playback.ytdl_error: ":no_entry: Something went horribly wrong. Error: {err}"
+voice.playback.downloading: ":hourglass: Téléchargement des informations de la vidéo..."
+voice.playback.ytdl_error: ":no_entry: Quelque chose ne s'est pas passé comme prévu. Erreur: {err}"
 voice.playback.bad_info: >
-        :no_entry: Something went horribly wrong. Could not get video information.
+        :no_entry: Quelque chose ne s'est pas passé comme prévu. Impossible d'obtenir les informations de la vidéo.
 
-voice.playback.timeout: ":x: Timed out trying to connect to server."
-voice.playback.connection_error: ":x: Error happened on connecting to voice."
+voice.playback.timeout: ":x: Le délai d'attente à été dépassé lors de la connexion au serveur."
+voice.playback.connection_error: ":x: Une erreur s'est produite durant la connexion au server vocal."
 
-voice.playback.queue_num: ":heavy_check_mark: You are number {pos} in the queue."
-voice.playback.queue_next: ":heavy_check_mark: You are next in the queue."
+voice.playback.queue_num: ":heavy_check_mark: Vous êtes numéro {pos} dans la file d'attente."
+voice.playback.queue_next: ":heavy_check_mark: Vous êtes le prochain sur la file d'attente."
 
-voice.playback.np: ":heavy_check_mark: Now playing: `{title}`"
-voice.playback.queue_full: ":no_entry: The queue is full."
+voice.playback.np: ":heavy_check_mark: En cours de lecture: `{title}`"
+voice.playback.queue_full: ":no_entry: La file d'attente est pleine."
 voice.playback.pl_queue_full: ":no_entry: There are too many songs on the queue. Limiting playlist to {limit}."
 voice.playback.pl_error: ":x: Search returned nothing, or playlist errored."
 voice.playback.pl_added: ":heavy_check_mark: Added {num} track(s) to queue."
