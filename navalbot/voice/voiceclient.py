@@ -172,6 +172,7 @@ class NavalVoiceClient(discord.VoiceClient):
         """
         if not self.playing:
             await ctx.reply("voice.no_song")
+            return
 
         m, s = divmod(self.progress, 60)
         if self.duration:
@@ -184,7 +185,7 @@ class NavalVoiceClient(discord.VoiceClient):
         b_str = ctx.locale["voice.curr_playing"].format(self.title, d_str)
         await ctx.client.send_message(ctx.message.channel, b_str)
 
-    async def cmd_queue(self, start_pos: int = 0):
+    async def cmd_queue(self, ctx: CommandContext, start_pos: int = 0):
         """
         Returns output for the ?queue command.
         """
@@ -193,9 +194,11 @@ class NavalVoiceClient(discord.VoiceClient):
         qsize = await db.get_config(self.channel.server.id, "max_queue", default=99, type_=int)
 
         if len(queue) != 0 and start_pos + 1 > len(queue):
-            return ":x: Queue is not as long as that."
+            await ctx.reply("voice.queue_too_short", num=len(queue))
+            return
         if start_pos < 0:
-            return ":x: Cannot check queue for negative numbers."
+            await ctx.reply("voice.queue_negative")
+            return
 
         # Set song str.
         song_str = ""
@@ -222,29 +225,28 @@ class NavalVoiceClient(discord.VoiceClient):
                 # get duration
                 dm, ds = divmod(i[1].get("duration"), 60)
                 df = "`[{:02d}:{:02d}]`".format(trunc(dm), trunc(ds))
-            song_str += "\n{}. `{}` `{}`".format(item + 1, title, df)
+            song_str += "{}. `{}` `{}`\n".format(item + 1, title, df)
 
         if len(queue) > start_pos + 10:
-            song_str += "\n(Omitted {} queued items.)".format((len(queue) - 10) - start_pos)
+            song_str += "({})\n".format(ctx.locale["voice.queue.omitted"].format((len(queue) - 10) - start_pos))
 
         # Divmod queue length, to get total length.
         tm, ds = divmod(total_dur, 60)
         dh, dm = divmod(tm, 60)
 
-        s = "**Currently queued: ({lq}/{mq})** `[{h:02d}:{m:02d}:{s:02d}]`" \
-            .format(lq=len(queue), mq=qsize,
-                    h=trunc(dh), m=trunc(dm), s=trunc(ds))
+        s = ctx.locale["voice.queue.curr_queued"] \
+            .format(queue_length=len(queue), max_queue_length=qsize,
+                    hour=trunc(dh), minute=trunc(dm), second=trunc(ds))
 
         # Check if the queue is empty.
         if not queue or len(queue) == 0:
-            s += "\n`Nothing is queued.`"
-            return s
+            s += ctx.locale["voice.queue.nothing_queued"]
 
         s += song_str
 
-        return s
+        await ctx.client.send_message(ctx.message.channel, s)
 
-    async def cmd_skip(self, to_skip: int):
+    async def cmd_skip(self, ctx: CommandContext, to_skip: int):
         """
         Skip command implementation
         """
@@ -253,20 +255,22 @@ class NavalVoiceClient(discord.VoiceClient):
         qsize = await db.get_config(self.server.id, "max_queue", default=99, type_=int)
 
         if not self.playing:
-            return ":x: No song is currently playing on this server."
+            await ctx.reply("voice.no_song")
+            return
 
         if not self.player:
             # Attempt to restore internal state.
             self.curr_task.cancel()
             self._play_queue = asyncio.Queue(qsize)
             await self.disconnect()
-            return ":x: Inconsistent internal state - resetting connection. " \
-                   "This is usually because of multiple commands at once."
+            await ctx.reply("voice.bad_state")
+            return
 
         if to_skip == 1:
             # Just stop the player.
             self.player.stop()
-            return ":heavy_check_mark: Skipped current song."
+            await ctx.reply("voice.skip.one")
+            return
 
         # Stop the player.
         self.player.stop()
@@ -284,10 +288,14 @@ class NavalVoiceClient(discord.VoiceClient):
             self.progress = 0
             self.duration = 0
             self.title = ""
-            return ":heavy_check_mark: Reached end of queue."
+            await ctx.reply("voice.skip.all")
+            return
 
         new_queue = asyncio.Queue(maxsize=qsize)
-        for i in self._play_queue._queue[to_skip:]:
+
+        int_q = list(self._play_queue._queue)
+
+        for i in int_q[to_skip:]:
             try:
                 new_queue.put_nowait(i)
             except asyncio.QueueFull:
@@ -296,9 +304,9 @@ class NavalVoiceClient(discord.VoiceClient):
 
         # Update the queue.
         self._play_queue = new_queue
-        return ":heavy_check_mark: Skipped {} items.".format(to_skip)
+        await ctx.reply("voice.skip.many", num=to_skip + 1)
 
-    def cmd_voteskip(self, author_id: str):
+    async def cmd_voteskip(self, ctx: CommandContext, author_id: str):
         """
         Implementation of voteskip
         """
@@ -318,19 +326,19 @@ class NavalVoiceClient(discord.VoiceClient):
         if author_id not in self.voteskips:
             self.voteskips.append(author_id)
         else:
-            return ":x: You have already voted."
+            await ctx.reply("voice.voteskip.already_voted")
+            return
 
         # Skip as appropriate.
         if len(self.voteskips) >= required or required == 1:
             self.player.stop()
             self.playing = False
             self.voteskips = []
-            return ":heavy_check_mark: Skipped current track."
+            await ctx.reply("voice.skip.one")
         else:
-            return ":heavy_check_mark: Voteskip acknowledged. `{}` more votes required.".format(
-                required - len(self.voteskips))
+            await ctx.reply("voice.voteskip.vote", left=required - len(self.voteskips))
 
-    async def cmd_move(self, fr: int, to: int):
+    async def cmd_move(self, ctx: CommandContext, fr: int, to: int):
         """
         Implementation of move command
         """
@@ -339,7 +347,8 @@ class NavalVoiceClient(discord.VoiceClient):
             got = internal_queue.pop(fr)
             internal_queue.insert(to, got)
         except IndexError as e:
-            return ":x: Could not find track at index `{}`."
+            await ctx.reply("voice.mv.could_not_find", index=fr)
+            return
 
         qsize = await db.get_config(self.server.id, "max_queue", default=99, type_=int)
 
@@ -356,9 +365,9 @@ class NavalVoiceClient(discord.VoiceClient):
 
         title = got[1].get("title")
 
-        return ":heavy_check_mark: Moved item `{}` to position `{}`.".format(title, to)
+        await ctx.reply("voice.mv.moved", title=title, index=to)
 
-    async def cmd_remove(self, start: int, end: int = None):
+    async def cmd_remove(self, ctx: CommandContext, start: int, end: int = None):
         """
         Implementation for remove.
         """
@@ -368,15 +377,15 @@ class NavalVoiceClient(discord.VoiceClient):
         internal_queue = list(self._play_queue._queue)
 
         if start > end:
-            return ":x: Start must be larger than end."
+            return await ctx.reply("ctx.remove.start_lt_end")
 
         if start <= 0:
-            return ":x: Cannot remove queue items less than 1."
+            return await ctx.reply("ctx.mv.could_not_find")
 
         if start > len(internal_queue):
-            return ":x: Queue is not as long as `{}`.".format(start)
+            return await ctx.reply("voice.queue_too_short", num=start)
         elif end > len(internal_queue):
-            return ":x: Queue is not as long as `{}`.".format(end)
+            return await ctx.reply("voice.queue_too_short", num=end)
 
         try:
             for i in range(start, end + 1):
@@ -401,11 +410,11 @@ class NavalVoiceClient(discord.VoiceClient):
 
         # If we only removed one, return the item we removed.
         if (start == end):
-            return ":heavy_check_mark: Deleted item {} `({})`.".format(start, removed[1].get("title"))
+            return await ctx.reply("voice.remove.deleted_one", index=start, title=removed[1].get("title"))
         else:
-            return ":heavy_check_mark: Deleted items {} to {}.".format(start, end)
+            return await ctx.reply("voice.remove.deleted_many", start=start, end=end)
 
-    async def cmd_shuffle(self):
+    async def cmd_shuffle(self, ctx: CommandContext):
         """
         Implementation of the shuffle command.
         """
@@ -431,22 +440,24 @@ class NavalVoiceClient(discord.VoiceClient):
         # Update the queue.
         self._play_queue = new_queue
 
-        return ":heavy_check_mark: Shuffled queue."
+        await ctx.reply("voice.shuffled")
 
-    def cmd_again(self):
+    async def cmd_again(self, ctx: CommandContext):
         """
         Implementation of `again`.
         """
         if not self.playing:
-            return ":x: Not currently playing on this server."
+            await ctx.reply("voice.no_song")
+            return
 
         # Place the coroutine on the queue, again.
         try:
             self._play_queue.put_nowait((self.coro_factory, self.curr_info))
         except asyncio.QueueFull:
-            return ":x: Queue is full."
+            await ctx.reply("voice.playback.queue_full")
+            return
 
-        return ":heavy_check_mark: Playing `{}` again.".format(self.title)
+        return await ctx.reply("voice.play_again", title=self.title)
 
     async def reset(self):
         """

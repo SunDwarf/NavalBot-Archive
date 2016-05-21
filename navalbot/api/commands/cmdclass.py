@@ -146,7 +146,8 @@ class Command(object):
             u_id = int(message.author.id)
             # Check if it is in the ids specified.
             if not u_id == owner:
-                await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
+                #await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
+                await client.send_message(message.channel, loc["perms.not_owner"])
                 return
         # Role check.
 
@@ -156,7 +157,7 @@ class Command(object):
             try:
                 assert isinstance(message.author, discord.Member)
             except AssertionError:
-                await client.send_message(message.channel, ":no_entry: Cannot determine your role!")
+                await client.send_message(message.channel, loc["perms.cannot_determine_role"])
                 return
 
             # Load roles correctly.
@@ -169,12 +170,12 @@ class Command(object):
 
             if not await has_permissions_with_override(message.author, new_roles, message.server.id,
                                                        self._wrapped_coro.__name__):
-                await client.send_message(
-                    message.channel,
-                    ":no_entry: You do not have any of the required roles: `{}`!"
-                        .format({role.val for role in allowed_roles})
-
-                )
+                #await client.send_message(
+                #    message.channel,
+                #    ":no_entry: You do not have any of the required roles: `{}`!"
+                #        .format({role.val for role in allowed_roles})
+                ss = loc['perms.bad_role'].format(roles={role.val for role in allowed_roles})
+                await client.send_message(message.channel, ss)
                 return
 
         # Arguments check.
@@ -189,35 +190,9 @@ class Command(object):
                     await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
                     return
             elif self._args_type == 1:
-                # Check the function for annotations.
-                func_sig = inspect.signature(self._wrapped_coro)
-                if len(func_sig.parameters) != (2 + self._args_count):
-                    raise exceptions.BadCommandException("Arg count of {} differs from number of requested args ({})"
-                                                         .format(len(func_sig.parameters), 2 + self._args_count))
-                # Get the annotations, if applicable.
-                params = list(func_sig.parameters.values())
-                annotations = [f.annotation for f in params[2:]]
-                temp_args = shlex.split(message.content)[1:]
-                if len(temp_args) != self._args_count:
-                    await client.send_message(message.channel, self._construct_arg_error_msg(message.server))
-                    return
-                args = []
-                # match the annotations
-                for arg, ann in zip(temp_args, annotations):
-                    if ann == inspect.Parameter.empty:
-                        args.append(arg)
-                    else:
-                        # Nested doom
-                        if isinstance(ann, type):
-                            if ann.__name__ == "bool":
-                                args.append(False if arg == "False" else True)
-                            else:
-                                try:
-                                    args.append(ann(arg))
-                                except ValueError:
-                                    await client.send_message(message.channel, ":x: One of your arguments was the "
-                                                                               "wrong type.")
-                                    return
+                args = shlex.split(message.content)[1:]
+                if len(args) != self._args_count:
+                    await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
 
         # Create the context.
         ctx = CommandContext(client, message, locale=loc)

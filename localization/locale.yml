@@ -10,6 +10,14 @@
 # You can re-order them for the sentences to make sense, but they must stay in the sentence.
 #####################################################
 
+# Generic keys.
+generic.not_int: ":x: Value {val} is not a valid integer."
+
+# Permissions keys
+perms.not_owner: ":no_entry: This command is restricted to the bot owner."
+perms.cannot_determine_role: ":no_entry: Cannot determine your role!"
+perms.bad_role: ":no_entry: You do not have any of the required roles: `{roles}`!"
+
 # Voice keys.
 voice.not_connected: ":x: Not currently connected on this server."
 voice.cant_control: ":x: You must be in voice and not deafened to control me."
@@ -21,7 +29,7 @@ voice.curr_playing: "Currently playing: `{title}` `{d_str}`"
 
 voice.playback.no_channel: >
         :x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`,
-        however you can override this with by running `{}setcfg voice_channel <your channel>`.
+        however you can override this with by running `{prefix}setcfg voice_channel <your channel>`.
 
 voice.playback.pl_warning: ":warning: If this is a playlist, it may take a long time to download."
 voice.playback.bad_url: >
@@ -42,7 +50,36 @@ voice.playback.queue_num: ":heavy_check_mark: You are number {pos} in the queue.
 voice.playback.queue_next: ":heavy_check_mark: You are next in the queue."
 
 voice.playback.np: ":heavy_check_mark: Now playing: `{title}`"
-voice.playback.queue_full: ":no_entry: There are too many songs on the queue. Cannot start playing."
+voice.playback.queue_full: ":no_entry: The queue is full."
 voice.playback.pl_queue_full: ":no_entry: There are too many songs on the queue. Limiting playlist to {limit}."
 voice.playback.pl_error: ":x: Search returned nothing, or playlist errored."
 voice.playback.pl_added: ":heavy_check_mark: Added {num} track(s) to queue."
+
+voice.play_again: ":heavy_check_mark: Playing `{title}` again."
+
+voice.shuffled: ":heavy_check_mark: Shuffled queue."
+
+voice.queue_too_short: ":x: Queue is not as long as that. (`{num}`)"
+voice.queue_negative: ":x: Cannot use a negative number with the queue."
+
+voice.queue.ommitted: "Omitted {num} queued items."
+voice.queue.curr_queued: >
+          **Currently queued: ({queue_length}/{max_queue_length})**
+          `[{hour:02d}:{minute:02d}:{second:02d}]`
+voice.queue.nothing_queued: "`Nothing is queued.`"
+
+voice.bad_state: ":x: Inconsistent internal state - resetting connection. Blame Discord, probably."
+
+voice.skip.one: ":heavy_check_mark: Skipped current song."
+voice.skip.all: ":heavy_check_mark: Skipped all songs."
+voice.skip.many: ":heavy_check_mark: Skipped {num} items."
+
+voice.voteskip.vote: ":heavy_check_mark: Voteskip acknowledged. `{left}` more votes required."
+voice.voteskip.already_voted: ":no_entry: You have already voted."
+
+voice.mv.could_not_find: ":x: Could not find track at position `{index}`."
+voice.mv.moved: ":heavy_check_mark: Moved item `{title}` to position `{index}`."
+
+voice.remove.start_lt_end: ":x: Start must be larger than end position."
+voice.remove.deleted_one: ":heavy_check_mark: Deleted item {index} `({title})`."
+voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."

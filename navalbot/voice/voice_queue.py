@@ -25,92 +25,87 @@ import discord
 
 from navalbot.api.commands import oldcommand, command
 from navalbot.api.commands.cmdclass import NavalRole
+from navalbot.api.commands.ctx import CommandContext
 from navalbot.voice.voice_util import author_is_valid, find_voice_channel
 from .stores import voice_params
 
 
 @command("again")
-async def again(client: discord.Client, message: discord.Message):
+async def again(ctx: CommandContext):
     """
     Adds this item to the queue again.
     """
-    vc = client.voice_client_in(message.server)
+    vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
-        await client.send_message(message.channel, ":x: Not currently connected on this server.")
+        await ctx.reply("voice.not_connected")
         return
 
-    channels = [vc.channel, find_voice_channel(message.server), message.author.voice_channel]
+    channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
 
-    if not author_is_valid(message.author, channels):
-        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
+    if not author_is_valid(ctx.message.author, channels):
+        await ctx.reply("voice.cant_control")
         return
 
-    s = vc.cmd_again()
-    await client.send_message(message.channel, s)
+    await vc.cmd_again(ctx)
 
 
 @command("shuffle", roles={NavalRole.VOICE, NavalRole.ADMIN, NavalRole.BOT_COMMANDER})
-async def shuffle(client: discord.Client, message: discord.Message):
+async def shuffle(ctx: CommandContext):
     """
     Shuffles the queue.
     """
-    vc = client.voice_client_in(message.server)
+    vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
-        await client.send_message(message.channel, ":x: Not currently connected on this server.")
+        await ctx.reply("voice.not_connected")
         return
 
-    channels = [vc.channel, find_voice_channel(message.server), message.author.voice_channel]
+    channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
 
-    if not author_is_valid(message.author, channels):
-        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
+    if not author_is_valid(ctx.message.author, channels):
+        await ctx.reply("voice.cant_control")
         return
 
-    s = await vc.cmd_shuffle()
-
-    await client.send_message(message.channel, s)
+    await vc.cmd_shuffle(ctx)
 
 
 @command("queue", "queued")
-async def get_queued_vids(client: discord.Client, message: discord.Message):
+async def get_queued_vids(ctx: CommandContext):
     """
     Get the current playback queue for this server.
     """
     # STILL HORRIBLE
     try:
-        start_pos = int(message.content.split(" ")[1])
+        start_pos = int(ctx.message.content.split(" ")[1])
     except (ValueError, IndexError):
         start_pos = 0
 
-    vc = client.voice_client_in(message.server)
+    vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
-        await client.send_message(message.channel, ":x: Not currently connected on this server.")
+        await ctx.reply("voice.not_connected")
         return
 
-    # Get the queue text.
-    s = await vc.cmd_queue(start_pos)
-
-    await client.send_message(message.channel, s)
+    await vc.cmd_queue(ctx, start_pos)
 
 
 @command("skip", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE})
-async def skip(client: discord.Client, message: discord.Message):
+async def skip(ctx: CommandContext):
     """
     Skips ahead one or more tracks.
     """
 
-    vc = client.voice_client_in(message.server)
+    vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
-        await client.send_message(message.channel, ":x: Not currently connected on this server.")
+        await ctx.reply("voice.not_connected")
         return
 
-    channels = [vc.channel, find_voice_channel(message.server), message.author.voice_channel]
+    channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
 
-    if not author_is_valid(message.author, channels):
-        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
+    if not author_is_valid(ctx.message.author, channels):
+        await ctx.reply("voice.cant_control")
         return
 
     try:
-        aaa = message.content.split(" ")
+        aaa = ctx.message.content.split(" ")
         if aaa[1] == "all":
             to_skip = 9999999
         else:
@@ -122,45 +117,56 @@ async def skip(client: discord.Client, message: discord.Message):
         to_skip = 1
 
     # Await cmd_skip
-    s = await vc.cmd_skip(to_skip)
-
-    await client.send_message(message.channel, s)
+    await vc.cmd_skip(ctx, to_skip)
 
 
 @command("voteskip")
-async def voteskip(client: discord.Client, message: discord.Message):
+async def voteskip(ctx: CommandContext):
     """
     Starts a vote to skip the currently playing track.
     """
-    # Get the client
-    voiceclient = client.voice_client_in(message.server)
-    if not voiceclient:
-        await client.send_message(message.channel, ":x: Not currently connected on this server.")
+    vc = ctx.client.voice_client_in(ctx.message.server)
+    if not vc:
+        await ctx.reply("voice.not_connected")
         return
 
-    # Check if in voice.
-    channels = [voiceclient.channel, find_voice_channel(message.server), message.author.voice_channel]
-    if not author_is_valid(message.author, channels):
-        await client.send_message(message.channel, ":x: You must be in the same channel as the bot and not deafened.")
+    channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
+
+    if not author_is_valid(ctx.message.author, channels):
+        await ctx.reply("voice.cant_control")
         return
 
-    await client.send_message(message.channel, voiceclient.cmd_voteskip(message.author.id))
+    await vc.cmd_voteskip(ctx, ctx.message.author.id)
 
 
 @command("move", argcount=2, argerror=":x: You must provide two numbers: The original position, and the new position.")
-async def move(client: discord.Client, message: discord.Message, fr: int, to: int):
+async def move(ctx: CommandContext):
     """
     Moves a song in the queue from position <x> to position <y>.
+
+    Both numbers must be integers.
     """
-    vc = client.voice_client_in(message.server)
+    vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
-        await client.send_message(message.channel, ":x: Not currently connected on this server.")
+        await ctx.reply("voice.not_connected")
+        return
+
+    channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
+
+    if not author_is_valid(ctx.message.author, channels):
+        await ctx.reply("voice.cant_control")
+        return
+
+    try:
+        fr = int(ctx.args[0])
+        to = int(ctx.args[0])
+    except ValueError:
+        await ctx.reply("generic.not_int", val=ctx.args[0])
+        return
 
     fr, to = fr - 1, to - 1
 
-    s = await vc.cmd_move(fr, to)
-
-    await client.send_message(message.channel, s)
+    await vc.cmd_move(ctx, fr, to)
 
 
 @command("remove", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE},
