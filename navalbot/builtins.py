@@ -28,8 +28,10 @@ import discord
 import re
 
 from navalbot.api.commands import commands, command, Command
-from navalbot.api import decorators, db
+from navalbot.api import db
 from navalbot.api.util import sanitize, get_file
+
+from navalbot import factoids
 
 
 # Factoid matcher compiled
@@ -68,6 +70,15 @@ async def help(client: discord.Client, message: discord.Message, cmd_name: str):
     await client.send_message(message.channel, doc)
 
 # region factoids
+async def default(client: discord.Client, message: discord.Message):
+    """
+    Default command.
+
+    Delegates to factoids.delegate().
+    """
+    await factoids.delegate(client, message)
+
+
 async def default(client: discord.Client, message: discord.Message):
     prefix = await db.get_config(message.server.id, "command_prefix", "?")
     data = message.content[len(prefix):]

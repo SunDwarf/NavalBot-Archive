@@ -12,6 +12,7 @@
 
 # Generic keys.
 generic.not_int: ":x: Value {val} is not a valid integer."
+generic.file_too_big: ":x: File {fname} is too big to download."
 
 # Help keys.
 help.None: |
@@ -187,6 +188,13 @@ voice.remove.start_lt_end: ":x: Start must be larger than end position."
 voice.remove.deleted_one: ":heavy_check_mark: Deleted item {index} `({title})`."
 voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."
 
-# core.cfg strings
-#core
-core.cfg.setcfg_updated: ""
+# core strings
+core.cfg.setcfg_updated: ":heavy_check_mark: Config updated: `{name}` -> `{val}`"
+core.cfg.avatar_changed: ":heavy_check_mark: Updated bot avatar."
+core.cfg.avatar_invalid: ":x: Avatar was not valid."
+core.cfg.name_changed: ":heavy_check_mark: Changed name to `{name}`."
+
+core.cfg.bad_override: ":x: You must provide an existing command."
+
+core.cfg_added_role_override: ":heavy_check_mark: Added role override for command {cmd}."
+core.cfg_removed_role_override: ":heavy_check_mark: Removed role override for command {cmd}."

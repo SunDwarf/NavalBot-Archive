@@ -29,6 +29,7 @@ import discord
 from navalbot.api import db, decorators, util
 from navalbot.api.commands import oldcommand, commands, command
 from navalbot.api.commands.cmdclass import NavalRole
+from navalbot.api.commands.ctx import CommandContext
 
 
 @oldcommand("ggetcfg")
@@ -44,24 +45,14 @@ async def g_get_config(client: discord.Client, message: discord.Message, args: l
     await client.send_message(message.channel, "`{}` -> `{}`".format(args[0], val))
 
 
-@oldcommand("set")
-@oldcommand("setcfg")
-@decorators.with_permission("Admin")
-async def set_config(client: discord.Client, message: discord.Message):
-    """
-    Sets a server-specific configuration value.
-    """
+@command("setcfg", argcount=2, roles={NavalRole.ADMIN})
+async def set_config(ctx: CommandContext):
     # Split the content with shlex.
-    split = shlex.split(message.content)
-    if len(split) != 3:
-        await client.send_message(message.channel, ":x: Config set must be in `setcfg 'key' 'value'` format, "
-                                                   "with quotation marks surrounding the spaces")
-        return
-    # Get the config values
-    name, val = split[1:3]
-    # Set them.
-    await db.set_config(message.server.id, name, val)
-    await client.send_message(message.channel, ":heavy_check_mark: Config updated: `{}` -> `{}`".format(name, val))
+    name, val = ctx.args[0:2]
+
+    await db.set_config(ctx.message.server.id, name, val)
+
+    await ctx.reply("core.cfg.setcfg_updated", name=name, val=val)
 
 
 @command("get", "getcfg", argcount=1, roles={NavalRole.ADMIN}, argerror=":x: You must provide a key to get.")
@@ -74,65 +65,66 @@ async def get_config(client: discord.Client, message: discord.Message, config_na
     await client.send_message(message.channel, "`{}` -> `{}`".format(config_name, val))
 
 
-@command("avatar", argcount=1, owner=True, argerror=":x: You must provide a URL.")
-async def avatar(client: discord.Client, message: discord.Message, file: str):
+@command("avatar", argcount=1, owner=True)
+async def avatar(ctx: CommandContext):
     """
     Changes the avatar of the bot.
     You must provide a valid url, pointing to a jpeg or png file.
     Owner-only
     """
     try:
-        await util.get_file((client, message), url=file, name='avatar.jpg')
+        await util.get_file(ctx, url=ctx.args[0], name='avatar.jpg')
         fp = open(os.path.join(os.getcwd(), "files", "avatar.jpg"), 'rb')
-        await client.edit_profile(avatar=fp.read())
-        await client.send_message(message.channel, "Avatar has been changed.")
+        await ctx.client.edit_profile(avatar=fp.read())
+        await ctx.reply("core.cfg.avatar_changed")
     except (ValueError, discord.errors.InvalidArgument):
-        await client.send_message(message.channel, "This command only supports jpeg or png files!")
+        await ctx.reply("core.cfg.avatar_invalid")
 
 
 @command("name", argcount=1, owner=True, argerror=":x: You must provide a new name.")
-async def changename(client: discord.Client, message: discord.Message, name: str):
+async def changename(ctx: CommandContext):
     """
     Change the name of the bot.
     Owner-only
     """
-    await client.edit_profile(username=name)
-    await client.send_message(message.channel, 'Username got changed!')
+    await ctx.client.edit_profile(username=ctx.args[0])
+    await ctx.reply("core.cfg.name_changed", name=ctx.args[0])
 
 
 @command("addoverride", argcount=2, roles={NavalRole.ADMIN}, argerror=":x: You must provide a command and a ")
-async def add_role_override(client: discord.Client, message: discord.Message, command_name: str, role: str):
+async def add_role_override(ctx: CommandContext):
     """
     Adds a role override to a command.
     This allows anybody with the role specified to run this command.
     You can enable a command for everybody by adding a role override for `@ everybody` (without the space.).
     """
-    if command_name not in commands:
-        await client.send_message(message.channel, ":x: You must provide a valid command.")
+    if ctx.args[0] not in commands:
+        await ctx.reply("core.cfg.bad_override")
         return
 
     # Set in aioredis
     async with (await util.get_pool()).get() as conn:
         assert isinstance(conn, aioredis.Redis)
-        conn.sadd("override:{}:{}".format(message.server.id, command_name), role)
+        conn.sadd("override:{}:{}".format(ctx.message.server.id, ctx.args[0]), ctx.args[1])
 
-    await client.send_message(message.channel, ":x: Added role override for command {}.".format(command_name))
+    # await client.send_message(message.channel, ":x: Added role override for command {}.".format(command_name))
+    await ctx.reply("core.cfg.added_role_override", cmd=ctx.args[0])
 
 
 @command("deloverride", roles={NavalRole.ADMIN}, argcount=2, argerror=":x: You must provide a command a role.")
-async def remove_role_override(client: discord.Client, message: discord.Message, args: list):
+async def remove_role_override(ctx: CommandContext):
     """
     Removes a role override from a command.
     """
-    command_name = args[0]
+    command_name = ctx.args[0]
     if command_name not in commands:
-        await client.send_message(message.channel, ":x: You must provide a valid command.")
+        await ctx.reply("core.cfg.bad_override")
         return
 
-    role = args[1]
+    role = ctx.args[1]
     # smse
     async with (await util.get_pool()).get() as conn:
         assert isinstance(conn, aioredis.Redis)
-        conn.srem("override:{}:{}".format(message.server.id, command_name), role)
+        conn.srem("override:{}:{}".format(ctx.message.server.id, command_name), role)
 
-    await client.send_message(message.channel, ":x: Deleted role override for command {}.".format(command_name))
+    await ctx.reply("core.cfg_removed_role_override", cmd=command_name)
