@@ -198,3 +198,9 @@ core.cfg.bad_override: ":x: You must provide an existing command."
 
 core.cfg_added_role_override: ":heavy_check_mark: Added role override for command {cmd}."
 core.cfg_removed_role_override: ":heavy_check_mark: Removed role override for command {cmd}."
+
+core.version.base: "Version **{ver}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
+core.version.no_dl: ":grey_exclamation: Could not download version information."
+core.version.new_ver: ":exclamation: *New version available:* **{ver}**"
+core.version.local_newer: ":grey_exclamation: *You are running a newer version than the one available online ({ver}).*"
+core.version.same: ":grey_exclamation: *You are running the latest version.*"

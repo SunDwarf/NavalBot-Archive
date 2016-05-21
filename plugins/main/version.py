@@ -25,6 +25,7 @@ import discord
 
 # =============== Commands
 from navalbot.api.commands import command
+from navalbot.api.commands.ctx import CommandContext
 from navalbot.version import VERSION, VERSIONT, VERSUFF
 
 
@@ -40,18 +41,14 @@ def read_version(data):
 
 
 @command("version")
-async def version(client: discord.Client, message: discord.Message):
+async def version(ctx: CommandContext):
     """
     Checks for the latest stable version of NavalBot.
     """
 
     # Version info is defined above so it can be reloaded as required.
+    await ctx.reply("core.version.base", ver=VERSION + VERSUFF)
 
-    await client.send_message(
-        message.channel,
-        "Version **{}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-            .format(VERSION + VERSUFF)
-    )
     # Download the latest version
     async with aiohttp.ClientSession() as sess:
         s = await sess.get("https://raw.githubusercontent.com/NavalBot/NavalBot-core/develop/navalbot/version.py")
@@ -61,12 +58,11 @@ async def version(client: discord.Client, message: discord.Message):
 
     version = read_version(data)
     if not version:
-        await client.send_message(message.channel, ":grey_exclamation: Could not download version information.")
+        await ctx.reply("core.version.no_dl")
         return
     if tuple(int(i) for i in version.split(".")) > VERSIONT:
-        await client.send_message(message.channel, ":exclamation: *New version available:* **{}**".format(version))
+        await ctx.reply("core.version.new_ver", ver=version)
     elif tuple(int(i) for i in version.split(".")) < VERSIONT:
-        await client.send_message(message.channel, ":grey_exclamation: *You are running a newer version than the one "
-                                                   "available online ({}).*".format(version))
+        await ctx.reply("core.version.local_newer", ver=version)
     else:
-        await client.send_message(message.channel, ":grey_exclamation: *You are running the latest version.*")
+        await ctx.reply("core.version.same")
