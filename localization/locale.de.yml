@@ -13,6 +13,110 @@
 
 # Allgemeine Schlüssel.
 generic.not_int: ":x: Wert {val} ist kein gültiger Integer."
+generic.file_too_big: ":x: Datei {fname} ist zu groß zum Downloaden."
+
+# Hilfe Schlüssel.
+help.None: |
+        Dieser Befehl hat keine Hilfe in dieser Sprache.
+
+help.set_config: |
+        Ändert eine server-spezifische Konfiguration.
+
+        Wenn du Leerzeichen in deinen Argumenten hast, müssen diese mit "Anführungszeichen" geschrieben werden.
+
+help.get_config: |
+        Fordert eine server-spezifische Konfiguration an.
+
+        Wenn du Leerzeichen in deinen Argumenten hast, müssen diese mit "Anführungszeichen" geschrieben werden.
+
+help.avatar: |
+        Ändert den Avatar des Bots.
+        Du musst die URL angeben, die als Bild genutzt werden soll.
+        Dieser Befehl ist auf den Bot-Besitzer beschränkt.
+
+help.changename: |
+        Ändert den **Benutzernamen** des Bots.
+        Braucht den Namen als ein Argument.
+        Dieser Befehl ist auf den Bot-Besitzer beschränkt.
+
+help.add_role_override: |
+        Überschreibt die angeforderten Rollen für einen Befehl
+        Du musst den Befehl und die Rolle angeben.
+        Dies ermöglicht es jedem, der die erforderte Rolle besitzt, den Befehl auszuführen
+        Du kannst einen Befehl für jeden zugägnlich machen indem du statt der Rolle `@ everybody` (ohne Leerzeichen.) schreibst.
+
+help.remove_role_override: |
+        Dies löscht eine Überschreibung der Rollenbegrenzung.
+        Du musst den Befehl und die Rolle angeben.
+
+help.lock: |
+        Dies sperrt ein Factoid.
+
+        Admins können trotz der Sperre das Factoid entsperren.
+
+help.delete_factoid: |
+        Dies löscht ein Factoid.
+
+        Wenn das Factoid gesperrt ist, kann es nur der Bot-Besitzer oder ein Admin entsperren.
+
+help.unlock: |
+        Dies entsperrt ein Factoid und macht es bearbeitbar für jeden.
+
+help.factoids: |
+        Dies listet alle Factoids auf, die auf einen bestimmtes Suchschema zutreffen.
+
+        Dieses Schema ist ein Redis-Such-Schema. Für mehr Informationen besuche http://redis.io/commands/scan
+
+help.factoid: |
+        Dieser Befehl zeigt dir, wie man ein Factoid erstellt.
+
+help.version: |
+        Informiert dich über die aktuelle Version des Bots.
+
+help.again: |
+        Fügt das aktuell laufende Lied nochmal zur Warteschlange hinzu.
+
+help.shuffle: |
+        Mischt die Warteschlange.
+
+help.get_queued_vids: |
+        Zeigt Informatioen über die Warteschlange.
+
+        Der Index eines Liedes in der Warteschlange kann als optionaler Wert angegeben werden, damit erst ab dort Informationen gezeigt werden.
+
+help.skip: |
+        Überspringt ein oder mehrere Lieder.
+
+        Als optionaler Paramter kann die Anzahl an zu überspringenden Liedern angegeben werden.
+        Dies überspringt das aktuelle Lied und dann alle anderen Lieder, die überspringt werden sollen.
+        Sonst wird nur ein Lied übersprungen.
+
+help.voteskip: |
+        Start eine Abstimmung, ob ein Lied übersprungen werden soll.
+
+help.move: |
+        Verschiebt ein Lied in der Warteschlange von Index <x> zu Index <y>.
+
+        Beide Nummern müssen positiv sein.
+
+help.remove_vid: |
+        Entfernt ein oder mehrere Lieder.
+
+        Nimmt eine Start- und optionale Endposition an.
+        Wenn keine Position zum Entfernen angegeben wurde, wird nur ein Lied entfernt.
+
+help.reset: |
+        Trennt den Bot vom Sprach-Kanal und setzt alle Sprachparamter zurück.
+
+help.np: |
+        Zeigt das aktuelle Lied an.
+
+help.play: |
+        Spielt ein Lied.
+
+        Es kann entweder eine URL oder ein Suchbegriff angegeben werden.
+        Die URL kann von den meisten Seiten kommen; Der Bot wird versuchen, das Lied richtig zu downloaden.
+
 
 # Berechtigungs-Schlüssel
 perms.not_owner: ":no_entry: Dieser Befehl ist auf den Bot-Besitzer beschränkt."
@@ -23,7 +127,7 @@ perms.bad_role: ":no_entry: Du hast keine der erforderten Rollen!: `{roles}`!"
 voice.not_connected: ":x: Momentan nicht mit dem Server verbunden."
 voice.cant_control: ":x: Du musst dich im Sprach-Chat befinden und nicht auf taub geschaltet sein."
 
-voice.reset.success: ":heavy_check_mark: Sprachparamter wurden zurückgesetzt."
+voice.reset.success: ":heavy_check_mark: Sprachparameter wurden zurückgesetzt."
 
 voice.no_song: ":x: Momentan wird kein Lied gespielt."
 voice.curr_playing: "Aktuelles Lied: `{title}` `{d_str}`"
@@ -84,3 +188,14 @@ voice.mv.moved: ":heavy_check_mark: Verschob Lied `{title}` auf Platz `{index}`.
 voice.remove.start_lt_end: ":x: Die Startposition muss größer als die Endposition sein."
 voice.remove.deleted_one: ":heavy_check_mark: Löschte Lied {index} `({title})`."
 voice.remove.deleted_many: ":heavy_check_mark: Löschte Lieder von Position {start} bis {end}."
+
+# core strings
+core.cfg.setcfg_updated: ":heavy_check_mark: Konfiguration aktualisiert: `{name}` -> `{val}`"
+core.cfg.avatar_changed: ":heavy_check_mark: Avatar aktualisiert."
+core.cfg.avatar_invalid: ":x: Avatar ist nicht gültig."
+core.cfg.name_changed: ":heavy_check_mark: Name wurde zu `{name}` geändert."
+
+core.cfg.bad_override: ":x: Du musst einen existierenden Befehl angeben."
+
+core.cfg_added_role_override: ":heavy_check_mark: Eine Rollenüberschreibung für {cmd} wurde hinzugefügt."
+core.cfg_removed_role_override: ":heavy_check_mark: Eine Rollenüberschreibung für {cmd} wurde entfernt."
