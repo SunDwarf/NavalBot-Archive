@@ -117,6 +117,29 @@ help.play: |
         This URL can be from most sites; the bot will try and download it correctly.
 
 
+help.choice: |
+        Makes that hard choice for you.
+
+        Surround your options with "quotation marks" if they have spaces in them.
+
+help.google: |
+        Search google for the top result of your search query.
+
+help.weather: |
+        Look up the weather for a place.
+
+help.commands: |
+        Display where to get help about a command.
+
+help.whois: |
+        Look up information about a user.
+
+        You must provide the author via a @mention.
+
+help.uptime: |
+        Display the uptime of the bot.
+
+
 # Permissions keys
 perms.not_owner: ":no_entry: This command is restricted to the bot owner."
 perms.cannot_determine_role: ":no_entry: Cannot determine your role!"
@@ -246,8 +269,7 @@ fun.uptime.response: "Bot has been running for {time} since startup of process `
 
 fun.stats.shard: "Currently shard `{shard_id}/{shard_count}\n"
 fun.stats.response: |
-        {shardm}
-        Currently running on `{servcount}` server(s). Processed `{msgcount}` messages since startup.
+        {shardm}Currently running on `{servcount}` server(s). Processed `{msgcount}` messages since startup.
         Connected to `{vcount}` voice channels, with `{scount}` streams currently playing.
         Using `{memcount}MB` of memory.
 

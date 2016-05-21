@@ -147,7 +147,7 @@ async def stats(ctx: CommandContext):
     used_memory = round(used_memory / 1024 / 1024, 2)
     if hasattr(ctx.client, "shard_id") and ctx.client.shard_id is not None:
         shardm = ctx.locale["fun.stats.shard"].format(shard_id=ctx.client.shard_id+1,
-                                                      shard_count=ctx.client.shard_count)
+                                                      shard_count=ctx.client.shard_count) + "\n"
     else:
         shardm = ""
     await ctx.reply("fun.stats.response",
