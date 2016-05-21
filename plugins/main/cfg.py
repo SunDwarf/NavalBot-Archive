@@ -28,6 +28,7 @@ import discord
 
 from navalbot.api import db, decorators, util
 from navalbot.api.commands import oldcommand, commands, command
+from navalbot.api.commands.cmdclass import NavalRole
 
 
 @oldcommand("ggetcfg")
@@ -63,7 +64,7 @@ async def set_config(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, ":heavy_check_mark: Config updated: `{}` -> `{}`".format(name, val))
 
 
-@command("get", "getcfg", argcount=1, roles={"Admin"}, argerror=":x: You must provide a key to get.")
+@command("get", "getcfg", argcount=1, roles={NavalRole.ADMIN}, argerror=":x: You must provide a key to get.")
 async def get_config(client: discord.Client, message: discord.Message, config_name: str):
     """
     Gets a server-specific configuration value.
@@ -99,7 +100,7 @@ async def changename(client: discord.Client, message: discord.Message, name: str
     await client.send_message(message.channel, 'Username got changed!')
 
 
-@command("addoverride", argcount=2, roles={"Admin"}, argerror=":x: You must provide a command and a ")
+@command("addoverride", argcount=2, roles={NavalRole.ADMIN}, argerror=":x: You must provide a command and a ")
 async def add_role_override(client: discord.Client, message: discord.Message, command_name: str, role: str):
     """
     Adds a role override to a command.
@@ -118,7 +119,7 @@ async def add_role_override(client: discord.Client, message: discord.Message, co
     await client.send_message(message.channel, ":x: Added role override for command {}.".format(command_name))
 
 
-@command("deloverride", roles={"Admin"}, argcount=2, argerror=":x: You must provide a command a role.")
+@command("deloverride", roles={NavalRole.ADMIN}, argcount=2, argerror=":x: You must provide a command a role.")
 async def remove_role_override(client: discord.Client, message: discord.Message, args: list):
     """
     Removes a role override from a command.

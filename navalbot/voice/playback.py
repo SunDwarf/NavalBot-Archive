@@ -33,6 +33,7 @@ from navalbot.api.commands import oldcommand, command
 from navalbot.api import db
 from navalbot.api import decorators
 from navalbot.api import util
+from navalbot.api.commands.cmdclass import NavalRole
 from navalbot.voice.voiceclient import NavalVoiceClient
 from .stores import voice_params, voice_locks
 
@@ -61,7 +62,7 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
         return vc
 
 
-@command("reset", "disconnect", roles={"Admin", "Bot Commander", "Voice"})
+@command("reset", "disconnect", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE})
 async def reset(client: discord.Client, message: discord.Message):
     vc = client.voice_client_in(message.server)
     if not vc:

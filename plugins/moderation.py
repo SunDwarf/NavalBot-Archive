@@ -29,12 +29,13 @@ import discord
 
 from navalbot.api import db
 from navalbot.api.commands import command
+from navalbot.api.commands.cmdclass import NavalRole
 from navalbot.exceptions import CommandError
 
 VERSION = "1.0.1"
 
 
-@command("mute", roles={"Admin", "Bot Commander"})
+@command("mute", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER})
 async def mute(client: discord.Client, message: discord.Message):
     """
     Mutes a user. This user must be @mentioned.
@@ -59,7 +60,7 @@ async def mute(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, "Usage: {}mute @UserName".format(prefix))
 
 
-@command("unmute", roles={"Admin", "Bot Commander"})
+@command("unmute", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER})
 async def unmute(client: discord.Client, message: discord.Message):
     """
     Unmutes a user. This user must be @mentioned.
@@ -83,7 +84,7 @@ async def unmute(client: discord.Client, message: discord.Message):
         await client.send_message(message.channel, "Usage: {}unmute @UserName".format(prefix))
 
 
-@command("ban", roles={"Admin", "Bot Commander"})
+@command("ban", roles={NavalRole.ADMIN})
 async def ban(client: discord.Client, message: discord.Message):
     """
     Bans a user from the server.
@@ -98,7 +99,7 @@ async def ban(client: discord.Client, message: discord.Message):
         print('[ERROR]:', banerror)
 
 
-@command("kick", roles={"Admin", "Bot Commander"})
+@command("kick", roles={NavalRole.ADMIN})
 async def kick(client: discord.Client, message: discord.Message):
     """
     Kicks a user from the server.
@@ -111,7 +112,7 @@ async def kick(client: discord.Client, message: discord.Message):
         print('[Error]', kickerror)
 
 
-@command("delete", roles={"Admin", "Bot Commander"})
+@command("delete", roles={NavalRole.ADMIN})
 async def delete(client: discord.Client, message: discord.Message):
     """
     Prunes a certain number of messages from the server.
@@ -164,7 +165,7 @@ async def banned(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, "Banned users: {}".format(', '.join(user.name for user in users)))
 
 
-@command("blacklist", roles={"Admin"}, argcount="?", argerror=":x: You must select at least one user to blacklist!")
+@command("blacklist", roles={NavalRole.ADMIN}, argcount="?", argerror=":x: You must select at least one user to blacklist!")
 async def blacklist(client: discord.Client, message: discord.Message, *_: list):
     """
     Blocks a user from communicating with the bot.
@@ -185,7 +186,7 @@ async def blacklist(client: discord.Client, message: discord.Message, *_: list):
         json.dump(black_list, f)
 
 
-@command("unblacklist", roles={"Admin"}, args=1)
+@command("unblacklist", roles={NavalRole.ADMIN}, args=1)
 async def unblacklist(client: discord.Client, message: discord.Message, *_: list):
     """
     Unblocks a user from communicating with the bot.
@@ -215,7 +216,7 @@ async def broadcast(client: discord.Client, message: discord.Message):
         await client.send_message(servers, "*Broadcast message:* {}".format(text))
 
 
-@command("changecolor", roles={"Bot Commander"}, argcount=1, argerror="You must provide a hex color")
+@command("changecolor", roles={NavalRole.BOT_COMMANDER}, argcount=1, argerror="You must provide a hex color")
 async def colour(client: discord.Client, message: discord.Message, hexa: str):
     """
     Changes the color of a user. The color needs to be supplied in a hexadecimal format without the `#`!
