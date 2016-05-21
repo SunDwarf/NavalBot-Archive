@@ -93,6 +93,16 @@ async def np(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, vc.cmd_np())
 
 
+def coro_factory(coro, *args, **kwargs):
+    """
+    This function is called to create a factory, which can be used to create infinitely as many copies of the
+    playback coroutine as you need.
+
+    Used for ?again, mostly.
+    """
+    return functools.partial(coro, *args, **kwargs)
+
+
 @command("play", "playyt", "playyoutube", argcount="?", argerror=":x: You must pass a video!")
 async def play(client: discord.Client, message: discord.Message, *args: list):
     """
@@ -130,7 +140,7 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
                 await client.send_message(
                     message.channel, ":x: This link is not in the link whitelist."
                                      "To turn this off, use `{}setcfg limit_urls False`."
-                                     .format(await db.get_config(message.server.id, "command_prefix", default="?")))
+                        .format(await db.get_config(message.server.id, "command_prefix", default="?")))
                 return
 
     # Do the same as play_file, but with a youtube streamer.
@@ -227,8 +237,9 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
             await client.send_message(message.channel, ":heavy_check_mark: You are next in the queue.")
 
         try:
-            # Put the coroutine on the queue.
-            queue.put_nowait((voice_client.oauth2_play(client, message, download_url, info), info))
+            # Create the factory.
+            fac = coro_factory(voice_client.oauth2_play, client, message, download_url, info)
+            queue.put_nowait((fac, info))
         except asyncio.QueueFull:
             await client.send_message(message.channel,
                                       ":no_entry: There are too many songs on the queue. Cannot start "
@@ -252,9 +263,10 @@ async def play(client: discord.Client, message: discord.Message, *args: list):
                 break
             # Add it to the queue.
             try:
-                queue.put_nowait((voice_client.oauth2_play(
-                    client, message,
-                    item["url"], item), item))
+                # Create the coro factory
+
+                fac = coro_factory(voice_client.oauth2_play, client, message, item["url"], item)
+                queue.put_nowait((fac, item))
             except asyncio.QueueFull:
                 await client.send_message(
                     message.channel, ":no_entry: There are too many songs on the queue. "

@@ -21,15 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 import asyncio
-import random
-from math import trunc, ceil
-
 import discord
 
 from navalbot.api.commands import oldcommand, command
-from navalbot.api import db
+from navalbot.api.commands.cmdclass import NavalRole
 from navalbot.voice.voice_util import author_is_valid, find_voice_channel
-from navalbot.voice.voiceclient import NavalVoiceClient
 from .stores import voice_params
 
 
@@ -38,31 +34,22 @@ async def again(client: discord.Client, message: discord.Message):
     """
     Adds this item to the queue again.
     """
-    if message.server.id not in voice_params:
-        await client.send_message(message.channel, content=":x: Not currently connected on this server.")
+    vc = client.voice_client_in(message.server)
+    if not vc:
+        await client.send_message(message.channel, ":x: Not currently connected on this server.")
         return
 
-    # Get the item from the queue.
-    i = voice_params[message.server.id].get("curr_coro")
-    if not i:
-        await client.send_message(message.channel, content=":x: Nothing to play again.")
+    channels = [vc.channel, find_voice_channel(message.server), message.author.voice_channel]
+
+    if not author_is_valid(message.author, channels):
+        await client.send_message(message.channel, ":x: You must be in voice and not deafened to control me.")
         return
 
-    # Add it to the queue.
-    try:
-        queue = voice_params[message.server.id]["queue"]
-        title = voice_params[message.server.id]["title"]
-        assert isinstance(queue, asyncio.Queue)
-        queue.put_nowait((i, title))
-    except KeyError:
-        await client.send_message(message.channel, content=":x: No queue to place item on.")
-    except asyncio.QueueFull:
-        await client.send_message(message.channel, content=":x: Queue is full.")
-    else:
-        await client.send_message(message.channel, content=":heavy_check_mark: Repeating track.")
+    s = vc.cmd_again()
+    await client.send_message(message.channel, s)
 
 
-@command("shuffle", roles={"Admin", "Bot Commander", "Voice"})
+@command("shuffle", roles={NavalRole.VOICE, NavalRole.ADMIN, NavalRole.BOT_COMMANDER})
 async def shuffle(client: discord.Client, message: discord.Message):
     """
     Shuffles the queue.
@@ -105,7 +92,7 @@ async def get_queued_vids(client: discord.Client, message: discord.Message):
     await client.send_message(message.channel, s)
 
 
-@command("skip", roles={"Admin", "Bot Commander", "Voice"})
+@command("skip", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE})
 async def skip(client: discord.Client, message: discord.Message):
     """
     Skips ahead one or more tracks.
@@ -176,7 +163,7 @@ async def move(client: discord.Client, message: discord.Message, fr: int, to: in
     await client.send_message(message.channel, s)
 
 
-@command("remove", roles={"Bot Commander", "Voice", "Admin"},
+@command("remove", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE},
          argcount="?", argerror=":x: You must give an index to remove.")
 async def remove_vid(client: discord.Client, message: discord.Message, *args: list):
     """

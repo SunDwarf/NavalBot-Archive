@@ -33,6 +33,8 @@ import youtube_dl
 
 from navalbot.api import db
 
+logger = logging.getLogger("NavalBot::Voice")
+
 
 class NavalVoiceClient(discord.VoiceClient):
     """
@@ -48,7 +50,7 @@ class NavalVoiceClient(discord.VoiceClient):
         self._play_queue = asyncio.Queue()
 
         # Used for the current status or so.
-        self.current_coroutine = None
+        self.coro_factory = None
         self.player = None
         self.playing = False
         self.title = "N/A"
@@ -75,17 +77,20 @@ class NavalVoiceClient(discord.VoiceClient):
             # Get the queue, fresh.
             # Why?
             # So we can shuffle it.
+            logger.info("Running iteration of voice task for server `{}`...".format(self.server))
             queue = self._play_queue
             if not queue:
                 return
             try:
                 items = await queue.get()
-            except RuntimeError:
+            except RuntimeError as e:
+                logger.error(e)
                 return
+            logger.info("Got new items for `{}`, awaiting.".format(self.server))
             # Place the current coroutine on the voice_params
-            self.current_coroutine = items[0]
+            self.coro_factory = items[0]
             # Await the playing coroutine.
-            await items[0]
+            await self.coro_factory()
 
     def ensure_playlist_task(self):
         """
@@ -102,7 +107,7 @@ class NavalVoiceClient(discord.VoiceClient):
             logging.getLogger("NavalBot").info("No need to fix up track {}...".format(wp_url))
             return download_url
 
-        logging.getLogger("NavalBot").info("Fixing up track {}...".format(wp_url))
+        logger.info("Fixing up track {}...".format(wp_url))
 
         ydl = youtube_dl.YoutubeDL(
             {"format": 'webm[abr>0]/bestaudio/best', "ignoreerrors": True, "source_address": "0.0.0.0"})
@@ -111,8 +116,7 @@ class NavalVoiceClient(discord.VoiceClient):
         func = functools.partial(ydl.extract_info, wp_url, download=False)
         data = await self.loop.run_in_executor(None, func)
 
-        logging.getLogger("NavalBot").info(
-            "Fixed up track {}, got new URL: {}".format(wp_url, download_url != data.get("url")))
+        logger.info("Fixed up track {}, got new URL: {}".format(wp_url, download_url != data.get("url")))
 
         return data.get("url")
 
@@ -429,6 +433,21 @@ class NavalVoiceClient(discord.VoiceClient):
         self._play_queue = new_queue
 
         return ":heavy_check_mark: Shuffled queue."
+
+    def cmd_again(self):
+        """
+        Implementation of `again`.
+        """
+        if not self.playing:
+            return ":x: Not currently playing on this server."
+
+        # Place the coroutine on the queue, again.
+        try:
+            self._play_queue.put_nowait((self.coro_factory, self.curr_info))
+        except asyncio.QueueFull:
+            return ":x: Queue is full."
+
+        return ":heavy_check_mark: Playing `{}` again.".format(self.title)
 
     async def reset(self):
         """
