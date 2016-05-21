@@ -156,10 +156,10 @@ voice.no_song: ":x: Aucune piste n'est en cours de lecture."
 voice.curr_playing: "En cours de lecture: `{title}` `{d_str}`"
 
 voice.playback.no_channel: >
-        :x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`,
-        however you can override this with by running `{prefix}setcfg voice_channel <your channel>`.
+        :x: Le bot ne parvient pas à trouver de canal vocal pour diffuser de la musique! Par défaut, le nom peut être `NavalBot` ou `Music`,
+        cependant, vous pouvez changez cela en utilisant la commande `{prefix}setcfg voice_channel <your channel>`.
 
-voice.playback.pl_warning: ":warning: If this is a playlist, it may take a long time to download."
+voice.playback.pl_warning: ":warning: Si il s'agit d'une liste de lecture, il se pourrait qu'elle prenne du temps à télécharger."
 voice.playback.bad_url: >
         :x: Ce lien n'est pas autorisé par la whitelist. Pour désactiver la whitelist, utilisez `{prefix}setcfg limit_urls False`.
 
@@ -179,55 +179,55 @@ voice.playback.queue_next: ":heavy_check_mark: Vous êtes le prochain sur la fil
 
 voice.playback.np: ":heavy_check_mark: En cours de lecture: `{title}`"
 voice.playback.queue_full: ":no_entry: La file d'attente est pleine."
-voice.playback.pl_queue_full: ":no_entry: There are too many songs on the queue. Limiting playlist to {limit}."
-voice.playback.pl_error: ":x: Search returned nothing, or playlist errored."
-voice.playback.pl_added: ":heavy_check_mark: Added {num} track(s) to queue."
+voice.playback.pl_queue_full: ":no_entry: Il y a trop de chansons dans la file d'attente. La liste de lecture est désormais limitée à {limit}."
+voice.playback.pl_error: ":x: La recherche n'a renvoyé aucun résultat ou la liste de lecture a rencontré une erreur."
+voice.playback.pl_added: ":heavy_check_mark: {num} pistes ont été ajoutées à la file d'attente."
 
-voice.play_again: ":heavy_check_mark: Playing `{title}` again."
+voice.play_again: ":heavy_check_mark: Lecture de `{title}` à nouveau."
 
-voice.shuffled: ":heavy_check_mark: Shuffled queue."
+voice.shuffled: ":heavy_check_mark: La file d'attente a été mélangée."
 
-voice.queue_too_short: ":x: Queue is not as long as that. (`{num}`)"
-voice.queue_negative: ":x: Cannot use a negative number with the queue."
+voice.queue_too_short: ":x: Il n y a pas autant de pistes dans la file d'attente. (`{num}`)"
+voice.queue_negative: ":x: Vous ne pouvez pas utiliser un nombre négatif."
 
-voice.queue.ommitted: "Omitted {num} queued items."
+voice.queue.ommitted:  "{num} pistes dans la file d'attente ont été omis."
 voice.queue.curr_queued: >
-          **Currently queued: ({queue_length}/{max_queue_length})**
+          **Dans la file d'attente: ({queue_length}/{max_queue_length})**
           `[{hour:02d}:{minute:02d}:{second:02d}]`
-voice.queue.nothing_queued: "`Nothing is queued.`"
+voice.queue.nothing_queued: "`Il n ya rien dans la file d'attente.`"
 
-voice.bad_state: ":x: Inconsistent internal state - resetting connection. Blame Discord, probably."
+voice.bad_state: ":x: Le bot rencontre des problèmes. C'est probablement à cause de Discord."
 
-voice.skip.one: ":heavy_check_mark: Skipped current song."
-voice.skip.all: ":heavy_check_mark: Skipped all songs."
-voice.skip.many: ":heavy_check_mark: Skipped {num} items."
+voice.skip.one: ":heavy_check_mark: La chanson actuelle a été sautée."
+voice.skip.all: ":heavy_check_mark: Toutes les chansons ont été sautées."
+voice.skip.many: ":heavy_check_mark: {num} ont été sautées."
 
-voice.voteskip.vote: ":heavy_check_mark: Voteskip acknowledged. `{left}` more votes required."
-voice.voteskip.already_voted: ":no_entry: You have already voted."
+voice.voteskip.vote: ":heavy_check_mark: Le vote pour sauter a été enregistré. `{left}` autres votes sont nécessaires."
+voice.voteskip.already_voted: ":no_entry: Vous avez déjà voté."
 
-voice.mv.could_not_find: ":x: Could not find track at position `{index}`."
-voice.mv.moved: ":heavy_check_mark: Moved item `{title}` to position `{index}`."
+voice.mv.could_not_find: ":x: Aucune piste n'a été trouvée à la position `{index}`."
+voice.mv.moved: ":heavy_check_mark: La piste `{title}` a été déplacée à la position `{index}`."
 
-voice.remove.start_lt_end: ":x: Start must be larger than end position."
-voice.remove.deleted_one: ":heavy_check_mark: Deleted item {index} `({title})`."
-voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."
+voice.remove.start_lt_end: ":x: La position de départ ne peut pas dépasser la position de fin."
+voice.remove.deleted_one: ":heavy_check_mark: La piste {index} `({title})` a été supprimée."
+voice.remove.deleted_many: ":heavy_check_mark:  Les pistes {start} à {end} ont été supprimées."
 
 # core strings
-core.cfg.setcfg_updated: ":heavy_check_mark: Config updated: `{name}` -> `{val}`"
-core.cfg.avatar_changed: ":heavy_check_mark: Updated bot avatar."
-core.cfg.avatar_invalid: ":x: Avatar was not valid."
-core.cfg.name_changed: ":heavy_check_mark: Changed name to `{name}`."
+core.cfg.setcfg_updated: ":heavy_check_mark: Configuration mise à jour: `{name}` -> `{val}`"
+core.cfg.avatar_changed: ":heavy_check_mark: L'avatar du bot a été mis à jour."
+core.cfg.avatar_invalid: ":x: L'avatar est invalide."
+core.cfg.name_changed: ":heavy_check_mark: Nom changé en `{name}`."
 
-core.cfg.bad_override: ":x: You must provide an existing command."
+core.cfg.bad_override: ":x: Vous devez renseigner une commande existante."
 
 core.cfg_added_role_override: ":heavy_check_mark: Added role override for command {cmd}."
 core.cfg_removed_role_override: ":heavy_check_mark: Removed role override for command {cmd}."
 
-core.version.base: "Version **{ver}**, written by SunDwarf (https://github.com/SunDwarf) and shadow (https://github.com/ilevn)"
-core.version.no_dl: ":grey_exclamation: Could not download version information."
-core.version.new_ver: ":exclamation: *New version available:* **{ver}**"
-core.version.local_newer: ":grey_exclamation: *You are running a newer version than the one available online ({ver}).*"
-core.version.same: ":grey_exclamation: *You are running the latest version.*"
+core.version.base: "Version **{ver}**, écrite par SunDwarf (https://github.com/SunDwarf) et shadow (https://github.com/ilevn)"
+core.version.no_dl: ":grey_exclamation: Impossible de télécharger les informations de la version."
+core.version.new_ver: ":exclamation: *Nouvelle version disponible:* **{ver}**"
+core.version.local_newer: ":grey_exclamation: *Votre version est plus récente que la version disponible en ligne ({ver}).*"
+core.version.same: ":grey_exclamation: *Votre version est à jour.*"
 
 core.factoids.nonexistant: ":x: Factoid `{fac}` does not exist."
 core.factoids.nexist_or_nlock: ":x: Factoid `{fac}` does not exist or is not locked."
