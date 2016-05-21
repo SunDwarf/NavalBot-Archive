@@ -215,3 +215,45 @@ core.factoids.unlocked: ":heavy_check_mark: Factoid `{fac}` unlocked."
 
 core.factoids.match.header: "Matched factoids:"
 core.factoids.match.none: "`Nothing found using that pattern.`"
+
+# fun strings
+# ech
+fun.chosen: "My choice was: `{choice}`"
+
+fun.weather.bad_api_key: ":exclamation: No API key has been installed into the bot. Pester the owner to install it."
+fun.weather.rate_limit: ":exclamation: Hit the rate limit. Please wait."
+fun.weather.result: |
+        :cloud: _Weather for {place}:_
+        **Temperature:** {temp} °C **Humidity:** {hum} % **Wind:** {wind} m/s
+fun.weather.no_such_place: ":x: {place} does not seem to exist."
+
+fun.commands: "**See https://github.com/SunDwarf/NavalBot/wiki for more info.**"
+
+fun.whois.bad_command: ":x: You must mention at a user."
+fun.whois.response: |
+        :mag_right: Whois for {author.name}:
+        ```
+        Name: {author.name}#{author.discriminator}
+        Nickname: {author.nick}
+        ID: {author.id}
+        Created at: {author.created_at}
+        Colour: {author.colour}
+        Avatar URL: {author.avatar_url}
+        ```
+
+fun.uptime.time_fmt: "`{hours_total} hours, {minutes} minutes, {seconds} seconds`"
+fun.uptime.response: "Bot has been running for {time} since startup of process `#{pid}`"
+
+fun.stats.shard: "Currently shard `{shard_id}/{shard_count}\n"
+fun.stats.response: |
+        Currently running on `{servcount}` server(s). Processed `{msgcount}` messages since startup.
+        Connected to `{vcount}` voice channels, with `{scount}` streams currently playing.
+        Using `{memcount}MB` of memory.
+
+fun.urban: |
+  **Your search for `{search}` returned the following:
+
+  *Definition:*** {definition}
+  ***Example:*** {example}
+
+fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
