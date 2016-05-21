@@ -151,7 +151,7 @@ async def stats(ctx: CommandContext):
     else:
         shardm = ""
     await ctx.reply("fun.stats.response",
-                    servcount=server_count, msgcount=msgcount, vcount=voice_clients,
+                    shardm=shardm, servcount=server_count, msgcount=msgcount, vcount=voice_clients,
                     scount=streams, memcount=used_memory)
 
 
