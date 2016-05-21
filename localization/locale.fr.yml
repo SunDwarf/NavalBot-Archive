@@ -220,8 +220,8 @@ core.cfg.name_changed: ":heavy_check_mark: Nom changé en `{name}`."
 
 core.cfg.bad_override: ":x: Vous devez renseigner une commande existante."
 
-core.cfg_added_role_override: ":heavy_check_mark: Ajouté  {cmd}."
-core.cfg_removed_role_override: ":heavy_check_mark: Removed role override for command {cmd}."
+core.cfg_added_role_override: ":heavy_check_mark: Ajouté une priorité de rôle sur la commande  {cmd}."
+core.cfg_removed_role_override: ":heavy_check_mark: Retiré une priorité de rôle sur la commande {cmd}."
 
 core.version.base: "Version **{ver}**, écrite par SunDwarf (https://github.com/SunDwarf) et shadow (https://github.com/ilevn)"
 core.version.no_dl: ":grey_exclamation: Impossible de télécharger les informations de la version."
