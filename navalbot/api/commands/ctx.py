@@ -32,7 +32,8 @@ class CommandContext:
     This class is a simple thin wrapper that stores a few tidbits of data.
     """
     def __init__(self, client: discord.Client, message: discord.Message, locale: LocaleLoader,
-                 args: list):
+                 args: list=None):
         self.client = client
         self.message = message
         self.locale = locale
+        self.args = args

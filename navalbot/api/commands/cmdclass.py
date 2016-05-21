@@ -26,7 +26,9 @@ import discord
 
 from navalbot import exceptions
 from navalbot.api import util, db
+from navalbot.api.commands.ctx import CommandContext
 from navalbot.api.util import has_permissions_with_override
+from navalbot.api.locale import get_locale
 
 
 class _RoleProxy:
@@ -132,6 +134,10 @@ class Command(object):
         if not self.role_loader:
             self.role_loader = NavalRole(message.server.id)
 
+        # Load the locale loader.
+        loc = await db.get_config(message.server.id, "lang", default=None)
+        loc = get_locale(loc)
+
         # Do the checks before running the coroutine.
         # Owner check.
 
@@ -213,11 +219,14 @@ class Command(object):
                                                                                "wrong type.")
                                     return
 
+        # Create the context.
+        ctx = CommandContext(client, message, locale=loc)
+
         # Now that we've gotten all of the returns out of the way, invoke the coroutine.
         if hasattr(self, "_args_type"):
-            result = await self._wrapped_coro(client, message, *args)
-        else:
-            result = await self._wrapped_coro(client, message)
+            ctx.args = args
+
+        result = await self._wrapped_coro(ctx)
 
         if result:
             await client.send_message(message.channel, result)
