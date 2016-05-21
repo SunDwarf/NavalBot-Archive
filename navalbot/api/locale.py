@@ -105,7 +105,7 @@ class LocaleLoader:
         if i == key:
             return None
         else:
-            return key
+            return i
 
 
 def get_locale(lang: str) -> LocaleLoader:
