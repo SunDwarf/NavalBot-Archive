@@ -25,80 +25,81 @@ import discord
 
 from navalbot.api import db, util
 from navalbot.api.commands import command
+from navalbot.api.commands.ctx import CommandContext
 
 
 @command("lock", argcount=1, errormsg=":x: You must provide a factoid to lock.")
-async def lock(client: discord.Client, message: discord.Message, to_lock: str):
+async def lock(ctx: CommandContext):
     """
     Locks a factoid, so only the owner of the factoid can change it.
     """
-    fac = await db.get_config(message.server.id, "fac:{}".format(to_lock))
+    to_lock = ctx.args[0]
+    fac = await db.get_config(ctx.message.server.id, "fac:{}".format(to_lock))
     if not fac:
-        await client.send_message(message.channel, ":x: Factoid `{}` does not exist".format(to_lock))
+        await ctx.reply("core.factoids.nonexistant", fac=to_lock)
         return
-    locked = await db.get_config(message.server.id, "fac:{}:locked".format(to_lock), type_=str, default=None)
-    if locked and locked != message.author.id:
+    locked = await db.get_config(ctx.message.server.id, "fac:{}:locked".format(to_lock), type_=str, default=None)
+    if locked and locked != ctx.message.author.id:
         # get username
-        await client.send_message(message.channel, ":x: Cannot change lock, factoid is locked to ID `{}`.".format(
-            locked))
+        await ctx.reply("core.factoids.cannot_edit", fac=to_lock, u=locked)
         return
     # Lock it.
-    await db.set_config(message.server.id, "fac:{}:locked".format(to_lock), str(message.author.id))
-    await client.send_message(message.channel, ":heavy_check_mark: Factoid `{}` locked to `{}`"
-                              .format(to_lock, message.author.id))
+    await db.set_config(ctx.message.server.id, "fac:{}:locked".format(to_lock), str(ctx.message.author.id))
+    await ctx.reply("core.factoids.locked", fac=to_lock, u=ctx.message.author.id    )
 
 
 @command("del", "delfactoid", argcount=1, errormsg=":x: You must provide a factoid to delete.")
-async def delete_factoid(client: discord.Client, message: discord.Message, to_del: str):
+async def delete_factoid(ctx: CommandContext):
     """
     Deletes a factoid. It must either be unlocked or locked by you.
     """
-    fac = await db.get_config(message.server.id, "fac:{}".format(to_del))
+    to_del = ctx.args[0]
+    fac = await db.get_config(ctx.message.server.id, "fac:{}".format(to_del))
     if not fac:
-        await client.send_message(message.channel, ":x: Factoid {} does not exist".format(to_del))
+        await ctx.reply("core.factoids.nonexistant", fac=to_del)
         return
-    locked = await db.get_config(message.server.id, "fac:{}:locked".format(to_del), type_=str, default=None)
-    if locked and locked != message.author.id:
+    locked = await db.get_config(ctx.message.server.id, "fac:{}:locked".format(to_del), type_=str, default=None)
+    if locked and locked != ctx.message.author.id:
         # get username
-        await client.send_message(message.channel, ":x: Cannot delete, factoid is locked to ID `{}`.".format(locked))
+        await ctx.reply("core.factoids.cannot_edit", fac=to_del, u=locked)
         return
 
     # delete it
-    await db.delete_config(message.server.id, "fac:{}".format(to_del))
-    await db.delete_config(message.server.id, "fac:{}:locked".format(to_del))
-    await client.send_message(message.channel, ":heavy_check_mark: Deleted factoid {}.".format(to_del))
+    await db.delete_config(ctx.message.server.id, "fac:{}".format(to_del))
+    await db.delete_config(ctx.message.server.id, "fac:{}:locked".format(to_del))
+    await ctx.reply("core.factoids.deleted", fac=to_del)
 
 
 @command("unlock", argcount=1, errormsg=":x: You must provide a factoid to unlock.")
-async def unlock(client: discord.Client, message: discord.Message, to_ulock):
+async def unlock(ctx: CommandContext):
     """
     Unlocks a factoid, so anybody can change it.
     """
-    locked = await db.get_config(message.server.id, "fac:{}:locked".format(to_ulock), type_=str, default=None)
-    unlock_exception = discord.utils.get(message.server.roles, name='Admin')
-    if locked and locked != message.author.id and not unlock_exception:
+    to_ulock = ctx.args[0]
+    locked = await db.get_config(ctx.message.server.id, "fac:{}:locked".format(to_ulock), type_=str, default=None)
+    unlock_exception = discord.utils.get(ctx.message.server.roles, name='Admin')
+    if locked and locked != ctx.message.author.id and not unlock_exception:
         # get username
-        await client.send_message(message.channel, ":x: Cannot change lock, factoid is locked to ID `{}`.".format(
-            locked))
+        await ctx.reply("core.factoids.cannot_edit", fac=to_ulock, u=locked)
         return
     elif not locked:
-        await client.send_message(message.channel, ":x: Factoid {} does not exist/not locked.".format(to_ulock))
+        await ctx.reply("core.factoids.nexist_or_nlock", fac=to_ulock)
         return
-    await db.delete_config(message.server.id, "fac:{}:locked".format(to_ulock))
-    await client.send_message(message.channel, ":heavy_check_mark: Factoid `{}` unlocked.".format(to_ulock))
+    await db.delete_config(ctx.message.server.id, "fac:{}:locked".format(to_ulock))
+    await ctx.reply("core.factoids.unlocked", fac=to_ulock)
 
 
 @command("factoids", argcount=1, errormsg=":x: You must provide a pattern to search for.")
-async def factoids(client: discord.Client, message: discord.Message, fac_patt: str):
+async def factoids(ctx: CommandContext):
     """
     Searches for factoids with a specific pattern.
     """
-    fac_patt = "config:{}:fac:".format(message.server.id) + fac_patt
+    fac_patt = "config:{}:fac:".format(ctx.message.server.id) + ctx.args[0]
     pool = await util.get_pool()
     async with pool.get() as conn:
         assert isinstance(conn, aioredis.Redis)
         keys = conn.iscan(match=fac_patt)
-    index, s = 0, "Matched factoids:\n"
+    index, s = 0, ctx.locale["core.factoids.match.header"] + '\n'
     fcs = []
     async for key in keys:
         # Decode it
@@ -112,16 +113,16 @@ async def factoids(client: discord.Client, message: discord.Message, fac_patt: s
         index += 1
         if index == 20:
             break
-        data = await db.get_config(message.server.id, "fac:{}".format(nkey))
+        data = await db.get_config(ctx.message.server.id, "fac:{}".format(nkey))
         fcs.append((nkey, data))
     # Sort fcs
     fcs = sorted(fcs, key=lambda x: x[0])
     for n, k in enumerate(fcs):
         # Append to the string, using index
-        s += "\n{}. `{}` -> `{}`".format(n + 1, k[0], k[1])
+        s += "{}. `{}` -> `{}`\n".format(n + 1, k[0], k[1])
     if index == 0:
-        s += "\n`Nothing found matching that pattern.`"
-    await client.send_message(message.channel, s)
+        s += ctx.locale["core.factoids.match.none"]
+    await ctx.client.send_message(ctx.message.channel, s)
 
 
 @command("factoid")

@@ -204,3 +204,14 @@ core.version.no_dl: ":grey_exclamation: Could not download version information."
 core.version.new_ver: ":exclamation: *New version available:* **{ver}**"
 core.version.local_newer: ":grey_exclamation: *You are running a newer version than the one available online ({ver}).*"
 core.version.same: ":grey_exclamation: *You are running the latest version.*"
+
+core.factoids.nonexistant: ":x: Factoid `{fac}` does not exist."
+core.factoids.nexist_or_nlock: ":x: Factoid `{fac}` does not exist or is not locked."
+core.factoids.cannot_edit: ":x: Cannot edit factoid {fac}, it is locked to user `{u}`."
+
+core.factoids.locked: ":heavy_check_mark: Factoid `{fac}` locked to user `{u}`."
+core.factoids.deleted: ":heavy_check_mark: Factoid `{fac}` deleted."
+core.factoids.unlocked: ":heavy_check_mark: Factoid `{fac}` unlocked."
+
+core.factoids.match.header: "Matched factoids:"
+core.factoids.match.none: "`Nothing found using that pattern.`"

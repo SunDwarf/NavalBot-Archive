@@ -31,7 +31,7 @@ from navalbot.api.commands import commands, command, Command
 from navalbot.api import db
 from navalbot.api.util import sanitize, get_file
 
-from navalbot import factoids
+#from navalbot import factoids
 
 
 # Factoid matcher compiled
