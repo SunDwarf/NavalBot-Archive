@@ -24,8 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import asyncio
 import datetime
 import os
+import shlex
 import shutil
 import time
+import typing
 from concurrent import futures
 from math import floor
 
@@ -205,3 +207,20 @@ def sanitize(param):
     param = param.replace('..', '.').replace('/', '')
     param = param.split('?')[0]
     return param
+
+
+def get_user(message: discord.Message) -> typing.Union[discord.Member, None]:
+    """
+    Gets a user from the message. This searches mentions first, then uses get_member_named.
+    """
+    if len(message.mentions) > 1:
+        return message.mentions[0]
+    try:
+        args = shlex.split(message.content)[1:]
+        to_find = args[0]
+    except ValueError:
+        args = message.content.split(" ")[1:]
+        to_find = ' '.join(args)
+
+    u = message.server.get_member_named(to_find)
+    return u

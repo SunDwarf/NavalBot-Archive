@@ -20,10 +20,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+
 import discord
 
 from navalbot.api.commands import command, CommandContext
 from navalbot.api.commands.cmdclass import NavalRole
+from navalbot.api.util import get_user
+
+
+def get_highest_role(user: discord.Member) -> discord.Role:
+    """
+    Gets the highest role that a user has.
+    """
+    return sorted(user.roles, key=lambda role: role.position)[-1]
+
+
+def user_is_higher(user1: discord.Member, user2: discord.Member) -> bool:
+    """
+    Compares the two users to see which has a higher position.
+
+    Returns True if user1's highest role is higher than user2's highest role.
+    """
+    u1_highest = get_highest_role(user1)
+    u2_highest = get_highest_role(user2)
+
+    return u1_highest.position > u2_highest.position
 
 
 @command("ban", argcount=1, roles={NavalRole.ADMIN})
@@ -32,7 +53,7 @@ async def ban(ctx: CommandContext):
     Ban a user from the server.
     """
     # Calculate our highest role
-    our_highest = sorted(ctx.message.server.me.roles, key=lambda role: role.position)[-1]
+    our_highest = get_highest_role(ctx.message.server.me)
 
     # Check our permission.
     if not ctx.message.server.me.permissions_in(ctx.message.channel).ban_members:
@@ -41,22 +62,12 @@ async def ban(ctx: CommandContext):
 
     assert isinstance(ctx.message.server, discord.Server)
 
-    # Check the length of the mentions
-    # We must have at least one mention.
-    if len(ctx.message.mentions) < 1:
-        # Try and find their user.
-        user = ctx.message.server.get_member_named(ctx.args[0])
-        if not user:
-            await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
-            return
-        assert isinstance(user, discord.Member)
-    else:
-        user = ctx.message.mentions[0]
-        assert isinstance(user, discord.Member)
+    user = get_user(ctx.message)
+    if not user:
+        await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+        return
 
-    # Calculate their highest role.
-    their_highest = sorted(user.roles, key=lambda role: role.position)[-1]
-    if their_highest.position >= our_highest.position or (user.id == ctx.message.server.owner_id):
+    if user_is_higher(user, ctx.message.server.me) or (user.id == ctx.message.server.owner_id):
         # Too high, we can't touch them.
         await ctx.reply("moderation.ban.low_permission",
                         role=our_highest.name if our_highest.name != "@everyone" else "everyone")
