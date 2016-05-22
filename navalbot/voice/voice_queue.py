@@ -159,7 +159,7 @@ async def move(ctx: CommandContext):
 
     try:
         fr = int(ctx.args[0])
-        to = int(ctx.args[0])
+        to = int(ctx.args[1])
     except ValueError:
         await ctx.reply("generic.not_int", val=ctx.args[0])
         return

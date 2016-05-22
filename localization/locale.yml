@@ -194,7 +194,7 @@ voice.playback.np: ":heavy_check_mark: Now playing: `{title}`"
 voice.playback.queue_full: ":no_entry: The queue is full."
 voice.playback.pl_queue_full: ":no_entry: There are too many songs on the queue. Limiting playlist to {limit}."
 voice.playback.pl_error: ":x: Search returned nothing, or playlist errored."
-voice.playback.pl_added: ":heavy_check_mark: Added {num} track(s) to queue."
+voice.playlist.pl_added: ":heavy_check_mark: Added {num} track(s) to queue."
 
 voice.play_again: ":heavy_check_mark: Playing `{title}` again."
 
@@ -203,7 +203,7 @@ voice.shuffled: ":heavy_check_mark: Shuffled queue."
 voice.queue_too_short: ":x: Queue is not as long as that. (`{num}`)"
 voice.queue_negative: ":x: Cannot use a negative number with the queue."
 
-voice.queue.ommitted: "Omitted {num} queued items."
+voice.queue.omitted: "Omitted {num} queued items."
 voice.queue.curr_queued: >
           **Currently queued: ({queue_length}/{max_queue_length})**
           `[{hour:02d}:{minute:02d}:{second:02d}]`
