@@ -267,7 +267,7 @@ fun.commands: "**See https://github.com/SunDwarf/NavalBot/wiki for more info.**"
 
 fun.whois.response: |
         :mag_right: Whois for {author.name}:
-        ```
+        ```xl
         Name: {author.name}#{author.discriminator}
         Nickname: {author.nick}
         ID: {author.id}
