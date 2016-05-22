@@ -13,6 +13,8 @@
 # Generic keys.
 generic.not_int: ":x: Value {val} is not a valid integer."
 generic.file_too_big: ":x: File {fname} is too big to download."
+generic.no_mention: ":x: You must mention a user."
+generic.cannot_find_user: ":x: Cannot find user `{user}`."
 
 # Help keys.
 help.None: |
@@ -252,7 +254,6 @@ fun.weather.no_such_place: ":x: {place} does not seem to exist."
 
 fun.commands: "**See https://github.com/SunDwarf/NavalBot/wiki for more info.**"
 
-fun.whois.bad_command: ":x: You must mention at a user."
 fun.whois.response: |
         :mag_right: Whois for {author.name}:
         ```
@@ -280,3 +281,7 @@ fun.urban: |
   ***Example:*** {example}
 
 fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
+
+# Moderation keys.
+moderation.ban.low_permission: ":x: My role (`{role}`) does not have permission to ban this user."
+moderation.ban.banned: ":heavy_check_mark: User `{target}` banned."

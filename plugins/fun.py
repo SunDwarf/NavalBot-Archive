@@ -115,7 +115,7 @@ async def whois(ctx: CommandContext):
     Displays information about the user specified.
     """
     if len(ctx.message.mentions) != 1:
-        await ctx.reply("fun.whois.bad_command")
+        await ctx.reply("generic.no_mention")
         return
 
     author = ctx.message.mentions[0]
