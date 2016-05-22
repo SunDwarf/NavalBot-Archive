@@ -15,6 +15,7 @@ generic.not_int: ":x: Value {val} is not a valid integer."
 generic.file_too_big: ":x: File {fname} is too big to download."
 generic.no_mention: ":x: You must mention a user."
 generic.cannot_find_user: ":x: Cannot find user `{user}`."
+generic.cannot_find_command: ":x: Cannot find command `{cmd}`."
 
 # Help keys.
 help.None: |
@@ -251,6 +252,8 @@ core.factoids.unlocked: ":heavy_check_mark: Factoid `{fac}` unlocked."
 
 core.factoids.match.header: "Matched factoids:"
 core.factoids.match.none: "`Nothing found using that pattern.`"
+
+core.factoids.set: ":heavy_check_mark: Factoid `{name}` is now `{content}`."
 
 # fun strings
 # ech
