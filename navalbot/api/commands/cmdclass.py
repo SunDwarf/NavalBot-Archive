@@ -25,8 +25,34 @@ import shlex
 import discord
 
 from navalbot import exceptions
-from navalbot.api import util
+from navalbot.api import util, db
+from navalbot.api.commands.ctx import CommandContext
 from navalbot.api.util import has_permissions_with_override
+from navalbot.api.locale import get_locale
+
+
+class _RoleProxy:
+    def __init__(self, order, name, val):
+        self.name = name
+        self.val = val
+
+        self.order = order
+
+
+class NavalRole:
+    ADMIN = _RoleProxy(999, "ADMIN", "Admin")
+    BOT_COMMANDER = _RoleProxy(100, "BOT_COMMANDER", "Bot Commander")
+    VOICE = _RoleProxy(1, "VOICE", "Voice")
+
+    def __init__(self, server_id: str):
+        self.server_id = server_id
+
+    async def load_role(self, rl: _RoleProxy):
+        """
+        Loads a role name, allowing for DB name overrides.
+        """
+        got = await db.get_config(self.server_id, "role:{}".format(rl.name), default=rl.val)
+        return got
 
 
 class Command(object):
@@ -46,6 +72,8 @@ class Command(object):
 
         self._parse_kwargs(**kwargs)
 
+        self.role_loader = None
+
     def _parse_kwargs(self, **kwargs):
         """
         Parse kwargs.
@@ -61,11 +89,6 @@ class Command(object):
                 self._args_type = 1
                 self._args_count = int(kwargs["argcount"])
 
-            self._arg_error_msg = kwargs.get(
-                "argerror",
-                ":x: You must have at least {} arguments. Use `\"\"` for arguments with spaces in them."
-                    .format(1 if not self._args_type else self._args_count))
-
         # Role restrictions.
         if kwargs.get("roles"):
             roles = kwargs.get("roles")
@@ -80,16 +103,46 @@ class Command(object):
         else:
             self._only_owner = False
 
-    def help(self):
+    async def help(self, server: discord.Server) -> str:
         """
         Get the help for a specific function.
         """
-        return self._wrapped_coro.__doc__
+        # load it from locale
+
+        loc = await db.get_config(server.id, "lang", default=None)
+        loc = get_locale(loc)
+
+        doc = loc.get("help.{}".format(self._wrapped_coro.__name__))
+        if not doc:
+            doc = loc["help.None"]
+
+        return doc
+
+    async def _construct_arg_error_msg(self, server: discord.Server):
+        prefix = await db.get_config(server.id, "command_prefix", default="?")
+        base = """```{}({})""".format(prefix, '|'.join(self.names))
+
+        if self._args_type == 0:
+            base += " <1 or more arguments>\n\n"
+        elif self._args_type == 1:
+            base += " <{} arguments>\n\n".format(self._args_count)
+
+        base += await self.help(server) + "\n```"
+
+        return base
 
     async def invoke(self, client: discord.Client, message: discord.Message):
         """
         Invoke the function.
         """
+        # Set up the role loader.
+        if not self.role_loader:
+            self.role_loader = NavalRole(message.server.id)
+
+        # Load the locale loader.
+        loc = await db.get_config(message.server.id, "lang", default=None)
+        loc = get_locale(loc)
+
         # Do the checks before running the coroutine.
         # Owner check.
 
@@ -98,7 +151,8 @@ class Command(object):
             u_id = int(message.author.id)
             # Check if it is in the ids specified.
             if not u_id == owner:
-                await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
+                #await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
+                await client.send_message(message.channel, loc["perms.not_owner"])
                 return
         # Role check.
 
@@ -108,15 +162,25 @@ class Command(object):
             try:
                 assert isinstance(message.author, discord.Member)
             except AssertionError:
-                await client.send_message(message.channel, ":no_entry: Cannot determine your role!")
+                await client.send_message(message.channel, loc["perms.cannot_determine_role"])
                 return
-            if not await has_permissions_with_override(message.author, allowed_roles, message.server.id,
-                                                       self._wrapped_coro.__name__):
-                await client.send_message(
-                    message.channel,
-                    ":no_entry: You do not have any of the required roles: `{}`!".format(allowed_roles)
 
-                )
+            # Load roles correctly.
+            new_roles = set()
+            for role in allowed_roles:
+                assert isinstance(role, _RoleProxy), "Role should be a NavalRole member in {}".format(
+                    self._wrapped_coro.__name__)
+                rn = await self.role_loader.load_role(role)
+                new_roles.add(rn)
+
+            if not await has_permissions_with_override(message.author, new_roles, message.server.id,
+                                                       self._wrapped_coro.__name__):
+                #await client.send_message(
+                #    message.channel,
+                #    ":no_entry: You do not have any of the required roles: `{}`!"
+                #        .format({role.val for role in allowed_roles})
+                ss = loc['perms.bad_role'].format(roles={role.val for role in allowed_roles})
+                await client.send_message(message.channel, ss)
                 return
 
         # Arguments check.
@@ -128,44 +192,22 @@ class Command(object):
                 except ValueError:
                     args = message.content.split(" ")[1:]
                 if len(args) < 1:
-                    await client.send_message(message.channel, self._arg_error_msg)
+                    await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
                     return
             elif self._args_type == 1:
-                # Check the function for annotations.
-                func_sig = inspect.signature(self._wrapped_coro)
-                if len(func_sig.parameters) != (2 + self._args_count):
-                    raise exceptions.BadCommandException("Arg count of {} differs from number of requested args ({})"
-                                                         .format(len(func_sig.parameters), 2 + self._args_count))
-                # Get the annotations, if applicable.
-                params = list(func_sig.parameters.values())
-                annotations = [f.annotation for f in params[2:]]
-                temp_args = shlex.split(message.content)[1:]
-                if len(temp_args) != self._args_count:
-                    await client.send_message(message.channel, self._arg_error_msg)
+                args = shlex.split(message.content)[1:]
+                if len(args) != self._args_count:
+                    await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
                     return
-                args = []
-                # match the annotations
-                for arg, ann in zip(temp_args, annotations):
-                    if ann == inspect.Parameter.empty:
-                        args.append(arg)
-                    else:
-                        # Nested doom
-                        if isinstance(ann, type):
-                            if ann.__name__ == "bool":
-                                args.append(False if arg == "False" else True)
-                            else:
-                                try:
-                                    args.append(ann(arg))
-                                except ValueError:
-                                    await client.send_message(message.channel, ":x: One of your arguments was the "
-                                                                               "wrong type.")
-                                    return
+
+        # Create the context.
+        ctx = CommandContext(client, message, locale=loc)
 
         # Now that we've gotten all of the returns out of the way, invoke the coroutine.
         if hasattr(self, "_args_type"):
-            result = await self._wrapped_coro(client, message, *args)
-        else:
-            result = await self._wrapped_coro(client, message)
+            ctx.args = args
+
+        result = await self._wrapped_coro(ctx)
 
         if result:
             await client.send_message(message.channel, result)

@@ -24,8 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 from .cmdclass import Command
+from .ctx import CommandContext
 
 commands = {}
+
 
 # Deprecated. Use @command which is much better.
 def oldcommand(*names):
@@ -51,6 +53,7 @@ def command(*names, **kwargs):
     """
     Register a new command.
     """
+
     def __decorator(func):
         # Create the class.
         cls = Command(func, *names, **kwargs)

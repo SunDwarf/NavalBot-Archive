@@ -24,8 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import asyncio
 import datetime
 import os
+import shlex
 import shutil
 import time
+import typing
 from concurrent import futures
 from math import floor
 
@@ -202,6 +204,7 @@ async def get_file(client: tuple, url, name):
 
 
 def sanitize(param):
-    param = param.replace('..', '.').replace('/', '')
-    param = param.split('?')[0]
+    ret = ''.join([c for c in param if c.isalnum()])
     return param
+
+

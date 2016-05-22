@@ -111,4 +111,3 @@ files/
 praw.ini
 bot.py.zipdep.py
 /config.yml
-plugins/*

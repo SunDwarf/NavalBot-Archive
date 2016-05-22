@@ -1,0 +1,299 @@
+#####################################################
+# This is the localization database for NavalBot.
+# This is used to localize messages.
+# This is the german translation for NavalBot
+#
+# locale.yml is the default file, where keys are loaded from if they do not exist
+# locale.<lang>.yml is used for loading locale from language-specific files.
+#
+# When localizing a file, DO NOT REPLACE ANYTHING INSIDE { } OR ANYTHING INSIDE :_:.
+# These are used by the bot to build up the strings automatically.
+# You can re-order them for the sentences to make sense, but they must stay in the sentence.
+#####################################################
+
+# Allgemeine Schlüssel.
+generic.not_int: ":x: Wert {val} ist kein gültiger Integer."
+generic.file_too_big: ":x: Datei {fname} ist zu groß zum Downloaden."
+generic.no_mention: ":x: Du musst den Nutzer erwähnen."
+generic.cannot_find_user: ":x: Konnte Nutzer `{user}` nicht finden."
+
+# Hilfe Schlüssel.
+help.None: |
+        Dieser Befehl hat keine Hilfe in dieser Sprache.
+
+help.set_config: |
+        Ändert eine server-spezifische Konfiguration.
+
+        Wenn du Leerzeichen in deinen Argumenten hast, müssen diese mit "Anführungszeichen" geschrieben werden.
+
+help.get_config: |
+        Fordert eine server-spezifische Konfiguration an.
+
+        Wenn du Leerzeichen in deinen Argumenten hast, müssen diese mit "Anführungszeichen" geschrieben werden.
+
+help.avatar: |
+        Ändert den Avatar des Bots.
+        Du musst die URL angeben, die als Bild genutzt werden soll.
+        Dieser Befehl ist auf den Bot-Besitzer beschränkt.
+
+help.changename: |
+        Ändert den **Benutzernamen** des Bots.
+        Braucht den Namen als ein Argument.
+        Dieser Befehl ist auf den Bot-Besitzer beschränkt.
+
+help.add_role_override: |
+        Überschreibt die angeforderten Rollen für einen Befehl
+        Du musst den Befehl und die Rolle angeben.
+        Dies ermöglicht es jedem, der die erforderte Rolle besitzt, den Befehl auszuführen
+        Du kannst einen Befehl für jeden zugägnlich machen indem du statt der Rolle `@ everybody` (ohne Leerzeichen.) schreibst.
+
+help.remove_role_override: |
+        Dies löscht eine Überschreibung der Rollenbegrenzung.
+        Du musst den Befehl und die Rolle angeben.
+
+help.lock: |
+        Dies sperrt ein Factoid.
+
+        Admins können trotz der Sperre das Factoid entsperren.
+
+help.delete_factoid: |
+        Dies löscht ein Factoid.
+
+        Wenn das Factoid gesperrt ist, kann es nur der Bot-Besitzer oder ein Admin entsperren.
+
+help.unlock: |
+        Dies entsperrt ein Factoid und macht es bearbeitbar für jeden.
+
+help.factoids: |
+        Dies listet alle Factoids auf, die auf einen bestimmtes Suchschema zutreffen.
+
+        Dieses Schema ist ein Redis-Such-Schema. Für mehr Informationen besuche http://redis.io/commands/scan
+
+help.factoid: |
+        Dieser Befehl zeigt dir, wie man ein Factoid erstellt.
+
+help.version: |
+        Informiert dich über die aktuelle Version des Bots.
+
+help.again: |
+        Fügt das aktuell laufende Lied nochmal zur Warteschlange hinzu.
+
+help.shuffle: |
+        Mischt die Warteschlange.
+
+help.get_queued_vids: |
+        Zeigt Informatioen über die Warteschlange.
+
+        Der Index eines Liedes in der Warteschlange kann als optionaler Wert angegeben werden, damit erst ab dort Informationen gezeigt werden.
+
+help.skip: |
+        Überspringt ein oder mehrere Lieder.
+
+        Als optionaler Paramter kann die Anzahl an zu überspringenden Liedern angegeben werden.
+        Dies überspringt das aktuelle Lied und dann alle anderen Lieder, die überspringt werden sollen.
+        Sonst wird nur ein Lied übersprungen.
+
+help.voteskip: |
+        Start eine Abstimmung, ob ein Lied übersprungen werden soll.
+
+help.move: |
+        Verschiebt ein Lied in der Warteschlange von Index <x> zu Index <y>.
+
+        Beide Nummern müssen positiv sein.
+
+help.remove_vid: |
+        Entfernt ein oder mehrere Lieder.
+
+        Nimmt eine Start- und optionale Endposition an.
+        Wenn keine Position zum Entfernen angegeben wurde, wird nur ein Lied entfernt.
+
+help.reset: |
+        Trennt den Bot vom Sprach-Kanal und setzt alle Sprachparamter zurück.
+
+help.np: |
+        Zeigt das aktuelle Lied an.
+
+help.play: |
+        Spielt ein Lied.
+
+        Es kann entweder eine URL oder ein Suchbegriff angegeben werden.
+        Die URL kann von den meisten Seiten kommen; Der Bot wird versuchen, das Lied richtig zu downloaden.
+
+
+help.choice: |
+        Trifft diese schwere Wahl für dich.
+
+        Umschließe deine Argumente mit "Anführungszeichen", wenn du ein Leerzeichen in deinem Wort hast.
+
+help.google: |
+        Such in Google nach dem besten Ergebnis deines Suchbegriffs.
+
+help.weather: |
+        Zeigt dir Informationen über das Wetter zu einem Ort.
+
+help.commands: |
+        Zeigt dir, wo du mehr Informationen über die verfügbaren Befehle bekommen kannst.
+
+help.whois: |
+        Sucht nach Informationen über einen Nutzer.
+
+        Du musst den Nuter @Erwähnen.
+
+help.uptime: |
+        Zeigt, wie lange der Bot schon läuft.
+
+
+help.ban: |
+        Verbannt einen Nutzer aus dem Server.
+
+        Der Nutzer muss entweder @erwähnt oder als ein Argument in dem Befehl geliefert werden.
+
+help.kick: |
+        Kickt einen Nutzer.
+
+        Der Nutzer muss entweder @erwähnt oder als ein Argument in dem Befehl geliefert werden.
+
+
+# Berechtigungs-Schlüssel
+perms.not_owner: ":no_entry: Dieser Befehl ist auf den Bot-Besitzer beschränkt."
+perms.cannot_determine_role: ":no_entry: Konnte Role nicht bestimmen!"
+perms.bad_role: ":no_entry: Du hast keine der erforderten Rollen!: `{roles}`!"
+
+# Sprach-Schlüssel
+voice.not_connected: ":x: Momentan nicht mit dem Server verbunden."
+voice.cant_control: ":x: Du musst dich im Sprach-Chat befinden und nicht auf taub geschaltet sein."
+
+voice.reset.success: ":heavy_check_mark: Sprachparameter wurden zurückgesetzt."
+
+voice.no_song: ":x: Momentan wird kein Lied gespielt."
+voice.curr_playing: "Aktuelles Lied: `{title}` `{d_str}`"
+
+voice.playback.no_channel: >
+        :x: Konnte nicht den Sprach-Kanal finden, um Lieder zu spielen! Die Standard-Kanäle sind `NavalBot` oder `Music`,
+        diese kannst du allerdings überschreiben, wenn du `{prefix}setcfg voice_channel <Name_des_Kanals>` ausführst.
+
+voice.playback.pl_warning: ":warning: Wenn dies eine Playlist ist, dann könnte das Downloaden lang dauern."
+voice.playback.bad_url: >
+        :x: Dieser Link ist nicht in der Whitelist. Zum Ausschalten schreibe `{prefix}setcfg limit_urls False`.
+
+voice.playback.wait_for: >
+        :hourglass: Etwas anderes wird momentan heruntergeladen. Es wird gewartet...
+
+voice.playback.downloading: ":hourglass: Lade Videoinformationen herunter..."
+voice.playback.ytdl_error: ":no_entry: Etwas ist schiefgelaufen. Error: {err}"
+voice.playback.bad_info: >
+        :no_entry: Etwas ist schiefgelaufen. Konnte keine Videoinformationen bekommen.
+
+voice.playback.timeout: ":x: Die Verbindung zum Sprach-Kanal dauerte zu lang."
+voice.playback.connection_error: ":x: Ein Fehler ist beim Verbinden mit dem Sprach-Kanal passiert."
+
+voice.playback.queue_num: ":heavy_check_mark: Du bist Nummer {pos} in der Warteschlange."
+voice.playback.queue_next: ":heavy_check_mark: Du bist als Nächster dran"
+
+voice.playback.np: ":heavy_check_mark: Aktuelles Lied: `{title}`"
+voice.playback.queue_full: ":no_entry: Die Warteschlange ist voll."
+voice.playback.pl_queue_full: ":no_entry: Es sind zu viele Lieder in der Warteschlange. Limitiere die Playlist auf {limit} Einträge..."
+voice.playback.pl_error: ":x: Die Suche erbrachte nichts oder mit der Playlist stimmt etwas nicht"
+voice.playback.pl_added: ":heavy_check_mark: {num} Lieder wurden zu der Warteschlange hinzugefügt."
+
+voice.play_again: ":heavy_check_mark: Spiele `{title}` nochmal."
+
+voice.shuffled: ":heavy_check_mark: Warteschlange wurde gemischt."
+
+voice.queue_too_short: ":x: Die Warteschlange ist nicht so lang. (`{num}`)"
+voice.queue_negative: ":x: Du kannst keine negative Nummner nutzen."
+
+voice.queue.ommitted: "Lasse {num} angestandene Lieder aus."
+voice.queue.curr_queued: >
+          **Momentane Warteschlange: ({queue_length}/{max_queue_length})**
+          `[{hour:02d}:{minute:02d}:{second:02d}]`
+voice.queue.nothing_queued: "`Nichts ist in der Warteschlange.`"
+
+voice.bad_state: ":x: Unstimmiger innerer Zustand - Die Verbindung wird zurückgesetzt. Discord ist wahrscheinlich verantwortlich."
+
+voice.skip.one: ":heavy_check_mark: Das aktuelle Lied wurde übersprungen."
+voice.skip.all: ":heavy_check_mark: Alle Lieder wurden übersprungen."
+voice.skip.many: ":heavy_check_mark: {num} Lieder wurden übersprungen."
+
+voice.voteskip.vote: ":heavy_check_mark: Stimme ist eingegangen. Es werden noch `{left}` Stimmen zum Überspringen benötigt."
+voice.voteskip.already_voted: ":no_entry: Du hast schon abgestimmt."
+
+voice.mv.could_not_find: ":x: Konnte kein Lied bei Platz `{index}` finden."
+voice.mv.moved: ":heavy_check_mark: Verschob Lied `{title}` auf Platz `{index}`."
+
+voice.remove.start_lt_end: ":x: Die Startposition muss größer als die Endposition sein."
+voice.remove.deleted_one: ":heavy_check_mark: Löschte Lied {index} `({title})`."
+voice.remove.deleted_many: ":heavy_check_mark: Löschte Lieder von Position {start} bis {end}."
+
+# Hauptprogramm
+core.cfg.setcfg_updated: ":heavy_check_mark: Konfiguration aktualisiert: `{name}` -> `{val}`"
+core.cfg.avatar_changed: ":heavy_check_mark: Avatar aktualisiert."
+core.cfg.avatar_invalid: ":x: Avatar ist nicht gültig."
+core.cfg.name_changed: ":heavy_check_mark: Name wurde zu `{name}` geändert."
+
+core.cfg.bad_override: ":x: Du musst einen existierenden Befehl angeben."
+
+core.cfg_added_role_override: ":heavy_check_mark: Eine Rollenüberschreibung für {cmd} wurde hinzugefügt."
+core.cfg_removed_role_override: ":heavy_check_mark: Eine Rollenüberschreibung für {cmd} wurde entfernt."
+
+core.version.base: "Version **{ver}**, geschrieben von SunDwarf (https://github.com/SunDwarf) und shadow (https://github.com/ilevn)"
+core.version.no_dl: ":grey_exclamation: Konnte keine Informationen über die Version bekommen."
+core.version.new_ver: ":exclamation: *Neue Version verfügbar:* **{ver}**"
+core.version.local_newer: ":grey_exclamation: *Du führst eine neuere Version als die, die online verfügbar ist, aus ({ver}).*"
+core.version.same: ":grey_exclamation: *Du hast die aktuellste Version*"
+
+core.factoids.nonexistant: ":x: Factoid `{fac}` existiert nicht."
+core.factoids.nexist_or_nlock: ":x: Factoid `{fac}` existiert nicht oder ist gesperrt."
+core.factoids.cannot_edit: ":x: Konnte Factoid {fac} nicht bearbeiten, es ist von Nutzer-ID `{u}` gesperrt."
+
+core.factoids.locked: ":heavy_check_mark: Factoid `{fac}` gesperrt von `{u}`."
+core.factoids.deleted: ":heavy_check_mark: Factoid `{fac}` gelöscht."
+core.factoids.unlocked: ":heavy_check_mark: Factoid `{fac}` entsperrt"
+
+core.factoids.match.header: "Passende Factoids:"
+core.factoids.match.none: "`Zu diesem Suchschema wurde nichts gefunden.`"
+
+# Spaßbefehle
+fun.chosen: "Meine Wahl war: `{choice}`"
+
+fun.weather.bad_api_key: ":exclamation: Es ist kein OWM-API Schlüssel vorhanden. Bitte wende dich an den Bot-Besitzer."
+fun.weather.rate_limit: ":exclamation: Es wurden zu viele Anfragen gemacht. Bitte warte."
+fun.weather.result: |
+        :cloud: _Wetter für {place}:_
+        **Temperatur:** {temp} °C **Humidität:** {hum} % **Windgeschwindigkeit:** {wind} m/s
+fun.weather.no_such_place: ":x: {place} scheint nicht zu existieren."
+
+fun.commands: "**Besuche https://github.com/SunDwarf/NavalBot/wiki für mehr Informationen.**"
+
+fun.whois.response: |
+        :mag_right: Informationen zu {author.name}:
+        ```xl
+        Name: {author.name}#{author.discriminator}
+        Nickname: {author.nick}
+        ID: {author.id}
+        Erstellt am: {author.created_at}
+        Farbe: {author.colour}
+        Avatar URL: {author.avatar_url}
+        ```
+
+fun.uptime.time_fmt: "`{hours_total} Stunden, {minutes} Minuten, {seconds} Sekunden`"
+fun.uptime.response: "Der Bot läuft {time} seit dem Start des Prozesses `#{pid}`"
+
+fun.stats.shard: "Aktuelle Scherbe `{shard_id}/{shard_count}\n"
+fun.stats.response: |
+        {shardm}Aktuell laufend in `{servcount}` Server(n). Verarbeitete `{msgcount}` Nachrichten seit dem Start.
+        Verbunden mit `{vcount}` Sprach-Kanälen, mit`{scount}` laufenden Musik-Streams.
+        Benutze `{memcount}MB` Arbeitsspeicher.
+
+fun.urban: |
+  **Deine Suche nach `{search}` erbrachte das Folgende:
+
+  *Definition:*** {definition}
+  ***Beispiel:*** {example}
+
+fun.sr.no_sr: ":x: Subreddit existiert nicht oder ist NSFW."
+
+# Moderationsschlüssel
+moderation.low_permission: ":x: Meine Rolle (`{role}`) hat keine Berechtigung, diesen Nutzer zu ändern."
+moderation.ban.banned: ":heavy_check_mark: Benutzer `{target}` wurde aus dem Server ausgeschlossen."
+moderation.kick.kicked: ":heavy_check_mark: Benutzer `{target}` wurde gekickt."

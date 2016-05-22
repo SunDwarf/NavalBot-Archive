@@ -1,0 +1,284 @@
+#####################################################
+# This is the localization database for NavalBot.
+# This is used to localize messages.
+# This is the french translation for NavalBot
+#
+# locale.yml is the default file, where keys are loaded from if they do not exist
+# locale.<lang>.yml is used for loading locale from language-specific files.
+#
+# When localizing a file, DO NOT REPLACE ANYTHING INSIDE { } OR ANYTHING INSIDE :_:.
+# These are used by the bot to build up the strings automatically.
+# You can re-order them for the sentences to make sense, but they must stay in the sentence.
+#####################################################
+
+# Generic keys.
+generic.not_int: ":x: La valeur {val} n'est pas un nombre entier valide."
+generic.file_too_big: ":x: Le poids du fichier {fname} est trop élevé pour le télécharger."
+
+# Help keys.
+help.None: |
+        Cette commande ne dispose d'aucune aide dans cette langue.
+
+help.set_config: |
+        Modifie un réglage du bot spécifique au serveur.
+
+        Si l'un de vos deux arguments contiennent un espace, ils doivent être entourés de "quotes".
+
+help.get_config: |
+        Renvoie un réglage du bot spécifique au serveur.
+
+        Si votre argument contient un espace, il doit être entouré de "quotes".
+
+help.avatar: |
+        Change l'avatar du bot.
+        Vous devez indiquer l'URL de l'avatar à utiliser à la place.
+        Seul le propriétaire du bot peut utiliser la commande.
+
+help.changename: |
+        Change le **nom d'utilisateur** du bot.
+        Indiquez le nom à la suite de la commande.
+        Seul le propriétaire du bot peut utiliser la commande.
+
+help.add_role_override: |
+        Adds a role override to a command.
+        
+        This takes the command and the role as an argument.
+        This allows anybody with the role specified to run this command.
+        You can enable a command for everybody by adding a role override for `@ everybody` (without the space.).
+
+help.remove_role_override: |
+        Removes a role override from a command.
+        This takes the command, and the role, as an argument.
+
+help.lock: |
+        Vérouille un alias pour que seul le propriétaire puisse l'éditer.
+
+        À noter que les admins peuvent toujours déverouiller et éditer les alias même verouillés.
+
+help.delete_factoid: |
+        Supprime un alias.
+
+        Si l'alias est verouillé, seul le propriétaire ou un admin peut le supprimer.
+
+help.unlock: |
+        Déverouille un alias pour que tout le monde puisse l'éditer.
+
+help.factoids: |
+        Affiche les alias correspondant à un motif spécifique.
+
+        Ce motif est une commande Scan de Redis. Pour plus d'informations, voir http://redis.io/commands/scan
+
+help.factoid: |
+        Explique simplement comment créer un alias.
+
+help.version: |
+        Affiche la version actuelle du bot.
+
+help.again: |
+        Ajoute la piste en cours de lecture à la fin de la file d'attente à nouveau.
+
+help.shuffle: |
+        Réordonne aléatoirement la file d'attente.
+
+help.get_queued_vids: |
+        Affiche la file d'attente actuelle.
+
+        Un deuxième paramètre optionnel est possible: le numéro de la piste où commencer. La commande renverra la liste d'attente à partir de cette position.
+
+help.skip: |
+        Sauter des pistes.
+
+        Un deuxième paramètre optionnel est possible: le nombre de pistes à sauter.
+        Cela sautera la piste en cours de lecture, puis <num - 1> pistes dans la queue.
+        Si aucun paramètre n'est renseigné, seule la piste en cours de lecture sera sautée.
+
+help.voteskip: |
+        Commence un vote pour sauter la piste en cours de lecture.
+
+help.move: |
+        Déplace une piste de la file d'attente de la position <x> à la position <y>.
+
+        Les deux nombres doivent être entiers.
+
+help.remove_vid: |
+        Supprime une plage de pistes de la file d'attente.
+
+        Il faut une position de départ, et optionellement une position de fin.
+        Si la position de fin n'est pas spécifiée, seul une piste sera supprimée.
+
+help.reset: |
+        Déconnecte le bot du serveur vocal et le réinitialise.
+
+help.np: |
+        Affiche la piste en cours de lecture.
+
+help.play: |
+        Jouer une piste.
+
+        Vous pouvez spécifier l'URL d'une vidéo, ou une recherche de mots-clés.
+        Cette URL peut provenir de la plupart des sites, le bot essaiera de télécharger l'audio correctement.
+
+
+help.choice: |
+        Fait ce choix cornélien à votre place.
+
+        Entourez vos options avec des "quotes" si elles contiennent des espaces.
+
+help.google: |
+        Fait une recherche Google et affiche le premier résultat.
+
+help.weather: |
+        Cherche la météo pour un endroit défini.
+
+help.commands: |
+        Affiche l'endroit ou obtenir de l'aide à propos d'une commande.
+
+help.whois: |
+        Recherche des informations concernant un utilisateur.
+
+        Vous devez @mentionner l'utilisateur.
+
+help.uptime: |
+        Affiche la durée durant laquelle le bot opère depuis la dernière mise en ligne.
+
+
+# Permissions keys
+perms.not_owner: ":no_entry: Cette commande est réservée au propriétaire du bot."
+perms.cannot_determine_role: ":no_entry: Impossible de déterminer votre rôle!"
+perms.bad_role: ":no_entry: Vous ne possédez aucun des rôles nécessaires: `{roles}`!"
+
+# Voice keys.
+voice.not_connected: ":x: Le bot n'est pas connecté sur ce serveur."
+voice.cant_control: ":x: Vous devez vous trouver dans un canal vocal et ne pas être sourd pour me contrôler."
+
+voice.reset.success: ":heavy_check_mark: Fonction vocale réinitialisée."
+
+voice.no_song: ":x: Aucune piste n'est en cours de lecture."
+voice.curr_playing: "En cours de lecture: `{title}` `{d_str}`"
+
+voice.playback.no_channel: >
+        :x: Le bot ne parvient pas à trouver de canal vocal pour diffuser de la musique! Par défaut, le nom peut être `NavalBot` ou `Music`,
+        cependant, vous pouvez changez cela en utilisant la commande `{prefix}setcfg voice_channel <your channel>`.
+
+voice.playback.pl_warning: ":warning: Si il s'agit d'une liste de lecture, il se pourrait qu'elle prenne du temps à télécharger."
+voice.playback.bad_url: >
+        :x: Ce lien n'est pas autorisé par la whitelist. Pour désactiver la whitelist, utilisez `{prefix}setcfg limit_urls False`.
+
+voice.playback.wait_for: >
+        :hourglass: Quelque chose d'autre est en cours de téléchargement. Veuillez patienter, le temps que ce téléchargement se termine.
+
+voice.playback.downloading: ":hourglass: Téléchargement des informations de la vidéo..."
+voice.playback.ytdl_error: ":no_entry: Quelque chose ne s'est pas passé comme prévu. Erreur: {err}"
+voice.playback.bad_info: >
+        :no_entry: Quelque chose ne s'est pas passé comme prévu. Impossible d'obtenir les informations de la vidéo.
+
+voice.playback.timeout: ":x: Le délai d'attente à été dépassé lors de la connexion au serveur."
+voice.playback.connection_error: ":x: Une erreur s'est produite durant la connexion au server vocal."
+
+voice.playback.queue_num: ":heavy_check_mark: Vous êtes numéro {pos} dans la file d'attente."
+voice.playback.queue_next: ":heavy_check_mark: Vous êtes le prochain sur la file d'attente."
+
+voice.playback.np: ":heavy_check_mark: En cours de lecture: `{title}`"
+voice.playback.queue_full: ":no_entry: La file d'attente est pleine."
+voice.playback.pl_queue_full: ":no_entry: Il y a trop de chansons dans la file d'attente. La liste de lecture est désormais limitée à {limit}."
+voice.playback.pl_error: ":x: La recherche n'a renvoyé aucun résultat ou la liste de lecture a rencontré une erreur."
+voice.playback.pl_added: ":heavy_check_mark: {num} pistes ont été ajoutées à la file d'attente."
+
+voice.play_again: ":heavy_check_mark: Lecture de `{title}` à nouveau."
+
+voice.shuffled: ":heavy_check_mark: La file d'attente a été mélangée."
+
+voice.queue_too_short: ":x: Il n y a pas autant de pistes dans la file d'attente. (`{num}`)"
+voice.queue_negative: ":x: Vous ne pouvez pas utiliser un nombre négatif."
+
+voice.queue.ommitted:  "{num} pistes dans la file d'attente ont été omis."
+voice.queue.curr_queued: >
+          **Dans la file d'attente: ({queue_length}/{max_queue_length})**
+          `[{hour:02d}:{minute:02d}:{second:02d}]`
+voice.queue.nothing_queued: "`Il n ya rien dans la file d'attente.`"
+
+voice.bad_state: ":x: Le bot rencontre des problèmes. C'est probablement à cause de Discord."
+
+voice.skip.one: ":heavy_check_mark: La chanson actuelle a été sautée."
+voice.skip.all: ":heavy_check_mark: Toutes les chansons ont été sautées."
+voice.skip.many: ":heavy_check_mark: {num} ont été sautées."
+
+voice.voteskip.vote: ":heavy_check_mark: Le vote pour sauter a été enregistré. `{left}` autres votes sont nécessaires."
+voice.voteskip.already_voted: ":no_entry: Vous avez déjà voté."
+
+voice.mv.could_not_find: ":x: Aucune piste n'a été trouvée à la position `{index}`."
+voice.mv.moved: ":heavy_check_mark: La piste `{title}` a été déplacée à la position `{index}`."
+
+voice.remove.start_lt_end: ":x: La position de départ ne peut pas dépasser la position de fin."
+voice.remove.deleted_one: ":heavy_check_mark: La piste {index} `({title})` a été supprimée."
+voice.remove.deleted_many: ":heavy_check_mark:  Les pistes {start} à {end} ont été supprimées."
+
+# core strings
+core.cfg.setcfg_updated: ":heavy_check_mark: Configuration mise à jour: `{name}` -> `{val}`"
+core.cfg.avatar_changed: ":heavy_check_mark: L'avatar du bot a été mis à jour."
+core.cfg.avatar_invalid: ":x: L'avatar est invalide."
+core.cfg.name_changed: ":heavy_check_mark: Nom changé en `{name}`."
+
+core.cfg.bad_override: ":x: Vous devez renseigner une commande existante."
+
+core.cfg_added_role_override: ":heavy_check_mark: Ajouté une priorité de rôle sur la commande  {cmd}."
+core.cfg_removed_role_override: ":heavy_check_mark: Retiré une priorité de rôle sur la commande {cmd}."
+
+core.version.base: "Version **{ver}**, écrite par SunDwarf (https://github.com/SunDwarf) et shadow (https://github.com/ilevn)"
+core.version.no_dl: ":grey_exclamation: Impossible de télécharger les informations de la version."
+core.version.new_ver: ":exclamation: *Nouvelle version disponible:* **{ver}**"
+core.version.local_newer: ":grey_exclamation: *Votre version est plus récente que la version disponible en ligne ({ver}).*"
+core.version.same: ":grey_exclamation: *Votre version est à jour.*"
+
+core.factoids.nonexistant: ":x: Alias `{fac}` n'existe pas."
+core.factoids.nexist_or_nlock: ":x: Alias `{fac}` n'existe pas ou n'est pas verouillé."
+core.factoids.cannot_edit: ":x: Vous ne pouvez pas éditer l'alias {fac}, il est verouillé par l'utilisateur  `{u}`."
+
+core.factoids.locked: ":heavy_check_mark: Alias `{fac}` verouillé par l'utilisateur `{u}`."
+core.factoids.deleted: ":heavy_check_mark: Alias `{fac}` supprimé."
+core.factoids.unlocked: ":heavy_check_mark: Alias `{fac}` déverouillé."
+
+core.factoids.match.header: "Alias correspondants:"
+core.factoids.match.none: "`Aucun alias ne correspond à ce motif.`"
+
+# fun strings
+# ech
+fun.chosen: "Mon choix était: `{choice}`"
+
+fun.weather.bad_api_key: ":exclamation: Aucune clé API n'a été installée avec le bot. Harcelez le propriétaire pour en installer une."
+fun.weather.rate_limit: ":exclamation: La limite de l'API a été atteinte. Veuillez patienter."
+fun.weather.result: |
+        :cloud: Météo à {place}:_
+        **Temperature:** {temp} °C **Humidité:** {hum} % **Vent:** {wind} m/s
+fun.weather.no_such_place: ":x: {place} ne semble pas exister."
+
+fun.commands: "**Voir https://github.com/SunDwarf/NavalBot/wiki pour plus d'infos.**"
+
+fun.whois.bad_command: ":x: Vous devez mentionner quelqu'un."
+fun.whois.response: |
+        :mag_right: Whois pour {author.name}:
+        ```
+        Nom: {author.name}#{author.discriminator}
+        Surnom: {author.nick}
+        ID: {author.id}
+        Créé le: {author.created_at}
+        Couleur: {author.colour}
+        URL de l'avatar: {author.avatar_url}
+        ```
+
+fun.uptime.time_fmt: "`{hours_total} heures, {minutes} minutes, {seconds} secondes`"
+fun.uptime.response: "Le bot a fonctionné pendant {time} depuis le lancement du processus `#{pid}`"
+
+fun.stats.shard: "Fragment actuel: `{shard_id}/{shard_count}\n"
+fun.stats.response: |
+        {shardm}En fonction sur `{servcount}` serveur(s). `{msgcount}` messages ont été traités depuis le lancement.
+        Connecté à `{vcount}` canaux vocaux, avec `{scount}` flux en cours de lecture.
+        `{memcount}Mo` de mémoire utilisés.
+
+fun.urban: |
+  **Votre requête `{search}` renvoie le résultat suivant:
+
+  *Définition:*** {definition}
+  ***Exemple:*** {example}
+
+fun.sr.no_sr: ":x: Ce subreddit n'existe pas ou est NSFW."
