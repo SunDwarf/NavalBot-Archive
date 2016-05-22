@@ -282,3 +282,26 @@ fun.urban: |
   ***Exemple:*** {example}
 
 fun.sr.no_sr: ":x: Ce subreddit n'existe pas ou est NSFW."
+
+moderation.low_permission: ":x: Mon rôle (`{role}`) n'a pas l'autorisation de modifier cet utilisateur."
+generic.cannot_find_command: ":x: La commande `{cmd}` est introuvable."
+moderation.kick.kicked: ":heavy_check_mark: L'utilisateur `{target}` a été exclu."
+help.ban: |
+        Bannit un utilisateur.
+
+        Cet utilisateur peut être @mentionné ou vous pouvez utiliser leur nom d'utilisateur/surnom comme argument et le bot détectera automatiquement l'utilisateur en question.
+
+
+generic.no_mention: ":x: Vous devez mentionner un utilisateur."
+core.cfg.cfg_deleted: ":heavy_check_mark: Réglage `{name}` supprimé."
+core.factoids.set: ":heavy_check_mark: L'alias `{name}` est désormais `{content}`."
+core.factoids.bad_args: ":heavy_check_mark: Vous n'avez pas inclus toutes les options nécessaires à l'alias."
+generic.cannot_find_user: ":x: Utilisateur `{user}` introuvable."
+moderation.ban.banned: ":heavy_check_mark: Utilisateur `{target}` banni."
+help.kick: |
+        Exclut un utilisateur.
+
+        Cet utilisateur peut être @mentionné ou vous pouvez utiliser leur nom d'utilisateur/surnom comme argument et le bot détectera automatiquement l'utilisateur en question.
+
+
+core.cfg.no_such_config: ":x: Le réglage `{name}` n'a pas été défini."
