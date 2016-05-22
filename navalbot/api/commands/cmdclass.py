@@ -51,7 +51,7 @@ class NavalRole:
         """
         Loads a role name, allowing for DB name overrides.
         """
-        got = await db.get_config(self.server_id, "role:{}".format(rl.name), default=rl.val)
+        got = await db.get_config(self.server_id, "role:{}".format(rl.name.lower()), default=rl.val)
         return got
 
 
@@ -179,7 +179,7 @@ class Command(object):
                 #    message.channel,
                 #    ":no_entry: You do not have any of the required roles: `{}`!"
                 #        .format({role.val for role in allowed_roles})
-                ss = loc['perms.bad_role'].format(roles={role.val for role in allowed_roles})
+                ss = loc['perms.bad_role'].format(roles={role for role in new_roles})
                 await client.send_message(message.channel, ss)
                 return
 
