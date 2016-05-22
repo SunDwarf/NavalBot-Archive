@@ -36,6 +36,22 @@ from navalbot.api.commands.ctx import CommandContext
 
 logger = logging.getLogger("NavalBot::Voice")
 
+from discord.opus import _lib, CTL_SET_BITRATE, OpusError, log
+
+
+def set_bitrate(self, kbps):
+    kbps = min(500, max(16, int(kbps)))
+
+    ret = _lib.opus_encoder_ctl(self._state, CTL_SET_BITRATE, kbps * 1024)
+    if ret < 0:
+        log.info('error has happened in set_bitrate')
+        raise OpusError(ret)
+
+    return kbps
+
+# Monkey-patch the opus encoder to accept high bit rate
+discord.opus.Encoder.set_bitrate = set_bitrate
+
 
 class NavalVoiceClient(discord.VoiceClient):
     """
@@ -126,6 +142,10 @@ class NavalVoiceClient(discord.VoiceClient):
         """
         Co-routine that is used for the message queue.
         """
+        # Change the encoder bitrate.
+        enc_br = await ctx.get_config("music_bitrate", default=128, type_=int)
+        bt = self.encoder.set_bitrate(enc_br)
+        logger.info("Encoding with opus at `{}kbit/s`.".format(bt))
         # Fix the URL.
         download_url = await self._fix_sc(download_url, info.get("webpage_url"))
         # Create a new ffmpeg player.
