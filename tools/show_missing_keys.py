@@ -9,7 +9,7 @@ lc = get_locale(sys.argv[1])
 keys = []
 
 for key in lc._default_data:
-    if not key in lc._locale_data:
+    if key not in lc._locale_data:
         keys.append(key)
 
 print("Missing keys: ")
