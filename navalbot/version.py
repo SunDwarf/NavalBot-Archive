@@ -19,5 +19,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 VERSION = "6.0.0"
-VERSUFF = "-alpha2"
+VERSUFF = "-beta1"
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
