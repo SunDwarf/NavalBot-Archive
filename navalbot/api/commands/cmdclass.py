@@ -72,8 +72,6 @@ class Command(object):
 
         self._parse_kwargs(**kwargs)
 
-        self.role_loader = None
-
     def _parse_kwargs(self, **kwargs):
         """
         Parse kwargs.
@@ -136,8 +134,7 @@ class Command(object):
         Invoke the function.
         """
         # Set up the role loader.
-        if not self.role_loader:
-            self.role_loader = NavalRole(message.server.id)
+        role_loader = NavalRole(message.server.id)
 
         # Load the locale loader.
         loc = await db.get_config(message.server.id, "lang", default=None)
@@ -170,7 +167,7 @@ class Command(object):
             for role in allowed_roles:
                 assert isinstance(role, _RoleProxy), "Role should be a NavalRole member in {}".format(
                     self._wrapped_coro.__name__)
-                rn = await self.role_loader.load_role(role)
+                rn = await role_loader.load_role(role)
                 new_roles.add(rn)
 
             if not await has_permissions_with_override(message.author, new_roles, message.server.id,
