@@ -444,7 +444,7 @@ class NavalVoiceClient(discord.VoiceClient):
         new_queue = asyncio.Queue(maxsize=qsize)
 
         # Create a list of the old queue.
-        deq = list(self._play_queue)
+        deq = list(self._play_queue._queue)
 
         # Shuffle it.
         random.shuffle(deq)
