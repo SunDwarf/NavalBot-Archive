@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import os
 import re
 import shlex
 
@@ -117,9 +118,27 @@ async def get_factoid(ctx: CommandContext, data: str):
         # Format the new content, using the inline command args.
         message = ctx.message
         client = ctx.client
-        print(data)
-        ctx.message.content = data.format(*old_args, full=' '.join(old_args))
+        try:
+            ctx.message.content = data.format(*old_args, full=' '.join(old_args))
+        except ValueError:
+            await ctx.reply("core.factoids.bad_args")
 
         # Invoke the new function.
         command = commands[command_word]
         await command.invoke(client, message)
+        return
+
+    # Check if it's a file.
+    if content.startswith("file:"):
+        fname = content.lstrip("file:")
+        # Sanitize the filename, to be safe.
+        fname = sanitize(fname)
+        # Open and send the file.
+        if not os.path.exists(os.path.join(os.getcwd(), 'files', fname)):
+            return
+        with open(os.path.join(os.getcwd(), 'files', fname), 'rb') as f:
+            await ctx.client.send_file(ctx.channel, f)
+            return
+
+    # Otherwise, just send the content.
+    await ctx.client.send_message(ctx.channel, content)

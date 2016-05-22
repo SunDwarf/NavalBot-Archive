@@ -255,6 +255,8 @@ core.factoids.match.none: "`Nothing found using that pattern.`"
 
 core.factoids.set: ":heavy_check_mark: Factoid `{name}` is now `{content}`."
 
+core.factoids.bad_args: ":heavy_check_mark: You did not pass all arguments to the factoid."
+
 # fun strings
 # ech
 fun.chosen: "My choice was: `{choice}`"

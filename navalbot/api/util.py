@@ -204,8 +204,7 @@ async def get_file(client: tuple, url, name):
 
 
 def sanitize(param):
-    param = param.replace('..', '.').replace('/', '')
-    param = param.split('?')[0]
+    ret = ''.join([c for c in param if c.isalnum()])
     return param
 
 
