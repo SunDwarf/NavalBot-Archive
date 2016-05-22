@@ -56,13 +56,13 @@ async def set_config(ctx: CommandContext):
 
 
 @command("get", "getcfg", argcount=1, roles={NavalRole.ADMIN}, argerror=":x: You must provide a key to get.")
-async def get_config(client: discord.Client, message: discord.Message, config_name: str):
+async def get_config(ctx: CommandContext):
     """
     Gets a server-specific configuration value.
     """
     # Get the value
-    val = await db.get_config(message.server.id, config_name)
-    await client.send_message(message.channel, "`{}` -> `{}`".format(config_name, val))
+    val = await ctx.get_config(ctx.args[0])
+    await ctx.client.send_message(ctx.message.channel, "`{}` -> `{}`".format(ctx.args[0], val))
 
 
 @command("avatar", argcount=1, owner=True)
