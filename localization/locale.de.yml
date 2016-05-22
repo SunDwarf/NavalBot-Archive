@@ -14,6 +14,8 @@
 # Allgemeine Schlüssel.
 generic.not_int: ":x: Wert {val} ist kein gültiger Integer."
 generic.file_too_big: ":x: Datei {fname} ist zu groß zum Downloaden."
+generic.no_mention: ":x: Du musst den Nutzer erwähnen."
+generic.cannot_find_user: ":x: Konnte Nutzer `{user}` nicht finden."
 
 # Hilfe Schlüssel.
 help.None: |
@@ -118,6 +120,40 @@ help.play: |
         Die URL kann von den meisten Seiten kommen; Der Bot wird versuchen, das Lied richtig zu downloaden.
 
 
+help.choice: |
+        Trifft diese schwere Wahl für dich.
+
+        Umschließe deine Argumente mit "Anführungszeichen", wenn du ein Leerzeichen in deinem Wort hast.
+
+help.google: |
+        Such in Google nach dem besten Ergebnis deines Suchbegriffs.
+
+help.weather: |
+        Zeigt dir Informationen über das Wetter zu einem Ort.
+
+help.commands: |
+        Zeigt dir, wo du mehr Informationen über die verfügbaren Befehle bekommen kannst.
+
+help.whois: |
+        Sucht nach Informationen über einen Nutzer.
+
+        Du musst den Nuter @Erwähnen.
+
+help.uptime: |
+        Zeigt, wie lange der Bot schon läuft.
+
+
+help.ban: |
+        Verbannt einen Nutzer aus dem Server.
+
+        Der Nutzer muss entweder @erwähnt oder als ein Argument in dem Befehl geliefert werden.
+
+help.kick: |
+        Kickt einen Nutzer.
+
+        Der Nutzer muss entweder @erwähnt oder als ein Argument in dem Befehl geliefert werden.
+
+
 # Berechtigungs-Schlüssel
 perms.not_owner: ":no_entry: Dieser Befehl ist auf den Bot-Besitzer beschränkt."
 perms.cannot_determine_role: ":no_entry: Konnte Role nicht bestimmen!"
@@ -189,7 +225,7 @@ voice.remove.start_lt_end: ":x: Die Startposition muss größer als die Endposit
 voice.remove.deleted_one: ":heavy_check_mark: Löschte Lied {index} `({title})`."
 voice.remove.deleted_many: ":heavy_check_mark: Löschte Lieder von Position {start} bis {end}."
 
-# core strings
+# Hauptprogramm
 core.cfg.setcfg_updated: ":heavy_check_mark: Konfiguration aktualisiert: `{name}` -> `{val}`"
 core.cfg.avatar_changed: ":heavy_check_mark: Avatar aktualisiert."
 core.cfg.avatar_invalid: ":x: Avatar ist nicht gültig."
@@ -199,3 +235,65 @@ core.cfg.bad_override: ":x: Du musst einen existierenden Befehl angeben."
 
 core.cfg_added_role_override: ":heavy_check_mark: Eine Rollenüberschreibung für {cmd} wurde hinzugefügt."
 core.cfg_removed_role_override: ":heavy_check_mark: Eine Rollenüberschreibung für {cmd} wurde entfernt."
+
+core.version.base: "Version **{ver}**, geschrieben von SunDwarf (https://github.com/SunDwarf) und shadow (https://github.com/ilevn)"
+core.version.no_dl: ":grey_exclamation: Konnte keine Informationen über die Version bekommen."
+core.version.new_ver: ":exclamation: *Neue Version verfügbar:* **{ver}**"
+core.version.local_newer: ":grey_exclamation: *Du führst eine neuere Version als die, die online verfügbar ist, aus ({ver}).*"
+core.version.same: ":grey_exclamation: *Du hast die aktuellste Version*"
+
+core.factoids.nonexistant: ":x: Factoid `{fac}` existiert nicht."
+core.factoids.nexist_or_nlock: ":x: Factoid `{fac}` existiert nicht oder ist gesperrt."
+core.factoids.cannot_edit: ":x: Konnte Factoid {fac} nicht bearbeiten, es ist von Nutzer-ID `{u}` gesperrt."
+
+core.factoids.locked: ":heavy_check_mark: Factoid `{fac}` gesperrt von `{u}`."
+core.factoids.deleted: ":heavy_check_mark: Factoid `{fac}` gelöscht."
+core.factoids.unlocked: ":heavy_check_mark: Factoid `{fac}` entsperrt"
+
+core.factoids.match.header: "Passende Factoids:"
+core.factoids.match.none: "`Zu diesem Suchschema wurde nichts gefunden.`"
+
+# Spaßbefehle
+fun.chosen: "Meine Wahl war: `{choice}`"
+
+fun.weather.bad_api_key: ":exclamation: Es ist kein OWM-API Schlüssel vorhanden. Bitte wende dich an den Bot-Besitzer."
+fun.weather.rate_limit: ":exclamation: Es wurden zu viele Anfragen gemacht. Bitte warte."
+fun.weather.result: |
+        :cloud: _Wetter für {place}:_
+        **Temperatur:** {temp} °C **Humidität:** {hum} % **Windgeschwindigkeit:** {wind} m/s
+fun.weather.no_such_place: ":x: {place} scheint nicht zu existieren."
+
+fun.commands: "**Besuche https://github.com/SunDwarf/NavalBot/wiki für mehr Informationen.**"
+
+fun.whois.response: |
+        :mag_right: Informationen zu {author.name}:
+        ```xl
+        Name: {author.name}#{author.discriminator}
+        Nickname: {author.nick}
+        ID: {author.id}
+        Erstellt am: {author.created_at}
+        Farbe: {author.colour}
+        Avatar URL: {author.avatar_url}
+        ```
+
+fun.uptime.time_fmt: "`{hours_total} Stunden, {minutes} Minuten, {seconds} Sekunden`"
+fun.uptime.response: "Der Bot läuft {time} seit dem Start des Prozesses `#{pid}`"
+
+fun.stats.shard: "Aktuelle Scherbe `{shard_id}/{shard_count}\n"
+fun.stats.response: |
+        {shardm}Aktuell laufend in `{servcount}` Server(n). Verarbeitete `{msgcount}` Nachrichten seit dem Start.
+        Verbunden mit `{vcount}` Sprach-Kanälen, mit`{scount}` laufenden Musik-Streams.
+        Benutze `{memcount}MB` Arbeitsspeicher.
+
+fun.urban: |
+  **Deine Suche nach `{search}` erbrachte das Folgende:
+
+  *Definition:*** {definition}
+  ***Beispiel:*** {example}
+
+fun.sr.no_sr: ":x: Subreddit existiert nicht oder ist NSFW."
+
+# Moderationsschlüssel
+moderation.low_permission: ":x: Meine Rolle (`{role}`) hat keine Berechtigung, diesen Nutzer zu ändern."
+moderation.ban.banned: ":heavy_check_mark: Benutzer `{target}` wurde aus dem Server ausgeschlossen."
+moderation.kick.kicked: ":heavy_check_mark: Benutzer `{target}` wurde gekickt."

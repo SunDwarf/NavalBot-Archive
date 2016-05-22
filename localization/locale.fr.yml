@@ -1,6 +1,7 @@
 #####################################################
 # This is the localization database for NavalBot.
 # This is used to localize messages.
+# This is the french translation for NavalBot
 #
 # locale.yml is the default file, where keys are loaded from if they do not exist
 # locale.<lang>.yml is used for loading locale from language-specific files.
@@ -112,7 +113,7 @@ help.np: |
         Affiche la piste en cours de lecture.
 
 help.play: |
-        Joue une piste.
+        Jouer une piste.
 
         Vous pouvez spécifier l'URL d'une vidéo, ou une recherche de mots-clés.
         Cette URL peut provenir de la plupart des sites, le bot essaiera de télécharger l'audio correctement.
