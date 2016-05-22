@@ -227,6 +227,10 @@ voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."
 
 # core strings
 core.cfg.setcfg_updated: ":heavy_check_mark: Config updated: `{name}` -> `{val}`"
+core.cfg.no_such_config: ":x: Config val `{name}` has not been set."
+core.cfg.cfg_deleted: ":heavy_check_mark: Config val `{name}` deleted."
+
+
 core.cfg.avatar_changed: ":heavy_check_mark: Updated bot avatar."
 core.cfg.avatar_invalid: ":x: Avatar was not valid."
 core.cfg.name_changed: ":heavy_check_mark: Changed name to `{name}`."

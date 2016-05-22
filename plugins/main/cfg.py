@@ -55,7 +55,7 @@ async def set_config(ctx: CommandContext):
     await ctx.reply("core.cfg.setcfg_updated", name=name, val=val)
 
 
-@command("get", "getcfg", argcount=1, roles={NavalRole.ADMIN}, argerror=":x: You must provide a key to get.")
+@command("getcfg", argcount=1, roles={NavalRole.ADMIN}, argerror=":x: You must provide a key to get.")
 async def get_config(ctx: CommandContext):
     """
     Gets a server-specific configuration value.
@@ -63,6 +63,20 @@ async def get_config(ctx: CommandContext):
     # Get the value
     val = await ctx.get_config(ctx.args[0])
     await ctx.client.send_message(ctx.message.channel, "`{}` -> `{}`".format(ctx.args[0], val))
+
+
+@command("delcfg", argcount=1, roles={NavalRole.ADMIN})
+async def delete_config(ctx: CommandContext):
+    """
+    Deletes a config key
+    """
+    val = await ctx.get_config(ctx.args[0])
+    if not val:
+        await ctx.reply("core.cfg.no_such_config", name=ctx.args[0])
+        return
+
+    await ctx.delete_config(ctx.args[0])
+    await ctx.reply("core.cfg.cfg_deleted", name=ctx.args[0])
 
 
 @command("avatar", argcount=1, owner=True)
