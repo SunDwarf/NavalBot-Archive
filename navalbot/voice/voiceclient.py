@@ -248,7 +248,7 @@ class NavalVoiceClient(discord.VoiceClient):
             song_str += "{}. `{}` `{}`\n".format(item + 1, title, df)
 
         if len(queue) > start_pos + 10:
-            song_str += "({})\n".format(ctx.locale["voice.queue.omitted"].format((len(queue) - 10) - start_pos))
+            song_str += "({})\n".format(ctx.locale["voice.queue.omitted"].format(num=(len(queue) - 10) - start_pos))
 
         # Divmod queue length, to get total length.
         tm, ds = divmod(total_dur, 60)
