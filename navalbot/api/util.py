@@ -209,18 +209,3 @@ def sanitize(param):
     return param
 
 
-def get_user(message: discord.Message) -> typing.Union[discord.Member, None]:
-    """
-    Gets a user from the message. This searches mentions first, then uses get_member_named.
-    """
-    if len(message.mentions) > 1:
-        return message.mentions[0]
-    try:
-        args = shlex.split(message.content)[1:]
-        to_find = args[0]
-    except ValueError:
-        args = message.content.split(" ")[1:]
-        to_find = ' '.join(args)
-
-    u = message.server.get_member_named(to_find)
-    return u

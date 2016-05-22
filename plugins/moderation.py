@@ -25,7 +25,6 @@ import discord
 
 from navalbot.api.commands import command, CommandContext
 from navalbot.api.commands.cmdclass import NavalRole
-from navalbot.api.util import get_user
 
 
 def get_highest_role(user: discord.Member) -> discord.Role:
@@ -62,12 +61,12 @@ async def ban(ctx: CommandContext):
 
     assert isinstance(ctx.message.server, discord.Server)
 
-    user = get_user(ctx.message)
+    user = ctx.get_user()
     if not user:
         await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
         return
 
-    if user_is_higher(user, ctx.message.server.me) or (user.id == ctx.message.server.owner_id):
+    if user_is_higher(user, ctx.me) or (user.id == ctx.server.owner_id):
         # Too high, we can't touch them.
         await ctx.reply("moderation.ban.low_permission",
                         role=our_highest.name if our_highest.name != "@everyone" else "everyone")
@@ -76,3 +75,11 @@ async def ban(ctx: CommandContext):
     # Try and ban the user.
     await ctx.client.ban(ctx.message.mentions[0])
     await ctx.reply("moderation.ban.banned", target=user.display_name)
+
+
+@command("kick", argcount=1, roles={NavalRole.ADMIN})
+async def kick(ctx: CommandContext):
+    """
+    Kicks the user from the server.
+    """
+    our_highest = get_highest_role()
