@@ -27,11 +27,11 @@ import os
 import discord
 import re
 
-from navalbot.api.commands import commands, command, Command
+from navalbot.api.commands import commands, command, Command, CommandContext
 from navalbot.api import db
 from navalbot.api.util import sanitize, get_file
 
-#from navalbot import factoids
+from navalbot import factoids
 
 
 # Factoid matcher compiled
@@ -42,32 +42,20 @@ command_matcher = re.compile(r'{(.*?)}')
 
 
 @command("help", argcount=1, argerror=":x: You must provide a function to check help of.")
-async def help(client: discord.Client, message: discord.Message, cmd_name: str):
+async def help(ctx: CommandContext):
     """
     ಠ_ಠ
     """
     # Get the function
-    func = commands.get(cmd_name)
+    func = commands.get(ctx.args[0])
     if not func:
-        await client.send_message(message.channel, ":no_entry: That function does not exist!")
+        await ctx.reply("core.cfg.bad_override")
         return
 
-    if hasattr(func, "help"):
-        help = func.help()
-        if not help:
-            await client.send_message(message.channel, ":x: This function doesn't have help.")
-            return
-    else:
-        # Format __doc__
-        if not func.__doc__:
-            await client.send_message(message.channel, ":x: This function doesn't have help.")
-            return
-        help = func.__doc__
+    assert isinstance(func, Command)
+    h = await func.help(ctx.server)
 
-    doc = help.split("\n")
-    doc = [d.lstrip() for d in doc if d.lstrip()]
-    doc = '\n'.join(doc)
-    await client.send_message(message.channel, doc)
+    await ctx.client.send_message(ctx.channel, h)
 
 # region factoids
 async def default(client: discord.Client, message: discord.Message):
@@ -76,6 +64,8 @@ async def default(client: discord.Client, message: discord.Message):
 
     Delegates to factoids.delegate().
     """
+    # Create a new context.
+    ctx = CommandContext()
     await factoids.delegate(client, message)
 
 
