@@ -34,7 +34,7 @@ help.avatar: |
 help.changename: |
         Altera o username do bot.
         Você deve dar um argumento fornecendo o nome para mudar para.
-    Este comando é só para proprietários do bot.
+        Este comando é só para proprietários do bot.
 
 help.add_role_override: |
         Adiciona uma substituição de função a um comando.
@@ -59,7 +59,7 @@ help.unlock: |
 
 help.factoids: |
         Mostra factóides que correspondem a um padrão específico.
-    Este padrão é um padrão de pesquisa de verificação utilisando o sìstema Redis. Para mais informações, consulte http://redis.io/commands/scan.
+        Este padrão é um padrão de pesquisa de verificação utilisando o sìstema Redis. Para mais informações, consulte http://redis.io/commands/scan.
 
 help.factoid:
         Mostra como criar um factóide.
