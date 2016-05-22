@@ -483,7 +483,8 @@ class NavalVoiceClient(discord.VoiceClient):
         """
         Reset the voice player.
         """
-        self.player.stop()
+        if self.player:
+            self.player.stop()
         await self.disconnect()
         self.playing = False
         self.player = None
