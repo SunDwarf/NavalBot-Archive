@@ -227,6 +227,9 @@ voice.remove.deleted_many: ":heavy_check_mark: Löschte Lieder von Position {sta
 
 # Hauptprogramm
 core.cfg.setcfg_updated: ":heavy_check_mark: Konfiguration aktualisiert: `{name}` -> `{val}`"
+core.cfg.no_such_config: ":x: Konfigurationswert `{name}` ist nicht vorhanden."
+core.cfg.cfg_deleted: ":heavy_check_mark: Konfigurationswert `{name}` wurde gelöscht."
+
 core.cfg.avatar_changed: ":heavy_check_mark: Avatar aktualisiert."
 core.cfg.avatar_invalid: ":x: Avatar ist nicht gültig."
 core.cfg.name_changed: ":heavy_check_mark: Name wurde zu `{name}` geändert."
