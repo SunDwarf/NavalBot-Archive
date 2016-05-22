@@ -202,7 +202,7 @@ class NavalVoiceClient(discord.VoiceClient):
 
         # Build the string
         d_str = "[{:02d}:{:02d} / {:02d}:{:02d}]".format(trunc(m), trunc(s), trunc(dm), trunc(ds))
-        b_str = ctx.locale["voice.curr_playing"].format(self.title, d_str)
+        b_str = ctx.locale["voice.curr_playing"].format(title=self.title, d_str=d_str)
         await ctx.client.send_message(ctx.message.channel, b_str)
 
     async def cmd_queue(self, ctx: CommandContext, start_pos: int = 0):
