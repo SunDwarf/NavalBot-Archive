@@ -142,6 +142,17 @@ help.uptime: |
         Display the uptime of the bot.
 
 
+help.ban: |
+        Bans a user.
+
+        The user can either be @mentioned or their username/nickname passed in as an argument, and the bot will automatically pick the correct user.
+
+help.kick: |
+        Kicks a user.
+
+        The user can either be @mentioned or their username/nickname passed in as an argument, and the bot will automatically pick the correct user.
+
+
 # Permissions keys
 perms.not_owner: ":no_entry: This command is restricted to the bot owner."
 perms.cannot_determine_role: ":no_entry: Cannot determine your role!"
@@ -283,5 +294,6 @@ fun.urban: |
 fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
 
 # Moderation keys.
-moderation.ban.low_permission: ":x: My role (`{role}`) does not have permission to ban this user."
+moderation.low_permission: ":x: My role (`{role}`) does not have permission to modify this user."
 moderation.ban.banned: ":heavy_check_mark: User `{target}` banned."
+moderation.kick.kicked: ":heavy_check_mark: User `{target}` kicked."

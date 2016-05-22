@@ -56,7 +56,7 @@ async def ban(ctx: CommandContext):
 
     # Check our permission.
     if not ctx.message.server.me.permissions_in(ctx.message.channel).ban_members:
-        await ctx.reply("moderation.ban.low_permission", role=our_highest.name)
+        await ctx.reply("moderation.low_permission", role=our_highest.name)
         return
 
     assert isinstance(ctx.message.server, discord.Server)
@@ -68,12 +68,12 @@ async def ban(ctx: CommandContext):
 
     if user_is_higher(user, ctx.me) or (user.id == ctx.server.owner_id):
         # Too high, we can't touch them.
-        await ctx.reply("moderation.ban.low_permission",
+        await ctx.reply("moderation.low_permission",
                         role=our_highest.name if our_highest.name != "@everyone" else "everyone")
         return
 
     # Try and ban the user.
-    await ctx.client.ban(ctx.message.mentions[0])
+    await ctx.client.ban(user)
     await ctx.reply("moderation.ban.banned", target=user.display_name)
 
 
@@ -82,4 +82,21 @@ async def kick(ctx: CommandContext):
     """
     Kicks the user from the server.
     """
-    our_highest = get_highest_role()
+    our_highest = get_highest_role(ctx.me)
+
+    if not ctx.me.permissions_in(ctx.channel).ban_members:
+        await ctx.reply("moderation.low_permission", role=our_highest.name)
+        return
+
+    user = ctx.get_user()
+    if not user:
+        await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+        return
+
+    if user_is_higher(user, ctx.me) or (user.id == ctx.server.owner_id):
+        await ctx.reply("moderation.low_permission",
+                        role=our_highest.name if our_highest.name != "@everyone" else "everyone")
+        return
+
+    await ctx.client.kick(user)
+    await ctx.reply("moderation.kick.kicked", target=user.display_name)
