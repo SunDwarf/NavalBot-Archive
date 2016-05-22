@@ -46,6 +46,8 @@ class CommandContext:
         self.server = self.message.server
         assert isinstance(self.server, discord.Server)
 
+        self.author = self.message.author
+
         self.channel = self.message.channel
         self.me = self.server.me
         if self.me is not None:
