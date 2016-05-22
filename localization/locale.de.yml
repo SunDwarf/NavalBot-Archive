@@ -253,6 +253,10 @@ core.factoids.unlocked: ":heavy_check_mark: Factoid `{fac}` entsperrt"
 core.factoids.match.header: "Passende Factoids:"
 core.factoids.match.none: "`Zu diesem Suchschema wurde nichts gefunden.`"
 
+core.factoids.set: ":heavy_check_mark: Factoid `{name}` ist jetzt `{content}`."
+
+core.factoids.bad_args: ":heavy_check_mark: Du hast nicht alle notwendigen Argumente zum Factoid übergeben."
+
 # Spaßbefehle
 fun.chosen: "Meine Wahl war: `{choice}`"
 
