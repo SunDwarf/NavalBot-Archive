@@ -255,7 +255,7 @@ fun.whois.response: |
 fun.uptime.time_fmt: "`{hours_total} horas, {minutes} minutos, {seconds} segundos`"
 fun.uptime.response: "Bot jà corre por {time} desde o arranque do processo de `#{pid}`"
 
-fun.stats.shard: "Atualmente shard `{shard_id}/{shard_count}\n"
+fun.stats.shard: "Atualmente shard `{shard_id}/{shard_count}`\n"
 fun.stats.response: |
         {shardm}Atualmente em execução em `{servcount}` servidores. Processou `{msgcount}` mensagens desde a inicialização.
         Conectado a `{vcount}` canais de voz, com `{scount}` streams que jogam atualmente .

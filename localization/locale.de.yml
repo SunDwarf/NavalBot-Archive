@@ -286,7 +286,7 @@ fun.whois.response: |
 fun.uptime.time_fmt: "`{hours_total} Stunden, {minutes} Minuten, {seconds} Sekunden`"
 fun.uptime.response: "Der Bot läuft {time} seit dem Start des Prozesses `#{pid}`"
 
-fun.stats.shard: "Aktuelle Scherbe `{shard_id}/{shard_count}\n"
+fun.stats.shard: "Aktuelle Scherbe `{shard_id}/{shard_count}`\n"
 fun.stats.response: |
         {shardm}Aktuell laufend in `{servcount}` Server(n). Verarbeitete `{msgcount}` Nachrichten seit dem Start.
         Verbunden mit `{vcount}` Sprach-Kanälen, mit`{scount}` laufenden Musik-Streams.

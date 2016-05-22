@@ -269,7 +269,7 @@ fun.whois.response: |
 fun.uptime.time_fmt: "`{hours_total} heures, {minutes} minutes, {seconds} secondes`"
 fun.uptime.response: "Le bot a fonctionné pendant {time} depuis le lancement du processus `#{pid}`"
 
-fun.stats.shard: "Fragment actuel: `{shard_id}/{shard_count}\n"
+fun.stats.shard: "Fragment actuel: `{shard_id}/{shard_count}`\n"
 fun.stats.response: |
         {shardm}En fonction sur `{servcount}` serveur(s). `{msgcount}` messages ont été traités depuis le lancement.
         Connecté à `{vcount}` canaux vocaux, avec `{scount}` flux en cours de lecture.
