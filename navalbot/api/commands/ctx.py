@@ -27,14 +27,16 @@ import typing
 import discord
 
 from navalbot.api.locale import LocaleLoader
+from navalbot.api import db
 
 
 class CommandContext:
     """
     This class is a simple thin wrapper that stores a few tidbits of data.
     """
+
     def __init__(self, client: discord.Client, message: discord.Message, locale: LocaleLoader,
-                 args: list=None):
+                 args: list = None):
         self.client = client
         self.message = message
         self.locale = locale
@@ -49,8 +51,23 @@ class CommandContext:
         if self.me is not None:
             assert isinstance(self.me, discord.Member)
 
+    async def get_config(self, name, default=None, type_: type = str):
+        """
+        Gets a config value from the database for a server-specific var.
+        """
+        return await db.get_config(self.server.id, name, default=default, type_=type_)
 
+    async def set_config(self, name, value):
+        """
+        Sets a config value from the database for a server-specific var.
+        """
+        await db.set_config(self.server.id, name, value)
 
+    async def delete_config(self, name):
+        """
+        Deletes a config value from the DB.
+        """
+        await db.delete_config(self.server.id, name)
 
     async def reply(self, key: str, **fmt):
         """
