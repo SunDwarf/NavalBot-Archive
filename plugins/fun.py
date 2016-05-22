@@ -109,18 +109,18 @@ async def commands(ctx: CommandContext):
     await ctx.reply("fun.commands")
 
 
-@command("whois")
+@command("whois", argcount=1)
 async def whois(ctx: CommandContext):
     """
     Displays information about the user specified.
     """
-    if len(ctx.message.mentions) != 1:
-        await ctx.reply("generic.no_mention")
-        return
+    user = ctx.get_user()
 
-    author = ctx.message.mentions[0]
-    assert isinstance(author, discord.Member)
-    await ctx.reply("fun.whois.response", author=author)
+    if not user:
+        await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+
+    await ctx.reply("fun.whois.response", author=user)
+
 
 @command("uptime")
 async def uptime(ctx: CommandContext):
@@ -146,7 +146,7 @@ async def stats(ctx: CommandContext):
     used_memory = psutil.Process().memory_info().rss
     used_memory = round(used_memory / 1024 / 1024, 2)
     if hasattr(ctx.client, "shard_id") and ctx.client.shard_id is not None:
-        shardm = ctx.locale["fun.stats.shard"].format(shard_id=ctx.client.shard_id+1,
+        shardm = ctx.locale["fun.stats.shard"].format(shard_id=ctx.client.shard_id + 1,
                                                       shard_count=ctx.client.shard_count) + "\n"
     else:
         shardm = ""
