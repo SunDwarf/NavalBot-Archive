@@ -87,7 +87,7 @@ async def avatar(ctx: CommandContext):
     Owner-only
     """
     try:
-        await util.get_file(ctx, url=ctx.args[0], name='avatar.jpg')
+        await util.get_file((ctx.client, ctx.message), url=ctx.args[0], name='avatar.jpg')
         fp = open(os.path.join(os.getcwd(), "files", "avatar.jpg"), 'rb')
         await ctx.client.edit_profile(avatar=fp.read())
         await ctx.reply("core.cfg.avatar_changed")
