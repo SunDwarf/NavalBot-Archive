@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import asyncio
 import logging
 import random
+from collections import deque
 from math import trunc, ceil
 
 import discord
@@ -488,5 +489,7 @@ class NavalVoiceClient(discord.VoiceClient):
         await self.disconnect()
         self.playing = False
         self.player = None
+        self._play_queue._queue = deque()
+
         if self.curr_task:
             self.curr_task.cancel()
