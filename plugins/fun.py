@@ -193,16 +193,16 @@ async def subreddit(ctx: CommandContext):
 
 
 @command("fullwidth", argcount="?", argerror=":x: You must provide at least one word to fullwidth.")
-async def aesthetic(client: discord.Client, message: discord.Message, *args: list):
+async def aesthetic(ctx: CommandContext):
     """
     ﻿Ｆｕｌｌｗｉｄｔｈｓ  ｓｏｍｅ  ｔｅｘｔ．
     """
     final_c = ""
-    pre_c = ' '.join(args)
+    pre_c = ' '.join(ctx.args)
     for char in pre_c:
         if not ord(char) in range(33, 127):
             final_c += char
             continue
         # Add 65248 to the ord() value to get the fullwidth counterpart.
         final_c += chr(ord(char) + 65248)
-    await client.send_message(message.channel, final_c)
+    await ctx.client.send_message(ctx.message.channel, final_c)

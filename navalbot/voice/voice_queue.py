@@ -171,32 +171,33 @@ async def move(ctx: CommandContext):
 
 @command("remove", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE},
          argcount="?", argerror=":x: You must give an index to remove.")
-async def remove_vid(client: discord.Client, message: discord.Message, *args: list):
+async def remove_vid(ctx: CommandContext):
     """
     Removes a video at a specific index from the queue.
     """
-    vc = client.voice_client_in(message.server)
+    vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
-        await client.send_message(message.channel, ":x: Not currently connected on this server.")
+        await ctx.reply("voice.not_connected")
         return
 
-    if len(args) == 2:
-        try:
-            fr = int(args[0])
-            end = int(args[1])
-        except ValueError as e:
-            await client.send_message(message.channel, ":x: {}".format(e.args[0]))
-            return
+    channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
 
+    if not author_is_valid(ctx.message.author, channels):
+        await ctx.reply("voice.cant_control")
+        return
+
+    if len(ctx.args) == 2:
+        try:
+            fr = int(ctx.args[0])
+            end = int(ctx.args[1])
+        except ValueError as e:
+            fr, end = 0, 1
     else:
         try:
-            fr = int(args[0])
+            fr = int(ctx.args[0])
             end = None
         except ValueError as e:
-            await client.send_message(message.channel, ":x: {}".format(e.args[0]))
-            return
+            fr, end = 0, 1
 
     # Call cmd_remove
-    s = await vc.cmd_remove(fr, end)
-
-    await client.send_message(message.channel, s)
+    await vc.cmd_remove(ctx, fr, end)
