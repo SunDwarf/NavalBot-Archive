@@ -136,6 +136,10 @@ class Command(object):
         # Set up the role loader.
         role_loader = NavalRole(message.server.id)
 
+        # Load the prefix, again.
+        # This is so spaces in prefixes don't break everything.
+        prefix = await db.get_config(message.server.id, "command_prefix", default="?")
+
         # Load the locale loader.
         loc = await db.get_config(message.server.id, "lang", default=None)
         loc = get_locale(loc)
@@ -183,16 +187,21 @@ class Command(object):
         # Arguments check.
         if hasattr(self, "_args_type"):
             if self._args_type == 0:
+                # Get the content, with the content split.
+
+                ctt = message.content[len(prefix):]
+
                 # Split out the args into a list.
                 try:
-                    args = shlex.split(message.content)[1:]
+                    args = shlex.split(ctt)[1:]
                 except ValueError:
-                    args = message.content.split(" ")[1:]
+                    args = ctt.split(" ")[1:]
                 if len(args) < 1:
                     await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
                     return
             elif self._args_type == 1:
-                args = shlex.split(message.content)[1:]
+                ctt = message.content[len(prefix):]
+                args = shlex.split(ctt)[1:]
                 if len(args) != self._args_count:
                     await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
                     return
