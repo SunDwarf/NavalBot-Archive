@@ -306,3 +306,9 @@ fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
 moderation.low_permission: ":x: My role (`{role}`) does not have permission to modify this user."
 moderation.ban.banned: ":heavy_check_mark: User `{target}` banned."
 moderation.kick.kicked: ":heavy_check_mark: User `{target}` kicked."
+
+moderation.cannot_edit_server: ":x: I do not have permission to edit this server."
+moderation.muted.not_muted: ":x: This user is not muted."
+
+moderation.muted.success: ":heavy_check_mark: User `{user.display_name}` muted."
+moderation.muted.unmuted: ":heavy_check_mark: User `{user.display_name}` unmuted."

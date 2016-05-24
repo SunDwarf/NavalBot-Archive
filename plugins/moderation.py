@@ -20,11 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-
+import aioredis
 import discord
+import logging
 
 from navalbot.api.commands import command, CommandContext
 from navalbot.api.commands.cmdclass import NavalRole
+
+logger = logging.getLogger("NavalBot")
 
 
 def get_highest_role(user: discord.Member) -> discord.Role:
@@ -100,3 +103,121 @@ async def kick(ctx: CommandContext):
 
     await ctx.client.kick(user)
     await ctx.reply("moderation.kick.kicked", target=user.display_name)
+
+
+async def ensure_muted(ctx: CommandContext):
+    """
+    Ensures that the Muted role exists on the server, and is set to not allow speaking on all channels.
+    """
+    muted = discord.utils.find(lambda r: r.name == "Muted", ctx.server.roles)
+    created = False
+    if not muted:
+        assert isinstance(ctx.server, discord.Server)
+        try:
+            muted = await ctx.client.create_role(ctx.server, name="Muted", permissions=discord.Permissions.none(),
+                                                 colour=discord.Colour.red())
+            created = True
+        except discord.Forbidden:
+            await ctx.reply("moderation.cannot_edit_server")
+            return
+        logger.info("Created new Muted role on server `{}`.".format(ctx.server.name))
+    if not muted.position == 1:
+        try:
+            await ctx.client.move_role(ctx.server, muted)
+        except discord.Forbidden:
+            await ctx.reply("moderation.cannot_edit_server")
+            return
+        logger.info("Moved Muted role to position 1 on server `{}`".format(ctx.server.name))
+
+    if created:
+        # Add `muted` denial to all channels.
+        # This may seem like allowed perms, but the True means 'deny this'.
+        allowed_perms = discord.Permissions.none()
+        allowed_perms.send_messages = True
+        allowed_perms.send_tts_messages = True
+        allowed_perms.speak = True
+
+        for chan in ctx.server.channels:
+            await ctx.client.edit_channel_permissions(chan, muted, deny=allowed_perms)
+
+    return muted
+
+
+@command("mute", argcount=1, roles={NavalRole.ADMIN})
+async def mute(ctx: CommandContext):
+    """
+    Mutes a user.
+    """
+    # Ensure the muted role exists.
+    muted = await ensure_muted(ctx)
+    if not muted:
+        return
+    # Locate the user.
+    user = ctx.get_user()
+    if not user:
+        await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+        return
+
+    # Strip all their roles.
+    rs = [role for role in user.roles if not role.is_everyone]
+    # Save role names.
+    rs_names = [r.name for r in rs]
+
+    async with await ctx.get_conn() as conn:
+        assert isinstance(conn, aioredis.Redis)
+        # Add the role names to a set, with kname "muted:saved:{server_id}:{user_id}"
+        sid, uid = ctx.server.id, user.id
+        for rn in rs_names:
+            await conn.sadd("muted:saved:{}:{}".format(sid, uid), rn)
+
+    logger.info("Saved roles before muting user.")
+
+    await ctx.client.remove_roles(user, *rs)
+
+    # Add the muted role.
+    await ctx.client.add_roles(user, muted)
+    await ctx.reply("moderation.muted.success", user=user)
+
+
+@command("unmute", argcount=1, roles={NavalRole.ADMIN})
+async def unmute(ctx: CommandContext):
+    """
+    Unmutes a user.
+    """
+    muted = await ensure_muted(ctx)
+    if not muted:
+        return
+    # Locate the user.
+    user = ctx.get_user()
+    if not user:
+        await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+        return
+
+    if muted not in user.roles:
+        await ctx.reply("moderation.muted.not_muted")
+        return
+
+    # Restore roles
+    async with await ctx.get_conn() as conn:
+        assert isinstance(conn, aioredis.Redis)
+        sid, uid = ctx.server.id, user.id
+        rns = await conn.smembers("muted:saved:{}:{}".format(sid, uid))
+
+        to_restore = []
+
+        # Search for the role name
+        for rn in rns:
+            rn = rn.decode()
+            rl = discord.utils.find(lambda r: r.name == rn, ctx.server.roles)
+            if not rl:
+                continue
+            assert isinstance(rl, discord.Role)
+            to_restore.append(rl)
+
+        # Delete the saved key.
+
+        await ctx.client.add_roles(user, *to_restore)
+        await conn.delete("muted:saved:{}:{}".format(sid, uid))
+
+    await ctx.client.remove_roles(user, muted)
+    await ctx.reply("moderation.muted.unmuted", user=user)
