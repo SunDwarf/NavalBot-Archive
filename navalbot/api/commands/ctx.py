@@ -24,10 +24,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import typing
 
+import aioredis
 import discord
 
 from navalbot.api.locale import LocaleLoader
 from navalbot.api import db
+from navalbot.api.util import get_pool
 
 
 class CommandContext:
@@ -64,6 +66,10 @@ class CommandContext:
         Sets a config value from the database for a server-specific var.
         """
         await db.set_config(self.server.id, name, value)
+
+    async def get_conn(self) -> aioredis.RedisConnection:
+        pool = await get_pool()
+        return pool.get()
 
     async def delete_config(self, name):
         """
