@@ -221,3 +221,45 @@ async def unmute(ctx: CommandContext):
 
     await ctx.client.remove_roles(user, muted)
     await ctx.reply("moderation.muted.unmuted", user=user)
+
+
+@command("color", "colour", argcount=1)
+async def change_colour(ctx: CommandContext):
+    """
+    Changes your colour.
+    """
+    try:
+        colour = int(ctx.args[0], 16)
+        colour = discord.Colour(colour)
+    except ValueError:
+        await ctx.reply("generic.not_int", val=ctx.args[0])
+        return
+
+    # Check the role for the user.
+    rl = discord.utils.get(ctx.server.roles, name="{}_colour".format(ctx.author.id))
+    if not rl:
+        # Create a new role.
+        try:
+            rl = await ctx.client.create_role(ctx.server, name="{}_colour".format(ctx.author.id),
+                                              permissions=discord.Permissions.none(), colour=colour)
+        except discord.Forbidden:
+            await ctx.reply("moderation.cannot_edit_server")
+            return
+    else:
+        try:
+            await ctx.client.edit_role(ctx.server, rl, colour=colour)
+        except discord.Forbidden:
+            await ctx.reply("moderation.cannot_edit_server")
+            return
+
+    # Add it to the user, if they don't already have it.
+    if rl not in ctx.author.roles:
+        logger.info("Adding role {}".format(rl))
+        try:
+            await ctx.client.add_roles(ctx.author, rl)
+        except discord.Forbidden:
+            await ctx.reply("moderation.cannot_edit_server")
+            return
+
+    await ctx.reply("moderation.colour.success", c=str(colour))
+

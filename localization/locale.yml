@@ -312,3 +312,5 @@ moderation.muted.not_muted: ":x: This user is not muted."
 
 moderation.muted.success: ":heavy_check_mark: User `{user.display_name}` muted."
 moderation.muted.unmuted: ":heavy_check_mark: User `{user.display_name}` unmuted."
+
+moderation.colour.success: ":heavy_check_mark: Changed colour to `{c}`."
