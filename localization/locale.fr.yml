@@ -24,12 +24,12 @@ help.None: |
 
 help.set_config: |
         Modifie un réglage du bot spécifique à ce serveur.
-		
+
         Si vos indications contiennent des espaces, elles doivent être fermées par des "guillemets".
 
 help.get_config: |
-		Renvoie un réglage du bot spécifique à ce serveur.
-		
+        Renvoie un réglage du bot spécifique à ce serveur.
+
         Si vos indications contiennent des espaces, elles doivent être fermées par des "guillemets".
 
 help.avatar: |
@@ -43,9 +43,9 @@ help.changename: |
         Cette commande ne peut être exécutée uniquement par le propriétaire du bot.
 
 help.add_role_override: |
-		Donne une autorisation à un rôle d'utiliser une commande.
+        Donne une autorisation à un rôle d'utiliser une commande.
         Indiquez la commande, puis le rôle bénéficiant de cette autorisation.
-		Cela permet à tous ceux ayant ce rôle d'utiliser la commande spécifiée.
+        Cela permet à tous ceux ayant ce rôle d'utiliser la commande spécifiée.
         Vous pouvez autoriser l'exécution de cette commande à tous ceux sur le serveur en mettant '@ everybody' (sans espace) en seconde valeur. 
 
 help.remove_role_override: |
@@ -96,19 +96,19 @@ help.skip: |
 help.voteskip: |
         Ouvre un vote pour sauter la piste de lecture actuelle. 
 
-		Le seuil pour sauter la piste de lecture est déterminée par le nombre de personnes, divisé par deux. Le bot n'est pas compté dans la solution.
+        Le seuil pour sauter la piste de lecture est déterminée par le nombre de personnes, divisé par deux. Le bot n'est pas compté dans la solution.
 
 help.move: |
         Change la position d'une piste de lecture dans la file d'attente.
 
         Vous devez indiquer la valeur de la piste de lecture en premier, puis celui de la position cible dans la file en second. 
-		Les valeurs doivent être entier.
+        Les valeurs doivent être entier.
 
 help.remove_vid: |
         Enlève une ou plusieurs piste.s de lecture.
 
         Takes a start position and an optional end position to remove.
-		Commence par la valeur indiquée en premier, puis se termine par une seconde valeur optionnelle.
+        Commence par la valeur indiquée en premier, puis se termine par une seconde valeur optionnelle.
         Si la seconde valeur n'est pas spécifiée, le bot ne supprimera que la piste de lecture indiquée en premier.
 
 help.reset: |
@@ -123,7 +123,6 @@ help.play: |
 
         Le bot téléchargera la piste de lecture depuis une URL que vous spécifierez, ou depuis une recherche.
         Le bot peut télécharger des pistes de lecture depuis les principaux sites de streaming.
-
 
 help.choice: |
         Vous donne une réponse à ce dilemme qui vous empêche d'avancer émotionnellement.
@@ -157,7 +156,6 @@ help.kick: |
         Kick un utilisateur.
 
         Vous pouver indiquer la @mention ou le pseudonyme de l'utilisateur en valeur, et le bot trouvera automatiquement l'utilisateur à kick.
-		
 
 help.mute: |
         Met un utilisateur en sourdine.
@@ -192,8 +190,8 @@ voice.playback.no_channel: >
 voice.playback.pl_warning: ":warning: L'URL cible semble rediriger vers une liste de lecture; télécharger chaque morceau risque de prendre du temps."
 voice.playback.bad_url: >
         :x: Le bot ne peut pas télécharger depuis ce lien, car ce domaine n'est pas dans la whitelist. 
-		
-		Pour désactiver la whitelist, lancez la commande `{prefix}setcfg limit_urls False`.
+
+        Pour désactiver la whitelist, lancez la commande `{prefix}setcfg limit_urls False`.
 
 voice.playback.wait_for: >
         :hourglass: Ce lien sera téléchargé une fois que le téléchargement en cours sera terminé.
