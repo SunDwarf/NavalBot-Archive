@@ -66,6 +66,11 @@ async def reset(ctx: CommandContext):
         await ctx.reply("voice.not_connected")
         return
 
+    # Unlock the lock, if it's locked.
+    lock = voice_locks.get(ctx.message.server.id)
+    if lock:
+        del voice_locks[ctx.message.server.id]
+
     # Reset the voice client
     channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
 
