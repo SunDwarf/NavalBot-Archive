@@ -123,7 +123,7 @@ async def ensure_muted(ctx: CommandContext):
         logger.info("Created new Muted role on server `{}`.".format(ctx.server.name))
     if not muted.position == 1:
         try:
-            await ctx.client.move_role(ctx.server, muted)
+            await ctx.client.move_role(ctx.server, muted, 1)
         except discord.Forbidden:
             await ctx.reply("moderation.cannot_edit_server")
             return
