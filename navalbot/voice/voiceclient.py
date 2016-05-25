@@ -484,12 +484,13 @@ class NavalVoiceClient(discord.VoiceClient):
         """
         Reset the voice player.
         """
+        # Kill the task first, so we don't get a ton of now playing messages immediately afterwards.
+        if self.curr_task:
+            self.curr_task.cancel()
+
         if self.player:
             self.player.stop()
         await self.disconnect()
         self.playing = False
         self.player = None
-        self._play_queue._queue = deque()
 
-        if self.curr_task:
-            self.curr_task.cancel()
