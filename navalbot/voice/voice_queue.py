@@ -87,7 +87,7 @@ async def get_queued_vids(ctx: CommandContext):
     await vc.cmd_queue(ctx, start_pos)
 
 
-@command("skip", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE})
+@command("stop", "skip", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE})
 async def skip(ctx: CommandContext):
     """
     Skips ahead one or more tracks.
