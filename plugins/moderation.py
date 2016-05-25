@@ -262,3 +262,27 @@ async def change_colour(ctx: CommandContext):
             return
 
     await ctx.reply("moderation.colour.success", c=str(colour))
+
+
+@command("purge", argcount=1)
+async def purge(ctx: CommandContext):
+    """
+    Deletes messages.
+
+    The arg is the number of messages to delete.
+    """
+    try:
+        to_delete = int(ctx.args[0])
+    except ValueError:
+        await ctx.reply("generic.not_int")
+        return
+
+    # add one if applicable
+    if to_delete != 100:
+        to_delete += 1
+
+    try:
+        await ctx.client.purge_from(ctx.channel, limit=to_delete)
+    except discord.Forbidden:
+        await ctx.reply("moderation.cannot_edit_server")
+        return

@@ -320,7 +320,7 @@ moderation.low_permission: ":x: My role (`{role}`) does not have permission to m
 moderation.ban.banned: ":heavy_check_mark: User `{target}` banned."
 moderation.kick.kicked: ":heavy_check_mark: User `{target}` kicked."
 
-moderation.cannot_edit_server: ":x: I do not have permission to edit this server."
+moderation.cannot_edit_server: ":x: I do not have the right permission to run this action here."
 moderation.muted.not_muted: ":x: This user is not muted."
 
 moderation.muted.success: ":heavy_check_mark: User `{user.display_name}` muted."
