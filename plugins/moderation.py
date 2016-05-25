@@ -194,7 +194,7 @@ async def unmute(ctx: CommandContext):
         return
 
     if muted not in user.roles:
-        await ctx.reply("moderation.muted.not_muted")
+        await ctx.reply("moderation.muted.not_muted", user=user)
         return
 
     # Restore roles
@@ -262,4 +262,3 @@ async def change_colour(ctx: CommandContext):
             return
 
     await ctx.reply("moderation.colour.success", c=str(colour))
-
