@@ -96,6 +96,8 @@ help.skip: |
 help.voteskip: |
         Starts a vote to skip the currently playing track.
 
+        The number of voteskips required is (number of undeafened people in voice - 1) / 2.
+
 help.move: |
         Moves a track in the queue from position <x> to position <y>.
 
@@ -152,6 +154,17 @@ help.kick: |
         Kicks a user.
 
         The user can either be @mentioned or their username/nickname passed in as an argument, and the bot will automatically pick the correct user.
+
+help.mute: |
+        Mutes a user.
+
+        The bot must have `Manage Roles` permission for this command.
+
+
+help.unmute: |
+        Unmutes a user.
+
+        The bot must have `Manage Roles` permission for this command.
 
 
 # Permissions keys
