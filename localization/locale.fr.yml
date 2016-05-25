@@ -23,7 +23,7 @@ help.None: |
         Cette commande n'est pas documenté dans cette langue.
 
 help.set_config: |
-   		Modifie un réglage du bot spécifique à ce serveur.
+        Modifie un réglage du bot spécifique à ce serveur.
 		
         Si vos indications contiennent des espaces, elles doivent être fermées par des "guillemets".
 
