@@ -353,20 +353,19 @@ class NavalClient(discord.Client):
             else:
                 raise
 
-        while True:
+        try:
+            self.loop.run_until_complete(self.connect())
+        except KeyboardInterrupt:
             try:
-                self.loop.run_until_complete(self.connect())
-            except KeyboardInterrupt:
-                try:
-                    self.loop.run_until_complete(self.logout())
-                except Exception:
-                    logger.error("Couldn't log out. Oh well. We tried!")
-                    return
-                return
-            except RuntimeError:
-                logger.error("Session appears to have errored. Exiting.")
-                return
+                self.loop.run_until_complete(self.logout())
             except Exception:
-                traceback.print_exc()
-                logger.error("Crashed. Don't know how, don't care. Continuing..")
-                continue
+                logger.error("Couldn't log out. Oh well. We tried!")
+                return
+            return
+        except RuntimeError:
+            logger.error("Session appears to have errored. Exiting.")
+            return
+        except Exception:
+            traceback.print_exc()
+            logger.error("Crashed.")
+            return
