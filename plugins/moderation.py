@@ -264,7 +264,7 @@ async def change_colour(ctx: CommandContext):
     await ctx.reply("moderation.colour.success", c=str(colour))
 
 
-@command("purge", argcount=1)
+@command("purge", argcount="?")
 async def purge(ctx: CommandContext):
     """
     Deletes messages.
@@ -274,15 +274,28 @@ async def purge(ctx: CommandContext):
     try:
         to_delete = int(ctx.args[0])
     except ValueError:
-        await ctx.reply("generic.not_int")
-        return
+        to_delete = 100
+    except IndexError:
+        to_delete = 100
+
+    # Create default check.
+    check = lambda message: True
 
     # add one if applicable
-    if to_delete != 100:
+    if to_delete is not None and to_delete != 100:
         to_delete += 1
 
+    # Checks.
+    if ctx.message.mentions:
+        check = lambda message: message.author in ctx.message.mentions
+    elif len(ctx.args) > 1:
+        # Remove files.
+        if ctx.args[1] == "files":
+            check = lambda message: not not message.attachments
+
     try:
-        await ctx.client.purge_from(ctx.channel, limit=to_delete)
+        msgs = await ctx.client.purge_from(ctx.channel, limit=to_delete, check=check)
+        await ctx.reply("moderation.deleted_messages", count=len(msgs))
     except discord.Forbidden:
         await ctx.reply("moderation.cannot_edit_server")
         return

@@ -166,6 +166,16 @@ help.unmute: |
 
         The bot must have `Manage Roles` permission for this command.
 
+help.colour: |
+        Sets your colour to the hexadecimal colour you specify.
+
+        The bot must have `Manage Roles` permission for this command.
+
+help.purge: |
+        Deletes a certain number of messages.
+
+        Mention user(s) to only delete messages from those users.
+
 
 # Permissions keys
 perms.not_owner: ":no_entry: This command is restricted to the bot owner."
@@ -331,3 +341,5 @@ moderation.colour.success: ":heavy_check_mark: Changed colour to `{c}`."
 moderation.muted.success: ":heavy_check_mark: Muted user `{user.display_name}`."
 moderation.muted.unmuted: ":heavy_check_mark: Unmuted user `{user.display_name}`."
 moderation.muted.not_muted: ":x: User `{user.display_name}` is not muted."
+
+moderation.deleted_messages: ":bomb: {count} messages deleted."
