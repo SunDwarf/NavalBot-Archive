@@ -81,7 +81,7 @@ async def get_set(key: str) -> set:
     async with pool.get() as conn:
         mem = await conn.smembers(key)
         if mem:
-            return set(mem)
+            return {i.decode() for i in mem}
 
 
 async def add_to_set(key: str, item) -> set:
@@ -91,4 +91,4 @@ async def add_to_set(key: str, item) -> set:
     pool = await util.get_pool()
     async with pool.get() as conn:
         await conn.sadd(key, item)
-        return await get_set(key)
+        return await {i.decode() for i in get_set(key)}

@@ -32,6 +32,8 @@ import sys
 import time
 
 import asyncio
+
+import aioredis
 import yaml
 import discord
 from raven import Client
@@ -41,6 +43,7 @@ from navalbot import builtins
 from navalbot.api import db
 from navalbot.api.commands import commands, Command
 from navalbot.api import util
+from navalbot.api.util import get_pool
 
 from navalbot.voice import voiceclient
 
@@ -263,25 +266,9 @@ class NavalClient(discord.Client):
         if not isinstance(message.channel, discord.PrivateChannel):
             # print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
             #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
-            logger.info("Recieved message: {message.content} from {message.author.name}".format(message=message))
+            logger.info("Recieved message: {message.content} from {message.author.display_name}"
+                        .format(message=message))
             logger.info(" On channel: #{message.channel.name}".format(message=message))
-
-        # Check if it matches the command prefix.
-        if message.author.id == self.user.id:
-            logger.info("Not processing own message.")
-            return
-
-        # Re-process the blacklist.
-        if os.path.exists("blacklist.json"):
-            # Get the time
-            mtime = os.stat("blacklist.json").st_mtime
-            if mtime > self.bl_mtime:
-                logger.debug("Blacklist file changed, reloading...")
-                # Update mtime
-                self.bl_mtime = mtime
-                # Reload blacklist
-                with open("blacklist.json") as f:
-                    self.bl = json.load(f)
 
         # Check for a valid server.
         if message.server is not None:
@@ -295,12 +282,16 @@ class NavalClient(discord.Client):
             await self.send_message(message.channel, "I don't accept private messages.")
             return
 
-        if message.server.id in self.bl:
-            bb = self.bl[message.server.id]
-            if message.author.id in bb:
-                # Ignore message
-                logger.warn("Ignoring message, as user is on the blacklist.")
-                return
+        # Load set members for blacklist.
+        pool = await get_pool()
+        async with pool.get() as conn:
+            assert isinstance(conn, aioredis.Redis)
+            blacklist = await db.get_set("blacklist:{}".format(message.server.id))
+
+        if blacklist and message.author.id in blacklist:
+            # Ignore the message.
+            logger.info("Ignoring message from blacklisted member {message.author.display_name}"
+                        .format(message=message))
 
         if len(message.content) == 0:
             logger.info("Ignoring (presumably) image-only message.")

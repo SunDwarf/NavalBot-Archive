@@ -264,7 +264,7 @@ async def change_colour(ctx: CommandContext):
     await ctx.reply("moderation.colour.success", c=str(colour))
 
 
-@command("purge", argcount="?")
+@command("purge", argcount="?", role={NavalRole.ADMIN})
 async def purge(ctx: CommandContext):
     """
     Deletes messages.
@@ -299,3 +299,17 @@ async def purge(ctx: CommandContext):
     except discord.Forbidden:
         await ctx.reply("moderation.cannot_edit_server")
         return
+
+
+@command("blacklist", argcount=1, role={NavalRole.ADMIN})
+async def blacklist(ctx: CommandContext):
+    """
+    Blacklists a user, so they cannot use the bot.
+    """
+    user = ctx.get_user()
+    if not user:
+        await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+        return
+
+    # Add the item to the blacklist.
+    await ctx.db.add_to_set("blacklist:{}".format(ctx.server.id), user.id)
