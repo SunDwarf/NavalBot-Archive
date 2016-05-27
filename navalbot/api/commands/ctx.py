@@ -55,6 +55,8 @@ class CommandContext:
         if self.me is not None:
             assert isinstance(self.me, discord.Member)
 
+        self.db = db
+
     async def get_config(self, name, default=None, type_: type = str):
         """
         Gets a config value from the database for a server-specific var.
