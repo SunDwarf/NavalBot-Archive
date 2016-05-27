@@ -71,3 +71,24 @@ async def get_key(key: str) -> str:
         except AttributeError:
             return None
 
+
+async def get_set(key: str) -> set:
+    """
+    Get all members of a set.
+    """
+
+    pool = await util.get_pool()
+    async with pool.get() as conn:
+        mem = await conn.smembers(key)
+        if mem:
+            return set(mem)
+
+
+async def add_to_set(key: str, item) -> set:
+    """
+    Add an item to a set, then return the set.
+    """
+    pool = await util.get_pool()
+    async with pool.get() as conn:
+        await conn.sadd(key, item)
+        return await get_set(key)
