@@ -202,7 +202,10 @@ class NavalVoiceClient(discord.VoiceClient):
             dm, ds = 0, 0
 
         # Build the string
-        d_str = "[{:02d}:{:02d} / {:02d}:{:02d}]".format(trunc(m), trunc(s), trunc(dm), trunc(ds))
+        if self.duration:
+            d_str = "[{:02d}:{:02d} / {:02d}:{:02d}]".format(trunc(m), trunc(s), trunc(dm), trunc(ds))
+        else:
+            d_str = "[LIVE]"
         b_str = ctx.locale["voice.curr_playing"].format(title=self.title, d_str=d_str)
         await ctx.client.send_message(ctx.message.channel, b_str)
 

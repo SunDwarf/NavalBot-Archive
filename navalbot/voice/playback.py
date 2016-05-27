@@ -184,8 +184,11 @@ async def play(ctx: CommandContext):
         if 'entries' in info:
             info = info['entries'][0]
         is_playlist = False
-        title = info.get('title')
         download_url = info['url']
+
+        # Change the duration if it is live.
+        if info.get("is_live"):
+            info["duration"] = 0
 
         pl_data = None
 
