@@ -202,7 +202,7 @@ class NavalVoiceClient(discord.VoiceClient):
             dm, ds = 0, 0
 
         # Build the string
-        if self.duration:
+        if not self.curr_info.get("is_live"):
             d_str = "[{:02d}:{:02d} / {:02d}:{:02d}]".format(trunc(m), trunc(s), trunc(dm), trunc(ds))
         else:
             d_str = "[LIVE]"
