@@ -91,4 +91,14 @@ async def add_to_set(key: str, item) -> set:
     pool = await util.get_pool()
     async with pool.get() as conn:
         await conn.sadd(key, item)
-        return await {i.decode() for i in get_set(key)}
+        return {i.decode() for i in await get_set(key)}
+
+
+async def remove_from_set(key: str, item) -> set:
+    """
+    Remove an item from the set.
+    """
+    pool = await util.get_pool()
+    async with pool.get() as conn:
+        await conn.srem(key, item)
+        return {i.decode() for i in await get_set(key)}
