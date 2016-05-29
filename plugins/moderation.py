@@ -313,3 +313,16 @@ async def blacklist(ctx: CommandContext):
 
     # Add the item to the blacklist.
     await ctx.db.add_to_set("blacklist:{}".format(ctx.server.id), user.id)
+
+
+@command("unblacklist", argcount=1, role={NavalRole.ADMIN})
+async def unblacklist(ctx: CommandContext):
+    """
+    Removes a user from the blacklist.
+    """
+    user = ctx.get_user()
+    if not user:
+        await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+        return
+
+    await ctx.db.remove_from_set("blacklist:{}".format(ctx.server.id), user.id)
