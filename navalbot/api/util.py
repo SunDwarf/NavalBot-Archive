@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import asyncio
 import datetime
+import logging
 import os
 import shlex
 import shutil
@@ -56,6 +57,8 @@ if not os.path.exists("config.yml"):
 
 with open("config.yml", "r") as f:
     global_config = yaml.load(f)
+
+logger = logging.getLogger("NavalBot")
 
 async def with_threading(func):
     """
@@ -208,3 +211,20 @@ def sanitize(param):
     return param
 
 
+async def with_cache(data, expires=300, miss=lambda data: None):
+    """
+    Caches the result of a function.
+    """
+    pool = await get_pool()
+    async with pool.get() as conn:
+        # Get the cached key.
+        content = await conn.get("cached:{}".format(data))
+        if content:
+            logger.info("Cache hit for {}.".format(data))
+            return content.decode()
+        logger.info("Cache miss for {}.".format(data))
+        # Call miss(data), and set the data in the cache.
+        result = await miss(data)
+        await conn.set("cached:{}".format(data), result)
+        await conn.expire("cached:{}".format(data), expires)
+        return result

@@ -325,6 +325,8 @@ fun.urban: |
 
 fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
 
+fun.ow.no_profile_found: ":x: Could not find a profile for `{tag}`."
+
 # Moderation keys.
 moderation.low_permission: ":x: My role (`{role}`) does not have permission to modify this user."
 moderation.ban.banned: ":heavy_check_mark: User `{target}` banned."
