@@ -27,3 +27,4 @@ PyYAML>=3.11
 aioredis>=0.2.6
 raven>=5.4.0
 raven-aiohttp
+lxml
