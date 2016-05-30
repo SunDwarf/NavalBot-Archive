@@ -278,6 +278,12 @@ core.factoids.set: ":heavy_check_mark: Le nom de l'alias `{name}` a été chang�
 
 core.factoids.bad_args: ":heavy_check_mark: Vous n'avez pas indiqué toutes les options à l'alias."
 
+core.ndc.not_loaded: ":x: Ce module n'est actuellement pas en fonctionnement."
+core.ndc.reload_success: ":heavy_check_mark: Le module a été redémarré."
+core.ndc.reload_all: ":heavy_check_mark: Les modules ont été redémarrés."
+core.ndc.plugins_base: "**Liste des modules complémentaires utilisés:**"
+core.ndc.plugins: "\n`{name} (chemin: {path})` - version **{ver}**" 
+
 # fun strings
 # ech
 fun.chosen: "J'ai choisi l'option `{choice}` !"
