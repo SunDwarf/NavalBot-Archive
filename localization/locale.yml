@@ -333,10 +333,6 @@ moderation.ban.banned: ":heavy_check_mark: User `{target}` banned."
 moderation.kick.kicked: ":heavy_check_mark: User `{target}` kicked."
 
 moderation.cannot_edit_server: ":x: I do not have the right permission to run this action here."
-moderation.muted.not_muted: ":x: This user is not muted."
-
-moderation.muted.success: ":heavy_check_mark: User `{user.display_name}` muted."
-moderation.muted.unmuted: ":heavy_check_mark: User `{user.display_name}` unmuted."
 
 moderation.colour.success: ":heavy_check_mark: Changed colour to `{c}`."
 
