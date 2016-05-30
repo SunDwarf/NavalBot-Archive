@@ -61,15 +61,15 @@ async def _fix_voice(client: discord.Client, vc: discord.VoiceClient, channel: d
 
 @command("reset", "disconnect", roles={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE})
 async def reset(ctx: CommandContext):
-    vc = ctx.client.voice_client_in(ctx.message.server)
-    if not vc:
-        await ctx.reply("voice.not_connected")
-        return
-
     # Unlock the lock, if it's locked.
     lock = voice_locks.get(ctx.message.server.id)
     if lock:
         del voice_locks[ctx.message.server.id]
+
+    vc = ctx.client.voice_client_in(ctx.message.server)
+    if not vc:
+        await ctx.reply("voice.reset.success")
+        return
 
     # Reset the voice client
     channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
