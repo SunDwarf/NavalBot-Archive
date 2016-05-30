@@ -281,6 +281,12 @@ core.factoids.set: ":heavy_check_mark: Factoid `{name}` ist jetzt `{content}`."
 
 core.factoids.bad_args: ":heavy_check_mark: Du hast nicht alle notwendigen Argumente zum Factoid übergeben."
 
+core.ndc.not_loaded: ":x: Plugin ist nicht geladen."
+core.ndc.reload_success: ":heavy_check_mark: Plugin wurde neu geladen."
+core.ndc.reload_all: ":heavy_check_mark: Alle Plugins wurden neu geladen."
+core.ndc.plugins_base: "**Aktuell geladene Plugins:**"
+core.ndc.plugins: "\n`{name} (von {path})` - Version **{ver}**"
+
 # Spaßbefehle
 fun.chosen: "Meine Wahl war: `{choice}`"
 

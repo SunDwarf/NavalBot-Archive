@@ -28,11 +28,10 @@ import logging
 import re
 import sys
 
-import discord
-
 from navalbot.api import util
 from navalbot.api.botcls import NavalClient
 from navalbot.api.commands import command
+from navalbot.api.commands.ctx import CommandContext
 
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```')
@@ -43,14 +42,14 @@ logger = logging.getLogger("NavalBot")
 
 
 @command("reload", owner=True, argcount=1, argerr=":x: You must pick a file to reload.")
-async def reload_f(client: discord.Client, message: discord.Message, args: list):
+async def reload_f(ctx: CommandContext):
     """
     Reloads a module in the bot.
     """
-    mod = args[0]
+    mod = ctx.args[0]
     if mod not in sys.modules:
         if 'plugins.' + mod not in sys.modules:
-            await client.send_message(message.channel, ":x: Module is not loaded.")
+            await ctx.reply("core.ndc.not_loaded")
             return
         else:
             mod = 'cmds.' + mod
@@ -58,11 +57,11 @@ async def reload_f(client: discord.Client, message: discord.Message, args: list)
     new_mod = importlib.reload(sys.modules[mod])
     # Update sys.modules
     sys.modules[mod] = new_mod
-    await client.send_message(message.channel, ":heavy_check_mark: Reloaded module.")
+    await ctx.reply("core.ndc.reload_success")
 
 
 @command("reloadall", owner=True)
-async def reload_all(client: discord.Client, message: discord.Message):
+async def reload_all(ctx: CommandContext):
     """
     Reloads all modules.
     """
@@ -82,29 +81,29 @@ async def reload_all(client: discord.Client, message: discord.Message):
             importlib.reload(sys.modules[mod])
             logger.info("Reloaded module.")
 
-    await client.send_message(message.channel, ":heavy_check_mark: Reloaded all.")
+    await ctx.reply("core.ndc.reload_all")
 
 
 @command("py", owner=True)
-async def py(client: discord.Client, message: discord.Message):
-    match_single = getter.findall(message.content)
-    match_multi = multi.findall(message.content)
+async def py(ctx: CommandContext):
+    match_single = getter.findall(ctx.message.content)
+    match_multi = multi.findall(ctx.message.content)
     if not match_single and not match_multi:
         return
     else:
         if not match_multi:
             result = eval(match_single[0])
-            await client.send_message(message.channel, "```{}```".format(result))
+            await ctx.reply("```{}```".format(result))
         else:
             def r(v):
-                loop.create_task(client.send_message(message.channel, "```{}```".format(v)))
+                loop.create_task(ctx.reply("```{}```".format(v)))
 
             exec(match_multi[0])
 
 
 @command("rget", owner=True)
-async def redis_get(client: discord.Client, message: discord.Message):
-    key = getter.findall(message.content)
+async def redis_get(ctx: CommandContext):
+    key = getter.findall(ctx.message.content)
     if not key:
         return
     pool = await util.get_pool()
@@ -112,16 +111,19 @@ async def redis_get(client: discord.Client, message: discord.Message):
         k = await conn.get(key[0])
         if k:
             k = k.decode()
-        await client.send_message(message.channel, "`{}`".format(k))
+        await ctx.reply("`{}`".format(k))
 
 
 @command("plugins")
-async def plugins(client: discord.Client, message: discord.Message):
+async def plugins(ctx: CommandContext):
     """
     Lists the currently loaded plugins.
     """
     mods = NavalClient.instance.modules
-    s = "**Currently loaded plugins:**"
+    s = ctx.locale["core.ndc.plugins_base"]
+    plugin = ctx.locale["core.ndc.plugins"]
+
     for name, mod in mods.items():
-        s += "\n`{} (from {})` - version **{}**".format(name, mod.__file__, getattr(mod, "VERSION", "??"))
-    await client.send_message(message.channel, s)
+        s += plugin.format(name=name, path=mod.__file__, ver=getattr(mod, "VERSION", "??"))
+
+    await ctx.reply(s)
