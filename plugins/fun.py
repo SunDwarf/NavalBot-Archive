@@ -26,16 +26,13 @@ import datetime
 import functools
 import os
 import random
-from lxml import etree
 
-import aiohttp
 import praw
 import psutil
 import pyowm
 import urbandict
-from google import search
-from math import trunc
 
+from google import search
 from navalbot.api import db, util
 from navalbot.api.commands import command
 from navalbot.api.commands.ctx import CommandContext
@@ -45,96 +42,6 @@ VERSION = "1.0.0"
 loop = asyncio.get_event_loop()
 
 r = praw.Reddit(user_agent='NavalBot/6.x for Discord')
-
-# This will break if Master Overwatch changes layout
-# Make sure to change it if it does
-heroes_xpath = "/html/body[@class='player']/main[@class='player-data']/div[@class='container']" \
-               "/div[@class='row']/div[@class='col-md-4']/div[@class='data-heroes']/div[@class='heroes-list']"
-stats_xpath = "/html/body[@class='player']/main[@class='player-data']/div[@class='container']/div[@class='row']" \
-              "/div[@class='col-md-8']/div[@class='data-stats']/div[@class='stats-list']/div"
-
-
-def _parse_html(content):
-    """
-    Parses with BS4.
-    """
-    return etree.HTML(content)
-
-
-async def parse_html(content) -> etree._Element:
-    return await util.with_threading(functools.partial(_parse_html, content))
-
-
-async def _get_ow_body(uri: str):
-    """
-    Fetch the OW data and parse it
-    """
-    async with aiohttp.ClientSession(headers={"User-Agent": "NavalBot/6.x for Discord"}) as sess:
-        async with sess.get(uri) as res:
-            assert isinstance(res, aiohttp.ClientResponse)
-            body = await res.read()
-
-            return body
-
-
-@command("ow", argcount="1")
-async def overwatch(ctx: CommandContext):
-    """
-    Shows everybody your *sick* overwatch skills.
-    """
-    # Check EU, then US, then KR.
-
-    async with aiohttp.ClientSession(headers={"User-Agent": "NavalBot/6.x for Discord"}) as sess:
-        for region in ["eu", "us", "kr"]:
-            t_btag = ctx.args[0].replace("#", "-")
-            uri = "https://masteroverwatch.com/profile/pc/{}/{}".format(region, t_btag)
-            body = await util.with_cache(uri, miss=_get_ow_body)
-            parsed = await parse_html(body)
-            # Check if it errored, because MOW doesn't return a 404.
-            h_body = parsed.xpath("/html/body")[0].values()[0]
-            if h_body == "error":
-                continue
-
-            # Since we found it, break.
-            break
-
-        else:
-            await ctx.reply("fun.ow.no_profile_found", tag=ctx.args[0])
-            return
-
-    # There has gotta be a better way than this.
-    hero_info = parsed.xpath(heroes_xpath)[0]
-    stats = parsed.xpath(stats_xpath)[0]
-
-    # Compute stats
-    base = "```xl\n"
-    kills = 0
-    for child in stats.iterchildren():
-        title, count = child[2], child[0]
-        base += "{}: {}\n".format(title.text, count.text)
-        if title.text == "Eliminations":
-            # Set kills.
-            kills = int(count.text)
-        elif title.text == "Deaths":
-            # Add the KDA.
-            base += "K/D: {}\n\n".format(round(kills / int(count.text), 2))
-
-    base += "\nHero stats:\n"
-
-    # This physically hurts me
-    for i, row in enumerate(hero_info.iterchildren()):
-        # Check for the 'show more'
-        if 'show more' in row.text.lower():
-            break
-        hero = row[0][1][0].text
-        kda = row[1][0][0].text
-        wr = row[2][0].text
-        base += "#{} - {} / {} KPD / {} Win rate\n".format(i + 1, hero, kda, wr)
-
-
-    base += "\n```"
-
-    await ctx.client.send_message(ctx.channel, base)
 
 
 @command("choice", "choose", argcount="?")

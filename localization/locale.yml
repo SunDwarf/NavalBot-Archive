@@ -331,7 +331,9 @@ fun.urban: |
 
 fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
 
-fun.ow.no_profile_found: ":x: Could not find a profile for `{tag}`."
+ow.btag_not_set: ":x: Your battletag is not set. Set it with `setbtag`."
+ow.no_such_btag: ":x: Could not find a profile for `{btag}`."
+ow.set_btag: ":heavy_check_mark: Battletag set to `{btag}`."
 
 # Moderation keys.
 moderation.low_permission: ":x: My role (`{role}`) does not have permission to modify this user."
@@ -347,3 +349,4 @@ moderation.muted.unmuted: ":heavy_check_mark: Unmuted user `{user.display_name}`
 moderation.muted.not_muted: ":x: User `{user.display_name}` is not muted."
 
 moderation.deleted_messages: ":bomb: {count} messages deleted."
+
