@@ -263,6 +263,10 @@ class NavalClient(discord.Client):
             logger.info("Ignoring message from bot account.")
             return
 
+        # Run on_message_before_blacklist
+        for hook in self.hooks.get("on_message_before_blacklist", []):
+            self.loop.create_task(hook(self, message))
+
         global_blacklist = await db.get_set("global_blacklist") or set()
 
         # Check if they are globally blacklist.

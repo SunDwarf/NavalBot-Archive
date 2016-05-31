@@ -172,7 +172,6 @@ async def globalunblacklist(ctx: CommandContext):
     )
 
 
-
 @command("plugins")
 async def plugins(ctx: CommandContext):
     """
