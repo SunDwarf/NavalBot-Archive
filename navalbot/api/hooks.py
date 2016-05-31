@@ -68,3 +68,26 @@ def on_generic_event(func: typing.Callable[[NavalClient, dict], None]) -> types.
         instance.hooks['on_recv'] = []
 
     instance.hooks['on_recv'].append(func)
+
+
+def on_event(name: str):
+    """
+    Registers a hook to be run on a any event you specify.
+    """
+    def _inner(func: typing.Callable[[NavalClient, dict], None]):
+        try:
+            instance = NavalClient.instance
+            assert isinstance(instance, NavalClient)
+        except (AssertionError, AttributeError):
+            logger.critical("Attempted to register on_message for function `{}` before bot is created."
+                            .format(func.__name__))
+            return
+
+        if name not in instance.hooks:
+            instance.hooks[name] = []
+
+        instance.hooks[name].append(func)
+
+        return func
+
+    return _inner
