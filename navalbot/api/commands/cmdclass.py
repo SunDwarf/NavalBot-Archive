@@ -83,6 +83,9 @@ class Command(object):
                 # 0 -> List of args, used for multiple.
                 self._args_type = 0
                 self._args_count = None
+            elif kwargs["argcount"] == "+":
+                self._args_type = 2
+                self._args_count = None
             else:
                 self._args_type = 1
                 self._args_count = int(kwargs["argcount"])
@@ -186,7 +189,7 @@ class Command(object):
 
         # Arguments check.
         if hasattr(self, "_args_type"):
-            if self._args_type == 0:
+            if self._args_type in [0, 2]:
                 # Get the content, with the content split.
 
                 ctt = message.content[len(prefix):]
@@ -196,7 +199,7 @@ class Command(object):
                     args = shlex.split(ctt)[1:]
                 except ValueError:
                     args = ctt.split(" ")[1:]
-                if len(args) < 1:
+                if self._args_type == 0 and len(args) < 1:
                     await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
                     return
             elif self._args_type == 1:
@@ -205,7 +208,6 @@ class Command(object):
                 if len(args) != self._args_count:
                     await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
                     return
-
         # Create the context.
         ctx = CommandContext(client, message, locale=loc)
 

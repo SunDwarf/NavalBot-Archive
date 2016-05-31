@@ -71,6 +71,11 @@ async def get_key(key: str) -> str:
         except AttributeError:
             return None
 
+async def set_key(key: str, value):
+    pool = await util.get_pool()
+    async with pool.get() as conn:
+        return await conn.set(key, value)
+
 
 async def get_set(key: str) -> set:
     """
