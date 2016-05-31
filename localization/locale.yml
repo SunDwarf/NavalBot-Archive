@@ -176,6 +176,21 @@ help.purge: |
 
         Mention user(s) to only delete messages from those users.
 
+help.blacklist: |
+        Blacklists a user from running bot commands on the server.
+
+        You must have `Admin` role to do this.
+
+help.unblacklist: |
+        Unblacklists a user from running bot commands on the server.
+
+        You must have `Admin` role to do this.
+
+help.globalblacklist: |
+        For very naughty users. Owner-only.
+
+        This command is irreversible unless you have access to the redis database.
+
 
 # Permissions keys
 perms.not_owner: ":no_entry: This command is restricted to the bot owner."
@@ -331,7 +346,7 @@ fun.urban: |
 
 fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
 
-ow.btag_not_set: ":x: Your battletag is not set. Set it with `setbtag`."
+ow.btag_not_set: ":x: Battletag is not set. Set it with `setbtag`."
 ow.no_such_btag: ":x: Could not find a profile for `{btag}`."
 ow.set_btag: ":heavy_check_mark: Battletag set to `{btag}`."
 
@@ -349,4 +364,7 @@ moderation.muted.unmuted: ":heavy_check_mark: Unmuted user `{user.display_name}`
 moderation.muted.not_muted: ":x: User `{user.display_name}` is not muted."
 
 moderation.deleted_messages: ":bomb: {count} messages deleted."
+
+moderation.blacklisted: ":heavy_check_mark: Blacklisted user {user}."
+moderation.unblacklisted: ":heavy_check_mark: Unblacklisted user {user}."
 

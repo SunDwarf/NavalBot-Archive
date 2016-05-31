@@ -105,7 +105,7 @@ async def get_ow_profile_data(ctx: CommandContext):
         await ctx.client.send_message(ctx.channel, stats)
 
 
-@command("setbtag", argcount="1")
+@command("setbtag", argcount=1)
 async def setbtag(ctx: CommandContext):
     """
     Sets your battletag.
@@ -113,3 +113,15 @@ async def setbtag(ctx: CommandContext):
     btag = ctx.args[0].replace("#", "-")
     await ctx.db.set_key("overwatch:{}".format(ctx.author.id), btag)
     await ctx.reply("ow.set_btag", btag=btag)
+
+
+@command("getbtag", argcount="?")
+async def getbtag(ctx: CommandContext):
+    """
+    Gets a battletag.
+    """
+    user = ctx.get_user() or ctx.author
+    btag = await ctx.db.get_key("overwatch:{}".format(ctx.author.id))
+
+    if btag is None:
+        await ctx.reply("ow.btag_not_set")
