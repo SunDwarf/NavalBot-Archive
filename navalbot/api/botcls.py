@@ -152,15 +152,6 @@ class NavalClient(discord.Client):
         with open("config.yml", "r") as f:
             self.config = yaml.load(f)
 
-        # Pre-load the blacklist.
-        if os.path.exists("blacklist.json"):
-            with open("blacklist.json") as f:
-                self.bl = json.load(f)
-                self.bl_mtime = os.stat(f.fileno()).st_mtime
-        else:
-            self.bl = []
-            self.bl_mtime = time.time()
-
         # Create a client if the config says so.
         if self.config.get("use_sentry"):
             logger.info("Using Sentry for error reporting.")
@@ -252,6 +243,15 @@ class NavalClient(discord.Client):
         # Load plugins
         await self.load_plugins()
 
+        # Run on_ready hooks
+        for hook in self.hooks.get("on_ready", []):
+            try:
+                await hook(self)
+            except:
+                logger.error("Caught exception in hook on_ready -> {}".format(hook.__name__))
+                traceback.print_exc()
+                continue
+
         # Set the game.
         await self.change_status(discord.Game(name="Type ?info for help!"))
 
@@ -265,7 +265,12 @@ class NavalClient(discord.Client):
 
         # Run on_message_before_blacklist
         for hook in self.hooks.get("on_message_before_blacklist", []):
-            self.loop.create_task(hook(self, message))
+            try:
+                await hook(self, message)
+            except:
+                logger.error("Caught exception in hook on_message_before_blacklist -> {}".format(hook.__name__))
+                traceback.print_exc()
+                continue
 
         global_blacklist = await db.get_set("global_blacklist") or set()
 
