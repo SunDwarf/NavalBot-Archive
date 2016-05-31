@@ -263,6 +263,13 @@ class NavalClient(discord.Client):
             logger.info("Ignoring message from bot account.")
             return
 
+        global_blacklist = await db.get_set("global_blacklist") or set()
+
+        # Check if they are globally blacklist.
+        if message.author.id in global_blacklist:
+            logger.info("Ignoring message from globally blacklisted user.")
+            return
+
         if not isinstance(message.channel, discord.PrivateChannel):
             # print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
             #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)

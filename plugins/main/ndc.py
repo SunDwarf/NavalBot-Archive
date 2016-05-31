@@ -134,11 +134,12 @@ async def globalblacklist(ctx: CommandContext):
     For very naughty users.
     """
     user = ctx.get_user()
-    user_id = user.id
     if not user:
         # Just use the ID, if possible.
         user = None
         user_id = ctx.args[0]
+    else:
+        user_id = user.id
 
     await ctx.client.send_message(ctx.channel, ":warning: Are you sure? Type `y` to proceed.")
     next_message = await ctx.client.wait_for_message(timeout=5, author=ctx.author, channel=ctx.channel, content="y")
@@ -159,16 +160,13 @@ async def globalunblacklist(ctx: CommandContext):
     When Jesus has died for your sins.
     """
     user = ctx.get_user()
-    user_id = user.id
     if not user:
         # Just use the ID, if possible.
         user = None
         user_id = ctx.args[0]
+    else:
+        user_id = user.id
 
-    removed = await ctx.db.remove_from_set("global_blacklist", user_id)
-    if not removed:
-        await ctx.client.send_message(ctx.channel, ":question: That user is not globally blacklisted.")
-        return
     await ctx.client.send_message(
         ctx.channel, ":angel: User `{}` has repented their sins.".format(user_id)
     )
