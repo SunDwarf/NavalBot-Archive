@@ -28,10 +28,12 @@ import logging
 import re
 import sys
 
+import aioredis
+import discord
+
 from navalbot.api import util
 from navalbot.api.botcls import NavalClient
-from navalbot.api.commands import command
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.commands import command, CommandContext
 
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```')
@@ -42,14 +44,14 @@ logger = logging.getLogger("NavalBot")
 
 
 @command("reload", owner=True, argcount=1, argerr=":x: You must pick a file to reload.")
-async def reload_f(ctx: CommandContext):
+async def reload_f(client: discord.Client, message: discord.Message, args: list):
     """
     Reloads a module in the bot.
     """
-    mod = ctx.args[0]
+    mod = args[0]
     if mod not in sys.modules:
         if 'plugins.' + mod not in sys.modules:
-            await ctx.reply("core.ndc.not_loaded")
+            await client.send_message(message.channel, ":x: Module is not loaded.")
             return
         else:
             mod = 'cmds.' + mod
@@ -57,11 +59,11 @@ async def reload_f(ctx: CommandContext):
     new_mod = importlib.reload(sys.modules[mod])
     # Update sys.modules
     sys.modules[mod] = new_mod
-    await ctx.reply("core.ndc.reload_success")
+    await client.send_message(message.channel, ":heavy_check_mark: Reloaded module.")
 
 
 @command("reloadall", owner=True)
-async def reload_all(ctx: CommandContext):
+async def reload_all(client: discord.Client, message: discord.Message):
     """
     Reloads all modules.
     """
@@ -81,7 +83,7 @@ async def reload_all(ctx: CommandContext):
             importlib.reload(sys.modules[mod])
             logger.info("Reloaded module.")
 
-    await ctx.reply("core.ndc.reload_all")
+    await client.send_message(message.channel, ":heavy_check_mark: Reloaded all.")
 
 
 @command("py", owner=True)
@@ -93,10 +95,10 @@ async def py(ctx: CommandContext):
     else:
         if not match_multi:
             result = eval(match_single[0])
-            await ctx.reply("```{}```".format(result))
+            await ctx.client.send_message(ctx.message.channel, "```{}```".format(result))
         else:
             def r(v):
-                loop.create_task(ctx.reply("```{}```".format(v)))
+                loop.create_task(ctx.client.send_message(ctx.message.channel, "```{}```".format(v)))
 
             exec(match_multi[0])
 
@@ -111,7 +113,66 @@ async def redis_get(ctx: CommandContext):
         k = await conn.get(key[0])
         if k:
             k = k.decode()
-        await ctx.reply("`{}`".format(k))
+        await ctx.client.send_message(ctx.message.channel, "`{}`".format(k))
+
+
+@command("rdel", owner=True)
+async def redis_del(ctx: CommandContext):
+    key = getter.findall(ctx.message.content)
+    if not key:
+        return
+    pool = await util.get_pool()
+    async with pool.get() as conn:
+        assert isinstance(conn, aioredis.Redis)
+        await conn.delete(key[0])
+        await ctx.client.send_message(ctx.message.channel, "Deleted {}".format(key[0]))
+
+
+@command("globalblacklist", argcount=1, owner=True)
+async def globalblacklist(ctx: CommandContext):
+    """
+    For very naughty users.
+    """
+    user = ctx.get_user()
+    user_id = user.id
+    if not user:
+        # Just use the ID, if possible.
+        user = None
+        user_id = ctx.args[0]
+
+    await ctx.client.send_message(ctx.channel, ":warning: Are you sure? Type `y` to proceed.")
+    next_message = await ctx.client.wait_for_message(timeout=5, author=ctx.author, channel=ctx.channel, content="y")
+    if not next_message or next_message.content != "y":
+        await ctx.client.send_message(ctx.channel, ":x: Aborting global blacklist.")
+        return
+
+    # Okay, you asked for it.
+    await ctx.db.add_to_set("global_blacklist", user_id)
+    await ctx.client.send_message(
+        ctx.channel, ":gun: Okay, user `{}` has been banned from using the bot.".format(user_id)
+    )
+
+
+@command("globalunblacklist", argcount=1, owner=True)
+async def globalunblacklist(ctx: CommandContext):
+    """
+    When Jesus has died for your sins.
+    """
+    user = ctx.get_user()
+    user_id = user.id
+    if not user:
+        # Just use the ID, if possible.
+        user = None
+        user_id = ctx.args[0]
+
+    removed = await ctx.db.remove_from_set("global_blacklist", user_id)
+    if not removed:
+        await ctx.client.send_message(ctx.channel, ":question: That user is not globally blacklisted.")
+        return
+    await ctx.client.send_message(
+        ctx.channel, ":angel: User `{}` has repented their sins.".format(user_id)
+    )
+
 
 
 @command("plugins")
@@ -120,10 +181,7 @@ async def plugins(ctx: CommandContext):
     Lists the currently loaded plugins.
     """
     mods = NavalClient.instance.modules
-    s = ctx.locale["core.ndc.plugins_base"]
-    plugin = ctx.locale["core.ndc.plugins"]
-
+    s = "**Currently loaded plugins:**"
     for name, mod in mods.items():
-        s += plugin.format(name=name, path=mod.__file__, ver=getattr(mod, "VERSION", "??"))
-
-    await ctx.reply(s)
+        s += "\nPlugin `{}`".format(name)
+    await ctx.client.send_message(ctx.message.channel, s)
