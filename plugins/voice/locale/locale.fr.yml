@@ -1,0 +1,118 @@
+
+
+help.again: |
+        Remet la piste de lecture actuelle  à la fin de la file d'attente.
+
+help.shuffle: |
+        Mélange les pistes de lecture dans la file d'attente actuelle.
+
+help.get_queued_vids: |
+        Donne les noms des pistes de lecture dans la file d'attente.
+
+        Peut être accompagné d'un nombre, pour que la commande donne les pistes de lecture restante, en partant de celle ayant le même numéro que celui indiqué.
+
+help.skip: |
+        Permet de sauter des pistes de lecture.
+
+        Peut être accompagné d'un nombre, qui permet de sauter autant de pistes de lecture qu'indiqué.
+        Cela sautera la piste de lecture actuelle, puis <X - 1> piste.s de lecture dans la file d'attente.
+        Si aucun nombre n'est spécifié, cette commande sautera la piste de lecture actuelle.
+help.voteskip: |
+        Ouvre un vote pour sauter la piste de lecture actuelle.
+
+        Le seuil pour sauter la piste de lecture est déterminée par le nombre de personnes, divisé par deux. Le bot n'est pas compté dans la solution.
+
+help.move: |
+        Change la position d'une piste de lecture dans la file d'attente.
+
+        Vous devez indiquer la valeur de la piste de lecture en premier, puis celui de la position cible dans la file en second.
+        Les valeurs doivent être entier.
+
+help.remove_vid: |
+        Enlève une ou plusieurs piste.s de lecture.
+
+        Takes a start position and an optional end position to remove.
+        Commence par la valeur indiquée en premier, puis se termine par une seconde valeur optionnelle.
+        Si la seconde valeur n'est pas spécifiée, le bot ne supprimera que la piste de lecture indiquée en premier.
+
+help.reset: |
+        Déconnecte le bot du chat vocal, et le remet à zéro.
+
+help.np: |
+        Donne le nom de la piste de lecture actuelle.
+        Donne le nom de la piste de lecture actuelle.
+
+help.play: |
+        Joue une piste de lecture.
+
+        Le bot téléchargera la piste de lecture depuis une URL que vous spécifierez, ou depuis une recherche.
+        Le bot peut télécharger des pistes de lecture depuis les principaux sites de streaming.
+
+
+# Voice keys.
+voice.not_connected: ":x: Le bot n'est pas connecté au serveur."
+voice.cant_control: ":x: Vous devez être dans le même chat vocal que le bot et ne pas avoir coupé le son pour le contrôler."
+
+voice.reset.success: ":heavy_check_mark: Fonction vocale du bot réinitialisée."
+
+voice.no_song: ":x: Aucune piste de lecture n'est actuellement joué."
+voice.curr_playing: "En cours de lecture : `{title}` `{d_str}`"
+
+voice.playback.no_channel: >
+        :x: NavalBot ne détecte aucun channel pour diffuser de la musice. Par défaut, le bot essaiera de se connecter sur `NavalBot` ou `Music`,
+        vous pouvez cependant changer cela en utilisant la commande `{prefix}setcfg voice_channel <votre channel>`.
+
+voice.playback.pl_warning: ":warning: L'URL cible semble rediriger vers une liste de lecture; télécharger chaque morceau risque de prendre du temps."
+voice.playback.bad_url: >
+        :x: Le bot ne peut pas télécharger depuis ce lien, car ce domaine n'est pas dans la whitelist.
+
+        Pour désactiver la whitelist, lancez la commande `{prefix}setcfg limit_urls False`.
+
+voice.playback.wait_for: >
+        :hourglass: Ce lien sera téléchargé une fois que le téléchargement en cours sera terminé.
+
+voice.playback.downloading: ":hourglass: Téléchargement des informations de la vidéo..."
+voice.playback.ytdl_error: ":no_entry: Quelque chose ne s'est pas passé comme prévu. Erreur: {err}"
+voice.playback.bad_info: >
+        :no_entry: Quelque chose ne s'est pas passé comme prévu. Impossible de télécharger les informations de la vidéo.
+
+voice.playback.timeout: ":x: Délai d'attente de connexion au serveur dépassé."
+voice.playback.connection_error: ":x: Une erreur est survenue en se connectant au chat vocal."
+
+voice.playback.queue_num: ":heavy_check_mark: Vous êtes en position numéro {pos} dans la file d'attente."
+voice.playback.queue_next: ":heavy_check_mark: Vous êtes le prochain à jouer votre vidéo."
+
+voice.playback.np: ":heavy_check_mark: En cours de lecture: `{title}`"
+voice.playback.queue_full: ":no_entry: La file d'attente est pleine."
+voice.playback.pl_queue_full: ":no_entry: Il y a trop de pistes de lecture dans la file d'attente. Le nombre de pistes est limitée à {limit}."
+voice.playback.pl_error: ":x: La recherche n'a donné aucun résultats, ou la file de lecture a rencontré un problème."
+voice.playback.pl_added: ":heavy_check_mark: {num} pistes de lecture ont été ajoutées à la file d'attente."
+
+voice.play_again: ":heavy_check_mark: Relecture de la piste `{title}`"
+
+voice.shuffled: ":heavy_check_mark: File d'attente mélangée"
+
+voice.queue_too_short: ":x: La file d'attente n'est pas aussi longue. (`{num} pistes dans la file`)"
+voice.queue_negative: ":x: Vous ne pouvez pas utiliser un nombre négatif."
+
+voice.queue.ommitted: "{num} pistes ont étés ignorées."
+voice.queue.curr_queued: >
+          **Nombre de pistes dans la file d'attente: ({queue_length}/{max_queue_length})**
+          `[{hour:02d}:{minute:02d}:{second:02d}]`
+voice.queue.nothing_queued: "`La file d'attente est vide.`"
+
+voice.bad_state: ":x: Erreur interne, la connexion a été réinitialisée. Probablement à cause de Discord."
+
+voice.skip.one: ":heavy_check_mark: La piste actuelle a été sautée."
+voice.skip.all: ":heavy_check_mark: Toutes les pistes ont été sautées."
+voice.skip.many: ":heavy_check_mark: {num} pistes ont été sautées"
+
+voice.voteskip.vote: ":heavy_check_mark: Voteskip pris en compte. Il manque `{left}` votes avant que la piste soit sautée. "
+voice.voteskip.already_voted: ":no_entry: Vous avez déjà voté."
+
+voice.mv.could_not_find: ":x: Il n'existe pas de vidéo avec le numéro `{index}` dans la file d'attente."
+voice.mv.moved: ":heavy_check_mark: La piste `{title}` a été déplacée en position `{index}`."
+
+voice.remove.start_lt_end: ":x: La première valeur doit être plus petite que la seconde."
+voice.remove.deleted_one: ":heavy_check_mark: La piste n°{index} `({title})` a été supprimée."
+voice.remove.deleted_many: ":heavy_check_mark: Les pistes de {start} jusqu'à {end} ont été supprimées."

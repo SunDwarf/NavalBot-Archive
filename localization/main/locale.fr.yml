@@ -1,0 +1,111 @@
+# Permissions keys
+perms.not_owner: ":no_entry: Cette commande n'est utilisable que par le propriétaire du bot."
+perms.cannot_determine_role: ":no_entry: Impossible de déterminer votre rôle !"
+perms.bad_role: ":no_entry: Vous n'êtes dans aucuns des rôles suivants : `{roles}`."
+
+# Generic keys.
+generic.not_int: ":x: La valeur {val} n'est pas un nombre entier valide."
+generic.file_too_big: ":x: Le fichier {fname} est trop lourd pour être téléchargé."
+generic.no_mention: ":x: Vous devez mentionner quelqu'un."
+generic.cannot_find_user: ":x: Utilisateur `{user}` introuvable."
+generic.cannot_find_command: ":x: Commande `{cmd}` introuvable."
+
+# Help keys.
+help.None: |
+        Cette commande n'est pas documenté dans cette langue.
+
+help.set_config: |
+        Modifie un réglage du bot spécifique à ce serveur.
+
+        Si vos indications contiennent des espaces, elles doivent être fermées par des "guillemets".
+
+help.get_config: |
+        Renvoie un réglage du bot spécifique à ce serveur.
+
+        Si vos indications contiennent des espaces, elles doivent être fermées par des "guillemets".
+
+help.avatar: |
+        Change l'avatar du bot.
+        Vous devez indiquer le lien de l'image à utiliser.
+        Cette commande ne peut être exécutée uniquement par le propriétaire du bot.
+
+help.changename: |
+        Change le **pseudonyme** du bot.
+        Indiquez le nouveau pseudonyme à la suite de cette commande.
+        Cette commande ne peut être exécutée uniquement par le propriétaire du bot.
+
+help.add_role_override: |
+        Donne une autorisation à un rôle d'utiliser une commande.
+        Indiquez la commande, puis le rôle bénéficiant de cette autorisation.
+        Cela permet à tous ceux ayant ce rôle d'utiliser la commande spécifiée.
+        Vous pouvez autoriser l'exécution de cette commande à tous ceux sur le serveur en mettant '@ everybody' (sans espace) en seconde valeur.
+
+help.remove_role_override: |
+        Enlève l'autorisation d'utiliser une commande à un rôle.
+        La commande doit être indiquée avant le rôle bénéficiant de l'autorisation.
+
+help.lock: |
+        Verrouille un alias pour que seulement le propriétaire du bot puisse le changer.
+
+        Les administrateurs du serveur peuvent cependant toujours déverrouiller et changer l'alias malgrès le verrouillage.
+
+help.delete_factoid: |
+        Supprime un alias
+
+        Si l'alias est verrouillé, seulement le propriétaire du bot ou un admin peuvent le supprimer.
+
+help.unlock: |
+        Déverouille un alias, et permet à tous de le modifier.
+
+help.factoids: |
+        Montre les alias correspondant au motif Scan de Redis.
+
+        Pour plus d'informations, allez sur http://redis.io/commands/scan
+
+help.factoid: |
+        Explique comment créer un alias.
+
+help.version: |
+        Affiche la version actuelle du bot.
+
+# core strings
+core.cfg.setcfg_updated: ":heavy_check_mark: Configuration mise à jour: `{name}` -> `{val}`"
+core.cfg.no_such_config: ":x: La configuration `{name}` n'existe pas."
+core.cfg.cfg_deleted: ":heavy_check_mark: Configuration `{name}` supprimée."
+
+
+core.cfg.avatar_changed: ":heavy_check_mark: Avatar du bot mis à jour."
+core.cfg.avatar_invalid: ":x: L'avatar cible est invalide."
+core.cfg.name_changed: ":heavy_check_mark: Le nom du bot a été changé en `{name}`."
+
+core.cfg.bad_override: ":x: La commande indiquée n'existe pas."
+
+core.cfg_added_role_override: ":heavy_check_mark: Ajout d'une autorisation d'exécuter la commande {cmd} par un rôle réussie."
+core.cfg_removed_role_override: ":heavy_check_mark: Suppression de l'autorisation d'exécuter la commande {cmd} pour ce rôle réussie."
+
+core.version.base: "Version **{ver}**, codée par SunDwarf (https://github.com/SunDwarf) et shadow (https://github.com/ilevn)"
+core.version.no_dl: ":grey_exclamation: Une erreur est survenue lors du téléchargement des infos de version."
+core.version.new_ver: ":exclamation: *Une nouvelle version est disponible* **{ver}**"
+core.version.local_newer: ":grey_exclamation: *Le bot est sur une version plus récente que celle disponible en ligne ({ver}).*"
+core.version.same: ":grey_exclamation: *Le bot est déjà sur la dernière version.*"
+
+core.factoids.nonexistant: ":x: L'alias `{fac}` n'existe pas."
+core.factoids.nexist_or_nlock: ":x: L'alias `{fac}` car il n'existe pas ou a été verrouillé."
+core.factoids.cannot_edit: ":x: Vous ne pouvez pas modifier l'alias {fac}, car il a été verrouillé par l'utilisateur `{u}`."
+
+core.factoids.locked: ":heavy_check_mark: L'alias `{fac}` a été verrouillé par `{u}`."
+core.factoids.deleted: ":heavy_check_mark: Alias `{fac}` supprimé."
+core.factoids.unlocked: ":heavy_check_mark: Alias `{fac}` déverrouillé."
+
+core.factoids.match.header: "Alias ayant le motif indiqué:"
+core.factoids.match.none: "`Aucun alias ne possède ce nom.`"
+
+core.factoids.set: ":heavy_check_mark: Le nom de l'alias `{name}` a été changé en `{content}`."
+
+core.factoids.bad_args: ":heavy_check_mark: Vous n'avez pas indiqué toutes les options à l'alias."
+
+core.ndc.not_loaded: ":x: Ce module n'est actuellement pas en fonctionnement."
+core.ndc.reload_success: ":heavy_check_mark: Le module a été redémarré."
+core.ndc.reload_all: ":heavy_check_mark: Les modules ont été redémarrés."
+core.ndc.plugins_base: "**Liste des modules complémentaires utilisés:**"
+core.ndc.plugins: "\n`{name} (chemin: {path})` - version **{ver}**"

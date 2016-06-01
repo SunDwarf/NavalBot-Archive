@@ -35,7 +35,7 @@ from navalbot.api.commands.cmdclass import NavalRole
 from .stores import voice_locks
 
 # Get loop
-from .voice_util import find_voice_channel, author_is_valid
+from navalbot.voice.voice_util import find_voice_channel, author_is_valid
 
 loop = asyncio.get_event_loop()
 

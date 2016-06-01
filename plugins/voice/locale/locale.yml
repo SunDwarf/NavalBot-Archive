@@ -1,15 +1,3 @@
-#####################################################
-# This is the localization database for NavalBot.
-# This is used to localize messages.
-#
-# locale.yml is the default file, where keys are loaded from if they do not exist
-# locale.<lang>.yml is used for loading locale from language-specific files.
-#
-# When localizing a file, DO NOT REPLACE ANYTHING INSIDE { } OR ANYTHING INSIDE :_:.
-# These are used by the bot to build up the strings automatically.
-# You can re-order them for the sentences to make sense, but they must stay in the sentence.
-#####################################################
-
 # Help keys.
 help.again: |
         Adds the currently playing track to the end of the queue again.
@@ -124,18 +112,3 @@ voice.remove.start_lt_end: ":x: Start must be smaller than end position."
 voice.remove.deleted_one: ":heavy_check_mark: Deleted item {index} `({title})`."
 voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."
 
-
-
-ow.btag_not_set: ":x: Battletag is not set. Set it with `setbtag`."
-ow.no_such_btag: ":x: Could not find a profile for `{btag}`."
-ow.set_btag: ":heavy_check_mark: Battletag set to `{btag}`."
-
-# Censorship keys.
-censor.no_args: ":x: Bad arguments provided: You must provide a regular expression."
-censor.add.bad_regex: ":x: Bad regex provided. Error: `{err}`"
-censor.add.added: ":heavy_check_mark: Added regex `{re}`."
-
-censor.del.removed: ":heavy_check_mark: Removed regex `{re}`."
-censor.del.no_such_regex: ":x: Regex does not exist in auto-delete list."
-
-censor.list.none: ":x: Nothing to list."

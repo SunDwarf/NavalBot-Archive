@@ -1,0 +1,112 @@
+
+
+help.again: |
+        Fügt das aktuell laufende Lied nochmal zur Warteschlange hinzu.
+
+help.shuffle: |
+        Mischt die Warteschlange.
+
+help.get_queued_vids: |
+        Zeigt Informatioen über die Warteschlange.
+
+        Der Index eines Liedes in der Warteschlange kann als optionaler Wert angegeben werden, damit erst ab dort Informationen gezeigt werden.
+
+help.skip: |
+        Überspringt ein oder mehrere Lieder.
+
+        Als optionaler Paramter kann die Anzahl an zu überspringenden Liedern angegeben werden.
+        Dies überspringt das aktuelle Lied und dann alle anderen Lieder, die überspringt werden sollen.
+        Sonst wird nur ein Lied übersprungen.
+
+help.voteskip: |
+        Start eine Abstimmung, ob ein Lied übersprungen werden soll.
+
+help.move: |
+        Verschiebt ein Lied in der Warteschlange von Index <x> zu Index <y>.
+
+        Beide Nummern müssen positiv sein.
+
+help.remove_vid: |
+        Entfernt ein oder mehrere Lieder.
+
+        Nimmt eine Start- und optionale Endposition an.
+        Wenn keine Position zum Entfernen angegeben wurde, wird nur ein Lied entfernt.
+
+help.reset: |
+        Trennt den Bot vom Sprach-Kanal und setzt alle Sprachparamter zurück.
+
+help.np: |
+        Zeigt das aktuelle Lied an.
+
+help.play: |
+        Spielt ein Lied.
+
+        Es kann entweder eine URL oder ein Suchbegriff angegeben werden.
+        Die URL kann von den meisten Seiten kommen; Der Bot wird versuchen, das Lied richtig zu downloaden.
+
+
+# Sprach-Schlüssel
+voice.not_connected: ":x: Momentan nicht mit dem Server verbunden."
+voice.cant_control: ":x: Du musst dich im Sprach-Chat befinden und nicht auf taub geschaltet sein."
+
+voice.reset.success: ":heavy_check_mark: Sprachparameter wurden zurückgesetzt."
+
+voice.no_song: ":x: Momentan wird kein Lied gespielt."
+voice.curr_playing: "Aktuelles Lied: `{title}` `{d_str}`"
+
+voice.playback.no_channel: >
+        :x: Konnte nicht den Sprach-Kanal finden, um Lieder zu spielen! Die Standard-Kanäle sind `NavalBot` oder `Music`,
+        diese kannst du allerdings überschreiben, wenn du `{prefix}setcfg voice_channel <Name_des_Kanals>` ausführst.
+
+voice.playback.pl_warning: ":warning: Wenn dies eine Playlist ist, dann könnte das Downloaden lang dauern."
+voice.playback.bad_url: >
+        :x: Dieser Link ist nicht in der Whitelist. Zum Ausschalten schreibe `{prefix}setcfg limit_urls False`.
+
+voice.playback.wait_for: >
+        :hourglass: Etwas anderes wird momentan heruntergeladen. Es wird gewartet...
+
+voice.playback.downloading: ":hourglass: Lade Videoinformationen herunter..."
+voice.playback.ytdl_error: ":no_entry: Etwas ist schiefgelaufen. Error: {err}"
+voice.playback.bad_info: >
+        :no_entry: Etwas ist schiefgelaufen. Konnte keine Videoinformationen bekommen.
+
+voice.playback.timeout: ":x: Die Verbindung zum Sprach-Kanal dauerte zu lang."
+voice.playback.connection_error: ":x: Ein Fehler ist beim Verbinden mit dem Sprach-Kanal passiert."
+
+voice.playback.queue_num: ":heavy_check_mark: Du bist Nummer {pos} in der Warteschlange."
+voice.playback.queue_next: ":heavy_check_mark: Du bist als Nächster dran"
+
+voice.playback.np: ":heavy_check_mark: Aktuelles Lied: `{title}`"
+voice.playback.queue_full: ":no_entry: Die Warteschlange ist voll."
+voice.playback.pl_queue_full: ":no_entry: Es sind zu viele Lieder in der Warteschlange. Limitiere die Playlist auf {limit} Einträge..."
+voice.playback.pl_error: ":x: Die Suche erbrachte nichts oder mit der Playlist stimmt etwas nicht"
+voice.playback.pl_added: ":heavy_check_mark: {num} Lieder wurden zu der Warteschlange hinzugefügt."
+
+voice.play_again: ":heavy_check_mark: Spiele `{title}` nochmal."
+
+voice.shuffled: ":heavy_check_mark: Warteschlange wurde gemischt."
+
+voice.queue_too_short: ":x: Die Warteschlange ist nicht so lang. (`{num}`)"
+voice.queue_negative: ":x: Du kannst keine negative Nummner nutzen."
+
+voice.queue.ommitted: "Lasse {num} angestandene Lieder aus."
+voice.queue.curr_queued: >
+          **Momentane Warteschlange: ({queue_length}/{max_queue_length})**
+          `[{hour:02d}:{minute:02d}:{second:02d}]`
+voice.queue.nothing_queued: "`Nichts ist in der Warteschlange.`"
+
+voice.bad_state: ":x: Unstimmiger innerer Zustand - Die Verbindung wird zurückgesetzt. Discord ist wahrscheinlich verantwortlich."
+
+voice.skip.one: ":heavy_check_mark: Das aktuelle Lied wurde übersprungen."
+voice.skip.all: ":heavy_check_mark: Alle Lieder wurden übersprungen."
+voice.skip.many: ":heavy_check_mark: {num} Lieder wurden übersprungen."
+
+voice.voteskip.vote: ":heavy_check_mark: Stimme ist eingegangen. Es werden noch `{left}` Stimmen zum Überspringen benötigt."
+voice.voteskip.already_voted: ":no_entry: Du hast schon abgestimmt."
+
+voice.mv.could_not_find: ":x: Konnte kein Lied bei Platz `{index}` finden."
+voice.mv.moved: ":heavy_check_mark: Verschob Lied `{title}` auf Platz `{index}`."
+
+voice.remove.start_lt_end: ":x: Die Startposition muss größer als die Endposition sein."
+voice.remove.deleted_one: ":heavy_check_mark: Löschte Lied {index} `({title})`."
+voice.remove.deleted_many: ":heavy_check_mark: Löschte Lieder von Position {start} bis {end}."

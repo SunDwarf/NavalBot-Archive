@@ -1,0 +1,110 @@
+# Allgemeine Schlüssel.
+generic.not_int: ":x: Wert {val} ist kein gültiger Integer."
+generic.file_too_big: ":x: Datei {fname} ist zu groß zum Downloaden."
+generic.no_mention: ":x: Du musst den Nutzer erwähnen."
+generic.cannot_find_user: ":x: Konnte Nutzer `{user}` nicht finden."
+generic.cannot_find_command: ":x: Konnte Befehl `{cmd}` nicht finden."
+
+# Berechtigungs-Schlüssel
+perms.not_owner: ":no_entry: Dieser Befehl ist auf den Bot-Besitzer beschränkt."
+perms.cannot_determine_role: ":no_entry: Konnte Role nicht bestimmen!"
+perms.bad_role: ":no_entry: Du hast keine der erforderten Rollen!: `{roles}`!"
+
+# Hilfe Schlüssel.
+help.None: |
+        Dieser Befehl hat keine Hilfe in dieser Sprache.
+
+help.set_config: |
+        Ändert eine server-spezifische Konfiguration.
+
+        Wenn du Leerzeichen in deinen Argumenten hast, müssen diese mit "Anführungszeichen" geschrieben werden.
+
+help.get_config: |
+        Fordert eine server-spezifische Konfiguration an.
+
+        Wenn du Leerzeichen in deinen Argumenten hast, müssen diese mit "Anführungszeichen" geschrieben werden.
+
+help.avatar: |
+        Ändert den Avatar des Bots.
+        Du musst die URL angeben, die als Bild genutzt werden soll.
+        Dieser Befehl ist auf den Bot-Besitzer beschränkt.
+
+help.changename: |
+        Ändert den **Benutzernamen** des Bots.
+        Braucht den Namen als ein Argument.
+        Dieser Befehl ist auf den Bot-Besitzer beschränkt.
+
+help.add_role_override: |
+        Überschreibt die angeforderten Rollen für einen Befehl
+        Du musst den Befehl und die Rolle angeben.
+        Dies ermöglicht es jedem, der die erforderte Rolle besitzt, den Befehl auszuführen
+        Du kannst einen Befehl für jeden zugägnlich machen indem du statt der Rolle `@ everybody` (ohne Leerzeichen.) schreibst.
+
+help.remove_role_override: |
+        Dies löscht eine Überschreibung der Rollenbegrenzung.
+        Du musst den Befehl und die Rolle angeben.
+
+help.lock: |
+        Dies sperrt ein Factoid.
+
+        Admins können trotz der Sperre das Factoid entsperren.
+
+help.delete_factoid: |
+        Dies löscht ein Factoid.
+
+        Wenn das Factoid gesperrt ist, kann es nur der Bot-Besitzer oder ein Admin entsperren.
+
+help.unlock: |
+        Dies entsperrt ein Factoid und macht es bearbeitbar für jeden.
+
+help.factoids: |
+        Dies listet alle Factoids auf, die auf einen bestimmtes Suchschema zutreffen.
+
+        Dieses Schema ist ein Redis-Such-Schema. Für mehr Informationen besuche http://redis.io/commands/scan
+
+help.factoid: |
+        Dieser Befehl zeigt dir, wie man ein Factoid erstellt.
+
+help.version: |
+        Informiert dich über die aktuelle Version des Bots.
+
+# Hauptprogramm
+core.cfg.setcfg_updated: ":heavy_check_mark: Konfiguration aktualisiert: `{name}` -> `{val}`"
+core.cfg.no_such_config: ":x: Konfigurationswert `{name}` ist nicht vorhanden."
+core.cfg.cfg_deleted: ":heavy_check_mark: Konfigurationswert `{name}` wurde gelöscht."
+
+core.cfg.avatar_changed: ":heavy_check_mark: Avatar aktualisiert."
+core.cfg.avatar_invalid: ":x: Avatar ist nicht gültig."
+core.cfg.name_changed: ":heavy_check_mark: Name wurde zu `{name}` geändert."
+
+core.cfg.bad_override: ":x: Du musst einen existierenden Befehl angeben."
+
+core.cfg_added_role_override: ":heavy_check_mark: Eine Rollenüberschreibung für {cmd} wurde hinzugefügt."
+core.cfg_removed_role_override: ":heavy_check_mark: Eine Rollenüberschreibung für {cmd} wurde entfernt."
+
+core.version.base: "Version **{ver}**, geschrieben von SunDwarf (https://github.com/SunDwarf) und shadow (https://github.com/ilevn)"
+core.version.no_dl: ":grey_exclamation: Konnte keine Informationen über die Version bekommen."
+core.version.new_ver: ":exclamation: *Neue Version verfügbar:* **{ver}**"
+core.version.local_newer: ":grey_exclamation: *Du führst eine neuere Version als die, die online verfügbar ist, aus ({ver}).*"
+core.version.same: ":grey_exclamation: *Du hast die aktuellste Version*"
+
+core.factoids.nonexistant: ":x: Factoid `{fac}` existiert nicht."
+core.factoids.nexist_or_nlock: ":x: Factoid `{fac}` existiert nicht oder ist gesperrt."
+core.factoids.cannot_edit: ":x: Konnte Factoid {fac} nicht bearbeiten, es ist von Nutzer-ID `{u}` gesperrt."
+
+core.factoids.locked: ":heavy_check_mark: Factoid `{fac}` gesperrt von `{u}`."
+core.factoids.deleted: ":heavy_check_mark: Factoid `{fac}` gelöscht."
+core.factoids.unlocked: ":heavy_check_mark: Factoid `{fac}` entsperrt"
+
+core.factoids.match.header: "Passende Factoids:"
+core.factoids.match.none: "`Zu diesem Suchschema wurde nichts gefunden.`"
+
+core.factoids.set: ":heavy_check_mark: Factoid `{name}` ist jetzt `{content}`."
+
+core.factoids.bad_args: ":heavy_check_mark: Du hast nicht alle notwendigen Argumente zum Factoid übergeben."
+
+core.ndc.not_loaded: ":x: Plugin ist nicht geladen."
+core.ndc.reload_success: ":heavy_check_mark: Plugin wurde neu geladen."
+core.ndc.reload_all: ":heavy_check_mark: Alle Plugins wurden neu geladen."
+core.ndc.plugins_base: "**Aktuell geladene Plugins:**"
+core.ndc.plugins: "\n`{name} (von {path})` - Version **{ver}**"

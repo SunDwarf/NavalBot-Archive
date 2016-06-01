@@ -21,8 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 import discord
 
-from navalbot.api import db, util
-from .stores import voice_params
+from navalbot.api import db
 
 
 async def find_voice_channel(server: discord.Server):

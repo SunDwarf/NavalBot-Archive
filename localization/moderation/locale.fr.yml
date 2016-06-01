@@ -1,0 +1,34 @@
+help.ban: |
+        Ban un utilisateur.
+
+        Vous pouver indiquer la @mention ou le pseudonyme de l'utilisateur en valeur, et le bot trouvera automatiquement l'utilisateur à bannir.
+
+help.kick: |
+        Kick un utilisateur.
+
+        Vous pouver indiquer la @mention ou le pseudonyme de l'utilisateur en valeur, et le bot trouvera automatiquement l'utilisateur à kick.
+
+help.mute: |
+        Met un utilisateur en sourdine.
+
+        Le bot doit avoir la permission de modifier les rôles pour utiliser cette commande.
+
+
+help.unmute: |
+        Enlève la sourdine à un utilisateur.
+
+        Le bot doit avoir la permission de modifier les rôles pour utiliser cette commande.
+
+
+# Moderation keys.
+moderation.low_permission: ":x: Le rôle du bot ('{role}') ne le permet pas de faire quoi que ce soit sur cet utilisateur."
+moderation.ban.banned: ":heavy_check_mark: L'utilisateur `{target}` a été banni."
+moderation.kick.kicked: ":heavy_check_mark: L'utilisateur `{target}`a été kické."
+
+moderation.cannot_edit_server: ":x: Le bot n'a pas les permissions requises pour effectuer cette action."
+moderation.muted.not_muted: ":x: Cet utilisateur n'est pas en sourdine."
+
+moderation.muted.success: ":heavy_check_mark: L'utilisateur `{user.display_name}` a été mis en sourdine."
+moderation.muted.unmuted: ":heavy_check_mark: L'utilisateur `{user.display_name}` n'est plus en sourdine."
+
+moderation.colour.success: ":heavy_check_mark: La couleur du rôle a été changé en celle-ci: `{c}`."
