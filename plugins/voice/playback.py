@@ -82,6 +82,23 @@ async def reset(ctx: CommandContext):
     await ctx.reply("voice.reset.success")
 
 
+@command("release", role={NavalRole.ADMIN, NavalRole.BOT_COMMANDER, NavalRole.VOICE})
+async def release(ctx: CommandContext):
+    """
+    Attempt to release the voice lock.
+    """
+    lock = voice_locks.get(ctx.message.server.id)
+    if not lock:
+        return
+
+    assert isinstance(lock, asyncio.Lock)
+    while True:
+        try:
+            lock.release()
+        except RuntimeError:
+            return
+
+
 @command("np", "nowplaying")
 async def np(ctx: CommandContext):
     """
@@ -117,7 +134,7 @@ async def play(ctx: CommandContext):
     """
     voice_channel = await find_voice_channel(ctx.message.server)
     if not voice_channel:
-        #await client.send_message(
+        # await client.send_message(
         #    message.channel,
         #    content=":x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`, "
         #            "however you can override this with by running `{}setcfg voice_channel <your channel>`."
