@@ -62,31 +62,6 @@ class LocaleLoader:
 
         self._load_locale_files()
 
-        # Load the files.
-        # if self.lang is None:
-        #    # Set the last loaded time to well in the future.
-        #    self.lang = ""
-        # self._last_load = 2147483647
-        #   self._locale_data = {}
-        #   self.path = ""
-        # else:
-        #     self.path = os.path.join(LOCALE_ROOT, LOCALE_FILE_BUILDER.format(lang=self.lang))
-        #    if not os.path.exists(self.path):
-        #         logger.warning("No such locale: `{}`".format(self.lang))
-        #         self._last_load = 2147483647
-        #         self._locale_data = {}
-        #     # Load the data from the file.
-        #     else:
-        #         self._last_load = os.stat(self.path).st_mtime
-        #         with open(self.path) as f:
-        #             self._locale_data = yaml.load(f)####
-
-        # Load the default data.
-        # self._default_path = os.path.join(LOCALE_ROOT, "locale.yml")
-        # with open(self._default_path) as f:
-        #    self._default_last_load = os.stat(self._default_path).st_mtime
-        #    self._default_data = yaml.load(f)
-
     def _load_locale_files(self):
         """
         Automatically load all of the locale files that are specified for loading by plugins.

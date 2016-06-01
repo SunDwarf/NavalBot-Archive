@@ -72,7 +72,7 @@ async def _autoremove_add(ctx: CommandContext):
     Manages autoremove adding.
     """
     if len(ctx.args) < 2:
-        await ctx.reply("censor.add.no_args")
+        await ctx.reply("censor.no_args")
         return
 
     # Validate the regex.
