@@ -29,7 +29,6 @@ import re
 import sys
 
 import aioredis
-import discord
 
 from navalbot.api import util
 from navalbot.api.botcls import NavalClient
@@ -44,14 +43,14 @@ logger = logging.getLogger("NavalBot")
 
 
 @command("reload", owner=True, argcount=1, argerr=":x: You must pick a file to reload.")
-async def reload_f(client: discord.Client, message: discord.Message, args: list):
+async def reload_f(ctx: CommandContext):
     """
     Reloads a module in the bot.
     """
-    mod = args[0]
+    mod = ctx.args[0]
     if mod not in sys.modules:
         if 'plugins.' + mod not in sys.modules:
-            await client.send_message(message.channel, ":x: Module is not loaded.")
+            await ctx.reply("core.ndc.not_loaded")
             return
         else:
             mod = 'cmds.' + mod
@@ -59,11 +58,11 @@ async def reload_f(client: discord.Client, message: discord.Message, args: list)
     new_mod = importlib.reload(sys.modules[mod])
     # Update sys.modules
     sys.modules[mod] = new_mod
-    await client.send_message(message.channel, ":heavy_check_mark: Reloaded module.")
+    await ctx.reply("core.ndc.reload_success")
 
 
 @command("reloadall", owner=True)
-async def reload_all(client: discord.Client, message: discord.Message):
+async def reload_all(ctx: CommandContext):
     """
     Reloads all modules.
     """
@@ -83,7 +82,7 @@ async def reload_all(client: discord.Client, message: discord.Message):
             importlib.reload(sys.modules[mod])
             logger.info("Reloaded module.")
 
-    await client.send_message(message.channel, ":heavy_check_mark: Reloaded all.")
+    await ctx.reply("core.ndc.reload_all")
 
 
 @command("py", owner=True)
@@ -141,17 +140,15 @@ async def globalblacklist(ctx: CommandContext):
     else:
         user_id = user.id
 
-    await ctx.client.send_message(ctx.channel, ":warning: Are you sure? Type `y` to proceed.")
+    await ctx.reply("core.ndc.globalblacklist")
     next_message = await ctx.client.wait_for_message(timeout=5, author=ctx.author, channel=ctx.channel, content="y")
     if not next_message or next_message.content != "y":
-        await ctx.client.send_message(ctx.channel, ":x: Aborting global blacklist.")
+        await ctx.reply("core.ndc.globalblacklist_abort")
         return
 
     # Okay, you asked for it.
     await ctx.db.add_to_set("global_blacklist", user_id)
-    await ctx.client.send_message(
-        ctx.channel, ":gun: Okay, user `{}` has been banned from using the bot.".format(user_id)
-    )
+    await ctx.reply("core.ndc.globalblacklist_success", u=user_id)
 
 
 @command("globalunblacklist", argcount=1, owner=True)
@@ -167,9 +164,7 @@ async def globalunblacklist(ctx: CommandContext):
     else:
         user_id = user.id
 
-    await ctx.client.send_message(
-        ctx.channel, ":angel: User `{}` has repented their sins.".format(user_id)
-    )
+    await ctx.reply("core.ndc.globalunblacklist", u=user_id)
 
 
 @command("plugins")
@@ -178,7 +173,9 @@ async def plugins(ctx: CommandContext):
     Lists the currently loaded plugins.
     """
     mods = NavalClient.instance.modules
-    s = "**Currently loaded plugins:**"
+    s = ctx.locale["core.ndc.plugins_base"]
+    plugin = ctx.locale["core.ndc.plugins"]
+
     for name, mod in mods.items():
-        s += "\nPlugin `{}`".format(name)
+        s += plugin.format(name=name)
     await ctx.client.send_message(ctx.message.channel, s)
