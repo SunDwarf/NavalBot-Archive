@@ -132,6 +132,25 @@ class Command(object):
 
         return base
 
+    async def _load_roles(self, server: discord.Server):
+        """
+        Loads the roles using the RoleLoader.
+        """
+        role_loader = NavalRole(server.id)
+
+        new_roles = set()
+        if hasattr(self, "_roles"):
+            roles = self._roles
+        else:
+            roles = set()
+        for role in roles:
+            assert isinstance(role, _RoleProxy), "Role should be a NavalRole member in {}".format(
+                self._wrapped_coro.__name__)
+            rn = await role_loader.load_role(role)
+            new_roles.add(rn)
+
+        return new_roles
+
     async def invoke(self, client: discord.Client, message: discord.Message):
         """
         Invoke the function.
@@ -162,7 +181,6 @@ class Command(object):
 
         # Get the user's roles.
         if hasattr(self, "_roles"):
-            allowed_roles = self._roles
             try:
                 assert isinstance(message.author, discord.Member)
             except AssertionError:
@@ -170,12 +188,7 @@ class Command(object):
                 return
 
             # Load roles correctly.
-            new_roles = set()
-            for role in allowed_roles:
-                assert isinstance(role, _RoleProxy), "Role should be a NavalRole member in {}".format(
-                    self._wrapped_coro.__name__)
-                rn = await role_loader.load_role(role)
-                new_roles.add(rn)
+            new_roles = await self._load_roles(message.server)
 
             if not await has_permissions_with_override(message.author, new_roles, message.server.id,
                                                        self._wrapped_coro.__name__):

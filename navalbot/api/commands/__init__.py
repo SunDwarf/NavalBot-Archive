@@ -27,7 +27,7 @@ from .cmdclass import Command
 from .ctx import CommandContext
 
 commands = {}
-
+_func_cmd_mapping = {}
 
 # Deprecated. Use @command which is much better.
 def oldcommand(*names):
@@ -59,6 +59,8 @@ def command(*names, **kwargs):
         cls = Command(func, *names, **kwargs)
         for name in names:
             commands[name] = cls
+
+        _func_cmd_mapping[func] = cls
 
         return cls
 
