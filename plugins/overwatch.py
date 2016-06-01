@@ -125,3 +125,6 @@ async def getbtag(ctx: CommandContext):
 
     if btag is None:
         await ctx.reply("ow.btag_not_set")
+        return
+
+    await ctx.client.send_message(ctx.message.channel, btag)
