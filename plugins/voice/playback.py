@@ -187,6 +187,8 @@ async def play(ctx: CommandContext):
         lock.release()
         return
 
+    del voice_locks[ctx.message.server.id]
+
     if not info:
         await ctx.reply("voice.playback.bad_info")
         return
