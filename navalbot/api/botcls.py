@@ -266,11 +266,15 @@ class NavalClient(discord.Client):
         # Run on_message_before_blacklist
         for hook in self.hooks.get("on_message_before_blacklist", []):
             try:
-                await hook(self, message)
+                result = await hook(self, message)
             except:
                 logger.error("Caught exception in hook on_message_before_blacklist -> {}".format(hook.__name__))
                 traceback.print_exc()
                 continue
+            # Don't process if the hook returns True.
+            if result:
+                logger.info("Hook `on_message_before_blacklist -> {}` forced end of processing.".format(hook.__name__))
+                return
 
         global_blacklist = await db.get_set("global_blacklist") or set()
 
