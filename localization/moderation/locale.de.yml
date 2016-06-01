@@ -44,3 +44,6 @@ moderation.muted.unmuted: ":heavy_check_mark: Bentzer `{user.display_name}` kann
 moderation.colour.success: ":heavy_check_mark: Farbe zu `{c}` geändert."
 
 moderation.deleted_messages: ":bomb: {count} Nachrichten gelöscht."
+
+moderation.blacklisted: ":heavy_check_mark: Nutzer {user} wurde zur Blacklist hinzugefügt."
+moderation.unblacklisted: ":heavy_check_mark: Nutzer {user} wurde von der Blacklist entfernt."
