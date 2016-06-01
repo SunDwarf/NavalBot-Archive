@@ -181,13 +181,22 @@ async def play(ctx: CommandContext):
         await lock.acquire()
         await ctx.reply("voice.playback.downloading")
         info = await loop.run_in_executor(None, func)
-        lock.release()
+        try:
+            lock.release()
+        except RuntimeError:
+            pass
     except Exception as e:
         await ctx.reply("voice.playback.ytdl_error", err=e)
-        lock.release()
+        try:
+            lock.release()
+        except RuntimeError:
+            pass
         return
 
-    del voice_locks[ctx.message.server.id]
+    try:
+        del voice_locks[ctx.message.server.id]
+    except IndexError:
+        pass
 
     if not info:
         await ctx.reply("voice.playback.bad_info")
