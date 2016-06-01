@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # Locale support.
+from navalbot.api import botcls
 import logging
 import os
 
@@ -35,6 +36,10 @@ LOCALE_FILE_BUILDER = "locale.{lang}.yml"
 logger = logging.getLogger("LocaleLoader")
 
 
+def get_locale_directory(lang: str) -> str:
+    return os.path.join(LOCALE_ROOT, lang)
+
+
 class LocaleLoader:
     """
     This defines a locale loader, that loads the specified locale key from the file each time.
@@ -43,47 +48,93 @@ class LocaleLoader:
     def __init__(self, locale: str = None):
         self.lang = locale
 
+        # Get the instance of the bot.
+        self.client = botcls.NavalClient.get_navalbot()
+        try:
+            assert isinstance(self.client, botcls.NavalClient)
+        except AssertionError as e:
+            raise TypeError("Attempted to load locales before NavalBot has loaded") from e
+
+        self._locale_files = {}
+
+        self._locale_data = {}
+        self._default_data = {}
+
+        self._load_locale_files()
+
         # Load the files.
-        if self.lang is None:
-            # Set the last loaded time to well in the future.
-            self.lang = ""
-            self._last_load = 2147483647
-            self._locale_data = {}
-            self.path = ""
-        else:
-            self.path = os.path.join(LOCALE_ROOT, LOCALE_FILE_BUILDER.format(lang=self.lang))
-            if not os.path.exists(self.path):
-                logger.warning("No such locale: `{}`".format(self.lang))
-                self._last_load = 2147483647
-                self._locale_data = {}
-            # Load the data from the file.
-            else:
-                self._last_load = os.stat(self.path).st_mtime
-                with open(self.path) as f:
-                    self._locale_data = yaml.load(f)
+        # if self.lang is None:
+        #    # Set the last loaded time to well in the future.
+        #    self.lang = ""
+        # self._last_load = 2147483647
+        #   self._locale_data = {}
+        #   self.path = ""
+        # else:
+        #     self.path = os.path.join(LOCALE_ROOT, LOCALE_FILE_BUILDER.format(lang=self.lang))
+        #    if not os.path.exists(self.path):
+        #         logger.warning("No such locale: `{}`".format(self.lang))
+        #         self._last_load = 2147483647
+        #         self._locale_data = {}
+        #     # Load the data from the file.
+        #     else:
+        #         self._last_load = os.stat(self.path).st_mtime
+        #         with open(self.path) as f:
+        #             self._locale_data = yaml.load(f)####
 
         # Load the default data.
-        self._default_path = os.path.join(LOCALE_ROOT, "locale.yml")
-        with open(self._default_path) as f:
-            self._default_last_load = os.stat(self._default_path).st_mtime
-            self._default_data = yaml.load(f)
+        # self._default_path = os.path.join(LOCALE_ROOT, "locale.yml")
+        # with open(self._default_path) as f:
+        #    self._default_last_load = os.stat(self._default_path).st_mtime
+        #    self._default_data = yaml.load(f)
+
+    def _load_locale_files(self):
+        """
+        Automatically load all of the locale files that are specified for loading by plugins.
+        """
+        for name, mod in self.client.modules.items():
+            logger.info("Loading locale data for plugin: {}".format(name))
+            # Use `LOCALE_DIR`/locale.<lang>.yml to load the locale data.
+            locale_dir = getattr(mod, "LOCALE_DIR", os.path.join(LOCALE_ROOT, name.split(".")[-1]))
+            locale_default_fname = os.path.join(locale_dir, "locale.yml")
+            locale_fname = os.path.join(locale_dir, "locale.{}.yml".format(self.lang))
+
+            self._locale_files[name] = []
+
+            # Load the file.
+            if os.path.exists(locale_fname):
+                # Get the stat data.
+                mtime = os.stat(locale_fname).st_mtime
+                with open(locale_fname) as f:
+                    self._locale_data = {**self._locale_data, **yaml.load(f)}
+                # Add the filename to self._locale_files.
+                self._locale_files[name].append((mtime, locale_fname, False))
+
+            # Load the default data.
+            if os.path.exists(locale_default_fname):
+                mtime = os.stat(locale_default_fname).st_mtime
+                with open(locale_default_fname) as f:
+                    self._default_data = {**self._default_data, **yaml.load(f)}
+                self._locale_files[name].append((mtime, locale_default_fname, True))
+            else:
+                logger.warning("Cannot load locale files for {}!".format(name))
 
     def _reload_locale(self):
         """
         Reloads the locale, if required.
         """
-        if os.path.exists(self.path):
-            mtime = os.stat(self.path).st_mtime
-            if mtime > self._last_load:
-                # Reload the file.
-                with open(self.path) as f:
-                    self._locale_data = yaml.load(f)
-        # Do the same for default locale.
-        mtime = os.stat(self._default_path).st_mtime
-        if mtime > self._default_last_load:
-            # Reload the file
-            with open(self._default_path) as f:
-                self._default_data = yaml.load(f)
+        for val in self._locale_files.values():
+            if not val:
+                continue
+            for mtime, path, default in val:
+                # Stat the file again.
+                new_mtime = os.stat(path).st_mtime
+                if new_mtime > mtime:
+                    logger.info("Reloading locale file {}".format(path))
+                    with open(path) as f:
+                        if default:
+                            self._default_data = {**self._default_data, **yaml.load(f)}
+                        else:
+                            self._locale_data = {**self._locale_data, **yaml.load(f)}
 
     def __getitem__(self, key) -> str:
         """

@@ -57,6 +57,13 @@ class NavalClient(discord.Client):
     instance = None
 
     @classmethod
+    def get_navalbot(cls) -> 'NavalClient':
+        """
+        Get the current instance of the bot.
+        """
+        return cls.instance
+
+    @classmethod
     def init_logging(cls):
         if sys.platform == "win32":
             logging.basicConfig(filename='nul', level=logging.INFO)
