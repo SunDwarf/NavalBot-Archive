@@ -88,6 +88,12 @@ class CommandContext:
         await self.client.send_message(self.message.channel, key)
         return key
 
+    async def send(self, message: str):
+        """
+        Send a message to the channel.
+        """
+        await self.client.send_message(self.channel, message)
+
     def get_user(self) -> typing.Union[discord.Member, None]:
         """
         Attempts to get a user from the message.

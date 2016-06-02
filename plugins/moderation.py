@@ -264,7 +264,7 @@ async def change_colour(ctx: CommandContext):
     await ctx.reply("moderation.colour.success", c=str(colour))
 
 
-@command("purge", argcount="?", role={NavalRole.ADMIN})
+@command("purge", argcount="?", roles={NavalRole.ADMIN})
 async def purge(ctx: CommandContext):
     """
     Deletes messages.

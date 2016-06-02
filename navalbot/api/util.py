@@ -208,7 +208,7 @@ async def get_file(client: tuple, url, name):
 
 def sanitize(param):
     ret = ''.join([c for c in param if c.isalnum()])
-    return param
+    return ret
 
 
 async def with_cache(data, expires=300, miss=lambda data: None):
@@ -228,3 +228,11 @@ async def with_cache(data, expires=300, miss=lambda data: None):
         await conn.set("cached:{}".format(data), result)
         await conn.expire("cached:{}".format(data), expires)
         return result
+
+
+def has_perm(perms: discord.Permissions, attr: str) -> bool:
+    if perms.administrator:
+        return True
+    if getattr(perms, attr, False):
+        return True
+    return False
