@@ -1,0 +1,3 @@
+ow.btag_not_set: ":x: Vous n'avez pas de Battletag spécifié.  Specifiez-le avec `setbtag`."
+ow.no_such_btag: ":x: Profil introuvable pour `{btag}`."
+ow.set_btag: ":heavy_check_mark: Votre Battletag est désormais `{btag}`."
