@@ -25,7 +25,8 @@ async def check_pm_mention(client: discord.Client, message: discord.Message):
         key = await db.get_config(message.server.id, "{}:pmmentions".format(mentioner.id))
         if key and key != "off":
             if key == "away":
-                if not mentioner.is_afk:
+                assert isinstance(mentioner, discord.Member)
+                if mentioner.status == discord.Status.online:
                     return
             # PM mentions are on, message them.
             constructed = "You have been mentioned:\n\n"
