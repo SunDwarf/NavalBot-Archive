@@ -23,7 +23,10 @@ async def check_pm_mention(client: discord.Client, message: discord.Message):
     for mentioner in to_msg:
         # Get from redis.
         key = await db.get_config(message.server.id, "{}:pmmentions".format(mentioner.id))
-        if key and key == "on":
+        if key and key != "off":
+            if key == "away":
+                if not mentioner.is_afk:
+                    return
             # PM mentions are on, message them.
             constructed = "You have been mentioned:\n\n"
             # Load the last 5 messages.
@@ -53,7 +56,12 @@ async def pmmentions(ctx: CommandContext):
 
     if ctx.args[0] == "off":
         await ctx.set_config("{}:pmmentions".format(ctx.author.id), "off")
-        ctx.reply("pmmentions.status", status="off")
+        await ctx.reply("pmmentions.status", status="off")
+        return
+
+    if ctx.args[0] == "away":
+        await ctx.set_config("{}:pmmentions".format(ctx.author.id), "away")
+        await ctx.reply("pmmentions.status", status="away")
         return
 
     await ctx.reply("pmmentions.unknown")
