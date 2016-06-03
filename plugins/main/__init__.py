@@ -21,6 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 # Chain import the other files.
-from . import cfg, factoids, ndc, version
+from . import cfg, factoids, ndc, version, setup
 
 VERSION = "1.0.0"
