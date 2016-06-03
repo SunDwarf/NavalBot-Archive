@@ -24,7 +24,9 @@ import discord
 from navalbot.api import db
 
 
-async def find_voice_channel(server: discord.Server):
+async def find_voice_channel(server: discord.Server, defaults=None):
+    if defaults is None:
+        defaults = ["music", "navalbot"]
     # Search for a voice channel with the name specified in the config, and then Music/NavalBot as a fallback.
     cfg_chan = await db.get_config(server.id, "voice_channel", default="")
     for channel in server.channels:
@@ -32,7 +34,7 @@ async def find_voice_channel(server: discord.Server):
         if not channel.type == discord.ChannelType.voice:
             continue
         # Check the name.
-        if channel.name.lower() in [cfg_chan.lower(), 'music', 'navalbot']:
+        if channel.name.lower() in [cfg_chan.lower(), *defaults]:
             chan = channel
             break
     else:
