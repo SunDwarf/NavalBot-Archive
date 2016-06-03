@@ -1,0 +1,49 @@
+help.ban: |
+        Verbannt einen Nutzer aus dem Server.
+
+        Der Nutzer muss entweder @erwähnt oder als ein Argument in dem Befehl geliefert werden.
+
+help.kick: |
+        Kickt einen Nutzer.
+
+        Der Nutzer muss entweder @erwähnt oder als ein Argument in dem Befehl geliefert werden.
+
+help.mute: |
+        Schaltet einen Nutzer stumm.
+
+        Der Bot muss `Manage Roles` als Berechtigung für diesen Befehl haben.
+
+
+help.unmute: |
+        Hebt die Stummschaltung für einen Nutzer auf.
+
+        Der Bot muss `Manage Roles` als Berechtigung für diesen Befehl haben.
+
+help.colour: |
+        Ändert die Farbe deines Namen zu einem hexadezimalen Wert, den du bestimmst
+
+        Der Bot muss `Manage Roles` als Berechtigung für diesen Befehl haben.
+
+help.purge: |
+        Löscht eine bestimmte Anzahl an Nachrichten.
+
+        Erwähne einen oder mehrere Benutzer, um ihre Nachrichten zu löschen.
+
+
+# Moderationsschlüssel
+moderation.low_permission: ":x: Meine Rolle (`{role}`) hat keine Berechtigung, diesen Nutzer zu ändern."
+moderation.ban.banned: ":heavy_check_mark: Benutzer `{target}` wurde aus dem Server ausgeschlossen."
+moderation.kick.kicked: ":heavy_check_mark: Benutzer `{target}` wurde gekickt."
+
+moderation.cannot_edit_server: ":x: Ich habe keine genügenden Berechtigungen, um diesen Befehl auszuführen."
+
+moderation.muted.not_muted: ":x: Dieser Nutzer ist nicht stummgeschaltet."
+moderation.muted.success: ":heavy_check_mark: Benutzer `{user.display_name}` wurde stummgeschaltet."
+moderation.muted.unmuted: ":heavy_check_mark: Bentzer `{user.display_name}` kann wieder schreiben und sprechen."
+
+moderation.colour.success: ":heavy_check_mark: Farbe zu `{c}` geändert."
+
+moderation.deleted_messages: ":bomb: {count} Nachrichten gelöscht."
+
+moderation.blacklisted: ":heavy_check_mark: Nutzer {user} wurde zur Blacklist hinzugefügt."
+moderation.unblacklisted: ":heavy_check_mark: Nutzer {user} wurde von der Blacklist entfernt."

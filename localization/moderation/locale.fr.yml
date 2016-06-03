@@ -1,0 +1,63 @@
+help.ban: |
+        Ban un utilisateur.
+
+        Vous pouver indiquer la @mention ou le pseudonyme de l'utilisateur en valeur, et le bot trouvera automatiquement l'utilisateur à bannir.
+
+help.kick: |
+        Kick un utilisateur.
+
+        Vous pouver indiquer la @mention ou le pseudonyme de l'utilisateur en valeur, et le bot trouvera automatiquement l'utilisateur à kick.
+
+help.mute: |
+        Met un utilisateur en sourdine.
+
+        Le bot doit avoir la permission de modifier les rôles pour utiliser cette commande.
+
+help.unmute: |
+        Enlève la sourdine à un utilisateur.
+
+        Le bot doit avoir la permission de modifier les rôles pour utiliser cette commande.
+        
+help.purge: |
+        Supprime un certain nombre de messages.
+        
+        Mentionnez un ou plusieurs utilisateurs pour supprimmer les messages de ces utilisateurs.
+        
+help.blacklist: |
+        Met un utilisateur en liste noire. Il ne pourra plus utiliser de commandes du bot.
+        
+        Vous devez avoir le rôle `Admin` pour effectuer cette commande.
+        
+help.unblacklist: |
+        Retire un utilisateur de la liste noire. Il pourra à nouveau utiliser des commandes du bot.
+        
+        You must have `Admin` role to do this.
+        
+help.globalblacklist: |
+        Pour les grosses bêtises. Seul le propriétaire du bot peut utiliser cette commande.
+        
+        Son usage est irréversible, à moins que vous ayez accès à la base de donnée Redis.
+        
+help.colour: |
+        Change votre couleur pour la valeur hexadécimale que vous précisez.
+        
+        Le bot doit avoir la permission de modifier les rôles pour que cette commande fonctionne.
+
+
+# Moderation keys.
+moderation.low_permission: ":x: Le rôle du bot ('{role}') ne le permet pas de faire quoi que ce soit sur cet utilisateur."
+moderation.ban.banned: ":heavy_check_mark: L'utilisateur `{target}` a été banni."
+moderation.kick.kicked: ":heavy_check_mark: L'utilisateur `{target}`a été exclu."
+
+moderation.cannot_edit_server: ":x: Le bot n'a pas les permissions requises pour effectuer cette action."
+moderation.muted.not_muted: ":x: Cet utilisateur n'est pas en sourdine."
+
+moderation.muted.success: ":heavy_check_mark: L'utilisateur `{user.display_name}` a été mis en sourdine."
+moderation.muted.unmuted: ":heavy_check_mark: L'utilisateur `{user.display_name}` n'est plus en sourdine."
+
+moderation.colour.success: ":heavy_check_mark: La couleur du rôle a été changé en celle-ci: `{c}`."
+moderation.deleted_messages: ":bomb: {count} messages supprimés."
+moderation.blacklisted: ":heavy_check_mark: L'utilisateur {user} est désormais dans la liste noire."
+moderation.unblacklisted: ":heavy_check_mark: L'utilisateur {user} n'est plus dans la liste noire."
+
+        

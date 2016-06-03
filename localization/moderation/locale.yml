@@ -1,0 +1,64 @@
+help.ban: |
+        Bans a user.
+
+        The user can either be @mentioned or their username/nickname passed in as an argument, and the bot will automatically pick the correct user.
+
+help.kick: |
+        Kicks a user.
+
+        The user can either be @mentioned or their username/nickname passed in as an argument, and the bot will automatically pick the correct user.
+
+help.mute: |
+        Mutes a user.
+
+        The bot must have `Manage Roles` permission for this command.
+
+
+help.unmute: |
+        Unmutes a user.
+
+        The bot must have `Manage Roles` permission for this command.
+
+help.colour: |
+        Sets your colour to the hexadecimal colour you specify.
+
+        The bot must have `Manage Roles` permission for this command.
+
+help.purge: |
+        Deletes a certain number of messages.
+
+        Mention user(s) to only delete messages from those users.
+
+help.blacklist: |
+        Blacklists a user from running bot commands on the server.
+
+        You must have `Admin` role to do this.
+
+help.unblacklist: |
+        Unblacklists a user from running bot commands on the server.
+
+        You must have `Admin` role to do this.
+
+help.globalblacklist: |
+        For very naughty users. Owner-only.
+
+        This command is irreversible unless you have access to the redis database.
+
+
+# Moderation keys.
+moderation.low_permission: ":x: My role (`{role}`) does not have permission to modify this user."
+moderation.ban.banned: ":heavy_check_mark: User `{target}` banned."
+moderation.kick.kicked: ":heavy_check_mark: User `{target}` kicked."
+
+moderation.cannot_edit_server: ":x: I do not have the right permission to run this action here."
+
+moderation.colour.success: ":heavy_check_mark: Changed colour to `{c}`."
+
+moderation.muted.success: ":heavy_check_mark: Muted user `{user.display_name}`."
+moderation.muted.unmuted: ":heavy_check_mark: Unmuted user `{user.display_name}`."
+moderation.muted.not_muted: ":x: User `{user.display_name}` is not muted."
+
+moderation.deleted_messages: ":bomb: {count} messages deleted."
+
+moderation.blacklisted: ":heavy_check_mark: Blacklisted user {user}."
+moderation.unblacklisted: ":heavy_check_mark: Unblacklisted user {user}."

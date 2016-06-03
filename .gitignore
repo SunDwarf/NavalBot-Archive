@@ -110,3 +110,4 @@ files/
 *.db
 praw.ini
 bot.py.zipdep.py
+/config.yml

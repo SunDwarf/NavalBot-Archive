@@ -1,0 +1,114 @@
+# Help keys.
+help.again: |
+        Adds the currently playing track to the end of the queue again.
+
+help.shuffle: |
+        Shuffles the current queue.
+
+help.get_queued_vids: |
+        Shows the current track queue.
+
+        This takes an optional second parameter: the number of which to start. The command will output the queue from that position onwards.
+
+help.skip: |
+        Skips tracks.
+
+        This takes an optional second parameter: the number of tracks to skip.
+        This will skip the current track, then <num - 1> tracks in the queue.
+        If this is not supplied, it will only skip the current track.
+
+help.voteskip: |
+        Starts a vote to skip the currently playing track.
+
+        The number of voteskips required is (number of undeafened people in voice - 1) / 2.
+
+help.move: |
+        Moves a track in the queue from position <x> to position <y>.
+
+        Both numbers must be integers.
+
+help.remove_vid: |
+        Removes a track or range of tracks.
+
+        Takes a start position and an optional end position to remove.
+        If the remove position is not specified, it will only remove one item.
+
+help.reset: |
+        Disconnects the bot from voice, and resets the voice client.
+
+help.np: |
+        Displays the currently playing track.
+
+help.play: |
+        Plays a track.
+
+        This takes either the URL to a video, or a search query.
+        This URL can be from most sites; the bot will try and download it correctly.
+
+
+# Voice keys.
+voice.not_connected: ":x: Not currently connected on this server."
+voice.cant_control: ":x: You must be in voice and not deafened to control me."
+
+voice.reset.success: ":heavy_check_mark: Reset voice."
+
+voice.no_song: ":x: No song is currently playing."
+voice.curr_playing: "Currently playing: `{title}` `{d_str}`"
+
+voice.playback.no_channel: >
+        :x: Cannot find voice channel for playing music! This defaults to `NavalBot` or `Music`,
+        however you can override this with by running `{prefix}setcfg voice_channel <your channel>`.
+
+voice.playback.pl_warning: ":warning: If this is a playlist, it may take a long time to download."
+voice.playback.bad_url: >
+        :x: This link is not in the link whitelist. To turn this off, use `{prefix}setcfg limit_urls False`.
+
+voice.playback.wait_for: >
+        :hourglass: Something else is downloading. Waiting for that to finish.
+
+voice.playback.downloading: ":hourglass: Downloading video information..."
+voice.playback.ytdl_error: ":no_entry: Something went horribly wrong. Error: {err}"
+voice.playback.bad_info: >
+        :no_entry: Something went horribly wrong. Could not get video information.
+
+voice.playback.timeout: ":x: Timed out trying to connect to server."
+voice.playback.connection_error: ":x: Error happened on connecting to voice."
+
+voice.playback.queue_num: ":heavy_check_mark: You are number {pos} in the queue."
+voice.playback.queue_next: ":heavy_check_mark: You are next in the queue."
+
+voice.playback.np: ":heavy_check_mark: Now playing: `{title}`"
+voice.playback.queue_full: ":no_entry: The queue is full."
+voice.playback.pl_queue_full: ":no_entry: There are too many songs on the queue. Limiting playlist to {limit}."
+voice.playback.pl_error: ":x: Search returned nothing, or playlist errored."
+voice.playlist.pl_added: ":heavy_check_mark: Added {num} track(s) to queue."
+
+voice.play_again: ":heavy_check_mark: Playing `{title}` again."
+
+voice.shuffled: ":heavy_check_mark: Shuffled queue."
+
+voice.queue_too_short: ":x: Queue is not as long as that. (`{num}`)"
+voice.queue_negative: ":x: Cannot use a negative number with the queue."
+
+voice.queue.omitted: "Omitted {num} queued items."
+voice.queue.curr_queued: >
+          **Currently queued: ({queue_length}/{max_queue_length})**
+          `[{hour:02d}:{minute:02d}:{second:02d}]`
+voice.queue.nothing_queued: "`Nothing is queued.`"
+
+voice.bad_state: ":x: Inconsistent internal state - resetting connection. Blame Discord, probably."
+
+voice.skip.one: ":heavy_check_mark: Skipped current song."
+voice.skip.all: ":heavy_check_mark: Skipped all songs."
+voice.skip.many: ":heavy_check_mark: Skipped {num} items."
+
+voice.voteskip.vote: ":heavy_check_mark: Voteskip acknowledged. `{left}` more votes required."
+voice.voteskip.already_voted: ":no_entry: You have already voted."
+
+voice.mv.could_not_find: ":x: Could not find track at position `{index}`."
+voice.mv.moved: ":heavy_check_mark: Moved item `{title}` to position `{index}`."
+
+voice.remove.start_lt_end: ":x: Start must be smaller than end position."
+voice.remove.deleted_one: ":heavy_check_mark: Deleted item {index} `({title})`."
+voice.remove.deleted_many: ":heavy_check_mark: Deleted items {start} to {end}."
+

@@ -1,0 +1,62 @@
+help.choice: |
+        Vous donne une réponse à ce dilemme qui vous empêche d'avancer émotionnellement.
+
+        Entourez vos options de guillemets, si elles contiennent des espaces.
+
+help.google: |
+        Fais une recherche Google et vous donne le premier résultat.
+
+help.weather: |
+        Donne la météo à l'endroit indiqué.
+
+help.commands: |
+        Montre où recevoir de l'aide à propos d'une commande.
+
+help.whois: |
+        Donne des informations sur un utilisateur.
+
+        Vous devez indiquer la personne cible en le @mentionnant.
+
+help.uptime: |
+        Donne la durée d'activité système du bot.
+
+# fun strings
+# ech
+fun.chosen: "J'ai choisi l'option `{choice}` !"
+
+fun.weather.bad_api_key: ":exclamation: Le bot ne possède pas de clé API pour effectuer cette action. Allez insulter le proprio en DM pour qu'il en installe une."
+fun.weather.rate_limit: ":exclamation: La limite de l'API a été atteinte. Veuillez patienter."
+fun.weather.result: |
+        :cloud: _Voici la météo pour {place}:_
+        **Température:** {temp} °C **Humidité:** {hum} % **Vents:** {wind} m/s
+fun.weather.no_such_place: ":x: {place} n'existe pas."
+
+fun.commands: "**Pour plus d'informations, consultez le wiki:  https://github.com/SunDwarf/NavalBot/wiki (en anglais)**"
+
+fun.whois.response: |
+        :mag_right: Whois pour {author.name}:
+        ```xl
+        Nom: {author.name}#{author.discriminator}
+        Pseudonyme: {author.nick}
+        ID: {author.id}
+        Crée le: {author.created_at}
+        Couleur: {author.colour}
+        Lien de son avatar: {author.avatar_url}
+        ```
+
+fun.uptime.time_fmt: "`{hours_total} heures, {minutes} minutes, {seconds} secondes`"
+fun.uptime.response: "Le bot est en marche depuis {time}, à partir du processus '#{pid}'"
+
+fun.stats.shard: "Morceau actuel: `{shard_id}/{shard_count}`\n"
+fun.stats.response: |
+        {shardm}En fonction sur `{servcount}` serveur(s). `{msgcount}` messages ont été traités depuis le démarrage.
+        Connecté à `{vcount}` chats vocaux, dont `{scount}` fluxs en cours de lecture.
+        `{memcount}Mo` d'utilisés.
+
+fun.urban: |
+  **Votre recherche pour le mot clé `{search}` a renvoyé le résultat suivant:
+
+  *Définition:*** {definition}
+  ***Exemple:*** {example}
+
+fun.sr.no_sr: ":x: Ce Subreddit n'existe pas ou est NSFW."

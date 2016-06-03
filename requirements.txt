@@ -18,10 +18,13 @@ requests==2.9.1
 six==1.10.0
 update-checker==0.11
 wcwidth==0.1.6
-websockets==2.7
+websockets==3.1
 ws4py==0.3.4
 youtube-dl>=2016.4.19
 google-api-python-client>=1.5.0
 setproctitle
-PyYAML
+PyYAML>=3.11
 aioredis>=0.2.6
+raven>=5.4.0
+raven-aiohttp
+lxml

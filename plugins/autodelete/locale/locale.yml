@@ -1,0 +1,10 @@
+
+# Censorship keys.
+censor.no_args: ":x: Bad arguments provided: You must provide a regular expression."
+censor.add.bad_regex: ":x: Bad regex provided. Error: `{err}`"
+censor.add.added: ":heavy_check_mark: Added regex `{re}`."
+
+censor.del.removed: ":heavy_check_mark: Removed regex `{re}`."
+censor.del.no_such_regex: ":x: Regex does not exist in auto-delete list."
+
+censor.list.none: ":x: Nothing to list."
