@@ -66,15 +66,7 @@ async def reload_all(ctx: CommandContext):
     """
     Reloads all modules.
     """
-    # Reload all navalbot stuff FIRST
-    for mod in sys.modules:
-        if mod.startswith("navalbot."):
-            # Reload it.
-            logger.info("Reloading module: {}".format(mod))
-            importlib.reload(sys.modules[mod])
-            logger.info("Reloaded module.")
-
-    # Then re-load plugins.
+    # Re-load plugins.
     for mod in sys.modules:
         if mod.startswith("plugins."):
             # Reload it.
