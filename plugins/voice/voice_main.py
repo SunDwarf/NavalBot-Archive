@@ -21,3 +21,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 # Chain file to import the other commands.
+from . import playback
+from . import voice_queue

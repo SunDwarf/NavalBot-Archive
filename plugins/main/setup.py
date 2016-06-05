@@ -7,6 +7,7 @@ import discord
 
 from navalbot.api import util
 from navalbot.api.commands import command, CommandContext
+from navalbot.voice.voice_util import find_voice_channel
 
 logger = logging.getLogger("NavalBot")
 
