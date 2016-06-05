@@ -20,9 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import logging
+
 import aioredis
 import discord
-import logging
 
 from navalbot.api.commands import command, CommandContext
 from navalbot.api.commands.cmdclass import NavalRole

@@ -19,16 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-import inspect
 import shlex
 
 import discord
 
-from navalbot import exceptions
 from navalbot.api import util, db
 from navalbot.api.commands.ctx import CommandContext
-from navalbot.api.util import has_permissions_with_override
 from navalbot.api.locale import get_locale
+from navalbot.api.util import has_permissions_with_override
 
 
 class _RoleProxy:
@@ -174,7 +172,7 @@ class Command(object):
             u_id = int(message.author.id)
             # Check if it is in the ids specified.
             if not u_id == owner:
-                #await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
+                # await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
                 await client.send_message(message.channel, loc["perms.not_owner"])
                 return
         # Role check.
@@ -192,7 +190,7 @@ class Command(object):
 
             if not await has_permissions_with_override(message.author, new_roles, message.server.id,
                                                        self._wrapped_coro.__name__):
-                #await client.send_message(
+                # await client.send_message(
                 #    message.channel,
                 #    ":no_entry: You do not have any of the required roles: `{}`!"
                 #        .format({role.val for role in allowed_roles})

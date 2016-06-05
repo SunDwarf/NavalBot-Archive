@@ -27,11 +27,11 @@ from concurrent.futures import TimeoutError
 import discord
 import youtube_dl
 
-from navalbot.api.commands import command
-from navalbot.api.commands.ctx import CommandContext
 from navalbot.api import db
 from navalbot.api import util
+from navalbot.api.commands import command
 from navalbot.api.commands.cmdclass import NavalRole
+from navalbot.api.commands.ctx import CommandContext
 from .stores import voice_locks
 
 # Get loop

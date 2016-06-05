@@ -1,13 +1,13 @@
 """
 Censorship couldn't be easier with this plugin.
 """
+import asyncio
+import functools
 import logging
 import re
 import sre_constants
 
-import asyncio
 import discord
-import functools
 
 from navalbot.api import db
 from navalbot.api.commands import command, CommandContext

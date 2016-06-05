@@ -1,14 +1,12 @@
 """
 This allows setting up of the bot.
 """
+import logging
+
 import discord
 
 from navalbot.api import util
 from navalbot.api.commands import command, CommandContext
-
-import logging
-
-from navalbot.voice.voice_util import find_voice_channel
 
 logger = logging.getLogger("NavalBot")
 

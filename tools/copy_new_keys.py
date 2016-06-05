@@ -1,7 +1,9 @@
 """
 Tool to show what keys are missing in a specified locale file.
 """
-import sys, os, asyncio
+import asyncio
+import os
+import sys
 
 import yaml
 

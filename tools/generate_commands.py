@@ -1,7 +1,8 @@
 """
 Generates the command data for the wiki.
 """
-import asyncio, time
+import asyncio
+import time
 
 import discord
 
@@ -45,6 +46,7 @@ def fix_up_help_text(text: str):
         newtext_l.append(newline)
 
     return "\n".join(newtext_l)
+
 
 for f, cmd in commands._func_cmd_mapping.items():
     print("Generating data for command {f}...".format(f=f.__name__))

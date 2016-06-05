@@ -27,7 +27,6 @@ import re
 import shlex
 
 from navalbot.api.commands import CommandContext, commands
-
 # Factoid matcher compiled
 from navalbot.api.util import sanitize, get_file
 
@@ -76,6 +75,7 @@ async def set_factoid(ctx: CommandContext, match):
 
     await ctx.set_config("fac:{}".format(name), fac)
     await ctx.reply("core.factoids.set", name=name, content=fac)
+
 
 async def get_factoid(ctx: CommandContext, data: str):
     """

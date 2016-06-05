@@ -20,14 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-import asyncio
-import discord
-
-from navalbot.api.commands import oldcommand, command
+from navalbot.api.commands import command
 from navalbot.api.commands.cmdclass import NavalRole
 from navalbot.api.commands.ctx import CommandContext
 from navalbot.voice.voice_util import author_is_valid, find_voice_channel
-from .stores import voice_params
 
 
 @command("again")

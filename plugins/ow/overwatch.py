@@ -3,8 +3,9 @@ Plugin for overwatch stuff.
 """
 import logging
 
-from navalbot.api.commands import command, CommandContext
 import aiohttp
+
+from navalbot.api.commands import command, CommandContext
 
 OWAPI_BASE_URL = "https://owapi.net"
 

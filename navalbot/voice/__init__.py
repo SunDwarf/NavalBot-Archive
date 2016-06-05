@@ -1,6 +1,7 @@
 # Check for opus
-import discord
 import logging
+
+import discord
 
 if not discord.opus.is_loaded():
     logging.getLogger("NavalBot").error("Opus is not installed, cannot load voice module.")
