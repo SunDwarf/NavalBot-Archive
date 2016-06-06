@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 import asyncio
-
 import os
 import sys
 from ctypes.util import find_library

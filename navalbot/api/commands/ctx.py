@@ -27,8 +27,8 @@ import typing
 import aioredis
 import discord
 
-from navalbot.api.locale import LocaleLoader
 from navalbot.api import db
+from navalbot.api.locale import LocaleLoader
 from navalbot.api.util import get_pool
 
 

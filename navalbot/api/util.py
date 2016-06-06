@@ -25,10 +25,8 @@ import asyncio
 import datetime
 import logging
 import os
-import shlex
 import shutil
 import time
-import typing
 from concurrent import futures
 from math import floor
 
@@ -59,6 +57,7 @@ with open("config.yml", "r") as f:
     global_config = yaml.load(f)
 
 logger = logging.getLogger("NavalBot")
+
 
 async def with_threading(func):
     """
@@ -138,6 +137,7 @@ async def has_permissions_with_override(author: discord.Member, roles: set,
 
     return has_permissions(author, allowed)
 
+
 async def _get_overrides(serv_id: int, cmd_name: str) -> set:
     async with (await get_pool()).get() as conn:
         assert isinstance(conn, aioredis.Redis)
@@ -181,7 +181,7 @@ def prov_dec_func(func1, func2):
     return func2
 
 
-def get_global_config(key, default=0, type_: type=None):
+def get_global_config(key, default=0, type_: type = None):
     if type_ is not None:
         return type_(global_config.get(key, default))
     else:

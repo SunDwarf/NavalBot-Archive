@@ -22,29 +22,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # Subclass of discord.Client.
+import asyncio
 import importlib
 import json
-import os
 import logging
-import traceback
+import os
 import shutil
 import sys
-import time
-
-import asyncio
+import traceback
 
 import aioredis
-import yaml
 import discord
+import yaml
 from raven import Client
 from raven_aiohttp import AioHttpTransport
 
 from navalbot import builtins
 from navalbot.api import db
-from navalbot.api.commands import commands, Command
 from navalbot.api import util
+from navalbot.api.commands import commands, Command
 from navalbot.api.util import get_pool
-
 from navalbot.voice import voiceclient
 
 logger = logging.getLogger("NavalBot")

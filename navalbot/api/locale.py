@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # Locale support.
-from navalbot.api import botcls
 import logging
 import os
 
 import yaml
+
+from navalbot.api import botcls
 
 # Dict of locale loaders.
 locale_loaders = {}

@@ -45,7 +45,7 @@ async def lock(ctx: CommandContext):
         return
     # Lock it.
     await db.set_config(ctx.message.server.id, "fac:{}:locked".format(to_lock), str(ctx.message.author.id))
-    await ctx.reply("core.factoids.locked", fac=to_lock, u=ctx.message.author.id    )
+    await ctx.reply("core.factoids.locked", fac=to_lock, u=ctx.message.author.id)
 
 
 @command("del", "delfactoid", argcount=1, errormsg=":x: You must provide a factoid to delete.")

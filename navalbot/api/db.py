@@ -24,7 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 from navalbot.api import util
 
-async def get_config(server_id: str, key: str, default=None, type_: type=str) -> str:
+
+async def get_config(server_id: str, key: str, default=None, type_: type = str) -> str:
     """
     Gets a config from the redis DB.
     """
@@ -40,6 +41,7 @@ async def get_config(server_id: str, key: str, default=None, type_: type=str) ->
                 return type_(data.decode())
             except (ValueError, AttributeError):
                 return default
+
 
 async def set_config(server_id: str, key: str, value: str):
     """
@@ -70,6 +72,7 @@ async def get_key(key: str) -> str:
             return (await conn.get(key)).decode()
         except AttributeError:
             return None
+
 
 async def set_key(key: str, value):
     pool = await util.get_pool()

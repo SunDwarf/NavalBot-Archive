@@ -29,6 +29,7 @@ from .ctx import CommandContext
 commands = {}
 _func_cmd_mapping = {}
 
+
 # Deprecated. Use @command which is much better.
 def oldcommand(*names):
     """
