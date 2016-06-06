@@ -1,3 +1,12 @@
+help.autoremove: |
+        Adds automatical removal rules for messages.
+
+        Use `autoremove add <pattern>` to add a pattern.
+        Use `autoremove del <pattern>` to remove a pattern.
+        Use `autoremove list` to list patterns.
+
+        Patterns are regular expression based.
+
 
 # Censorship keys.
 censor.no_args: ":x: Bad arguments provided: You must provide a regular expression."

@@ -2,6 +2,9 @@
 help.None: |
         This command does not have help in this language.
 
+help.help: |
+        Show help for a command.
+
 help.set_config: |
         Sets a server-specific configuration value.
 

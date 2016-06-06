@@ -19,7 +19,7 @@ help.unmute: |
 
         The bot must have `Manage Roles` permission for this command.
 
-help.colour: |
+help.change_colour: |
         Sets your colour to the hexadecimal colour you specify.
 
         The bot must have `Manage Roles` permission for this command.

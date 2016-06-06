@@ -20,6 +20,15 @@ help.whois: |
 help.uptime: |
         Display the uptime of the bot.
 
+help.aesthetic: |
+        Ｆｕｌｌｗｉｄｔｈ ｓｏｍｅ ｔｅｘｔ．
+
+help.urban: |
+        Looks up your term on Urban Dictionary.
+
+help.subreddit: |
+        Returns a random link from the subreddit you specify.
+
 # fun strings
 # ech
 fun.chosen: "My choice was: `{choice}`"
