@@ -176,7 +176,7 @@ class NavalClient(discord.Client):
 
         This is only used to dispatch to hooks.
         """
-        for hook in self.hooks.get("on_recv", []):
+        for hook in self.hooks.get("on_recv", {}).values()  :
             self.loop.create_task(hook(raw_data))
 
     async def on_error(self, event_method, *args, **kwargs):
@@ -251,7 +251,7 @@ class NavalClient(discord.Client):
         await self.load_plugins()
 
         # Run on_ready hooks
-        for hook in self.hooks.get("on_ready", []):
+        for hook in self.hooks.get("on_ready", {}).values():
             try:
                 await hook(self)
             except:
@@ -271,7 +271,7 @@ class NavalClient(discord.Client):
             return
 
         # Run on_message_before_blacklist
-        for hook in self.hooks.get("on_message_before_blacklist", []):
+        for hook in self.hooks.get("on_message_before_blacklist", {}).values():
             try:
                 result = await hook(self, message)
             except:
@@ -324,17 +324,14 @@ class NavalClient(discord.Client):
             logger.info("Ignoring (presumably) image-only message.")
             return
 
-        # Run on_message hooks
-        # for hook in cmds.message_hooks.values():
-        #    logger.info("Running hook {}".format(hook.__name__))
-        #    try:
-        #        await hook(client, message)
-        #    except StopProcessing:
-        #        return
-
         # Run on_message hooks.
-        for hook in self.hooks.get("on_message", []):
-            self.loop.create_task(hook(self, message))
+        for hook in self.hooks.get("on_message", {}).values():
+            try:
+                await hook(self, message)
+            except Exception:
+                logger.error("Caught exception in hook on_message -> {}".format(hook.__name__))
+                traceback.print_exc()
+                continue
 
         if message.content.startswith(prefix):
             cmd_content = message.content[len(prefix):]

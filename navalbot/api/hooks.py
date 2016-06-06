@@ -38,36 +38,16 @@ def on_message(func: typing.Callable[[NavalClient, discord.Message], None]) -> t
     """
     Registers a hook to be ran every message.
     """
-    try:
-        instance = NavalClient.instance
-        assert isinstance(instance, NavalClient)
-    except (AssertionError, AttributeError):
-        logger.critical("Attempted to register on_message for function `{}` before bot is created."
-                        .format(func.__name__))
-        return
 
-    if 'on_message' not in instance.hooks:
-        instance.hooks["on_message"] = []
-
-    instance.hooks["on_message"].append(func)
+    return on_event("on_message")(func)
 
 
 def on_generic_event(func: typing.Callable[[NavalClient, dict], None]) -> types.FunctionType:
     """
     Registers a hook to be ran on every event.
     """
-    try:
-        instance = NavalClient.instance
-        assert isinstance(instance, NavalClient)
-    except (AssertionError, AttributeError):
-        logger.critical("Attempted to register on_message for function `{}` before bot is created."
-                        .format(func.__name__))
-        return
 
-    if 'on_recv' not in instance.hooks:
-        instance.hooks['on_recv'] = []
-
-    instance.hooks['on_recv'].append(func)
+    return on_event("on_recv")(func)
 
 
 def on_event(name: str):
@@ -84,9 +64,11 @@ def on_event(name: str):
             return
 
         if name not in instance.hooks:
-            instance.hooks[name] = []
+            instance.hooks[name] = {}
 
-        instance.hooks[name].append(func)
+        # Use func.__name__ as the key.
+        # This prevents multiple messages on a reload.
+        instance.hooks[name][func.__name__] = func
 
         return func
 
