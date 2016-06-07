@@ -115,6 +115,7 @@ async def whois(ctx: CommandContext):
 
     if not user:
         await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+        return
 
     await ctx.reply("fun.whois.response", author=user)
 
