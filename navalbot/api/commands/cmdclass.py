@@ -102,6 +102,11 @@ class Command(object):
         else:
             self._only_owner = False
 
+        if kwargs.get("force_split"):
+            self._force_normal_split = True
+        else:
+            self._force_normal_split = False
+
     async def help(self, server: discord.Server) -> str:
         """
         Get the help for a specific function.
@@ -206,9 +211,12 @@ class Command(object):
                 ctt = message.content[len(prefix):]
 
                 # Split out the args into a list.
-                try:
-                    args = shlex.split(ctt)[1:]
-                except ValueError:
+                if not self._force_normal_split:
+                    try:
+                        args = shlex.split(ctt)[1:]
+                    except ValueError:
+                        args = ctt.split(" ")[1:]
+                else:
                     args = ctt.split(" ")[1:]
                 if self._args_type == 0 and len(args) < 1:
                     await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
