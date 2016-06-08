@@ -247,7 +247,7 @@ class NavalVoiceClient(discord.VoiceClient):
             else:
                 title = i[1].get("title")
                 # get duration
-                dm, ds = divmod(i[1].get("duration"), 60)
+                dm, ds = divmod(i[1].get("duration", 0), 60)
                 df = "`[{:02d}:{:02d}]`".format(trunc(dm), trunc(ds))
             song_str += "{}. `{}` `{}`\n".format(item + 1, title, df)
 
