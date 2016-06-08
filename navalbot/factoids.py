@@ -22,13 +22,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import hashlib
 import os
+import random
 import re
 import shlex
+import string
 
 from navalbot.api.commands import CommandContext, commands
 # Factoid matcher compiled
-from navalbot.api.util import sanitize, get_file
+from navalbot.api.util import sanitize, get_file, get_image
 
 factoid_matcher = re.compile(r'(\S*?) is (.*)')
 
@@ -68,10 +71,9 @@ async def set_factoid(ctx: CommandContext, match):
 
     # Download the factoid, if applicable.
     if fac.startswith("http") and 'youtube' not in fac:
-        # download as a file
-        file = sanitize(fac.split('/')[-1])
-        await get_file((ctx.client, ctx.message), url=fac, name=file)
-        fac = "file:{}".format(file)
+        # download the file, with a filename.
+        fname = await get_image(url=fac)
+        fac = "file:{}".format(fname)
 
     await ctx.set_config("fac:{}".format(name), fac)
     await ctx.reply("core.factoids.set", name=name, content=fac)

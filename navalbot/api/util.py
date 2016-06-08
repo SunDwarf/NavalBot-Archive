@@ -23,10 +23,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import asyncio
 import datetime
+import hashlib
 import logging
+import mimetypes
 import os
 import shutil
 import time
+import typing
 from concurrent import futures
 from math import floor
 
@@ -205,9 +208,48 @@ async def get_file(client: tuple, url, name):
                     f.write(data)
                 print("--> Saved file to {}".format(name))
 
+async def get_image(url: str) -> typing.Union[str, None]:
+    """
+    Get an image if the mime type says it's an image, otherwise return None.
+
+    Then, return the file name with the appropriate extension.
+    """
+    with aiohttp.ClientSession() as sess:
+        async with sess.head(url) as hh:
+            assert isinstance(hh, aiohttp.ClientResponse)
+            if "image" not in hh.headers.get("Content-Type", ""):
+                # Not an image, return.
+                return
+
+        # Get the image.
+        async with sess.get(url) as got:
+            assert isinstance(got, aiohttp.ClientResponse)
+            # Don't download big files.
+            if int(got.headers["content-length"]) > 1024 * 1024 * 8:
+                return None
+            # Generate the file name using the hash of the URL.
+            name = hashlib.sha224(url.encode()).hexdigest()
+            # Guess the extension.
+            ext = mimetypes.guess_extension(got.headers.get("Content-Type", ""))
+            if ext == ".jpe":
+                # .jpe is bad
+                ext = ".jpg"
+            if not ext:
+                # AAAA what
+                # Skip the file.
+                return
+            # Create the final file name.
+            final = name + ext
+            # Download the file.
+            with open(os.path.join(os.getcwd(), 'files', final), 'wb') as f:
+                f.write(await got.read())
+            # Return the name.
+            return final
+
 
 def sanitize(param):
-    ret = ''.join([c for c in param if c.isalnum() or c == "."])
+    # Strip out `/` from the path to prevent transversal through directories.
+    ret = ''.join([c for c in param if c.isalnum() or c in [".", "_"]])
     return ret
 
 
