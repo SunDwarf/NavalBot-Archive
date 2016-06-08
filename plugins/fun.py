@@ -27,6 +27,7 @@ import functools
 import os
 import random
 
+import discord
 import praw
 import psutil
 import pyowm
@@ -117,7 +118,17 @@ async def whois(ctx: CommandContext):
         await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
         return
 
-    await ctx.reply("fun.whois.response", author=user)
+    # Get the roles.
+    s_roles = sorted(user.roles, key=lambda role: role.position)
+    # Remove the @everyone mention
+    n_roles = []
+    for r in s_roles:
+        assert isinstance(r, discord.Role)
+        if not r.is_everyone:
+            n_roles.append(r)
+    roles = ', '.join(r.name for r in n_roles)
+
+    await ctx.reply("fun.whois.response", author=user, roles=roles)
 
 
 @command("uptime")

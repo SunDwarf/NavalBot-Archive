@@ -50,6 +50,7 @@ fun.whois.response: |
         ID: {author.id}
         Created at: {author.created_at}
         Colour: {author.colour}
+        Roles: {roles}
         Avatar URL: {author.avatar_url}
         ```
 
