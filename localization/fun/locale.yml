@@ -84,3 +84,17 @@ fun.reminder.reminding: ":heavy_check_mark: Reminder set."
 
 fun.tz.unknown: ":x: No such time zone: `{timezone}`"
 fun.tz.result: "It is currently `{t}` in the specified timezone."
+
+fun.servinfo: |
+      ```xl
+      Name: {server.name}
+      Server ID: {server.id}
+      Region: {server.region}
+      Large server: {server.large}
+
+      Channels: {channels}
+      Members: {server.member_count}
+      Created at: {created}
+
+      Owner: {server.owner.display_name}
+      ```

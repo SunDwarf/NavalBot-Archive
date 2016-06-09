@@ -261,3 +261,14 @@ async def timezone(ctx: CommandContext):
     curr = datetime.datetime.now(tz=tz)
     ts = curr.strftime("%Y-%m-%d %H:%M:%S %z")
     await ctx.reply("fun.tz.result", t=ts)
+
+
+@command("servinfo")
+async def get_server_info(ctx: CommandContext):
+    """
+    Gets information about the server.
+    """
+    created_time = ctx.server.created_at.strftime("%Y-%m-%d %H:%M:%S %z")
+    await ctx.reply("fun.servinfo",
+                    server=ctx.server, channels=len(ctx.server.channels),
+                    created=created_time)
