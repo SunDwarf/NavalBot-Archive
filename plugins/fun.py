@@ -215,3 +215,27 @@ async def aesthetic(ctx: CommandContext):
         # Add 65248 to the ord() value to get the fullwidth counterpart.
         final_c += chr(ord(char) + 65248)
     await ctx.client.send_message(ctx.message.channel, final_c)
+
+
+@command("remind", "remindme", argcount="?")
+async def remindme(ctx: CommandContext):
+    """
+    Remind you to do stuff
+    """
+
+    async def _remind_task(time: int, s: str):
+        await asyncio.sleep(time)
+        await ctx.reply("fun.reminder", mention=ctx.author.mention, message=s)
+
+    if len(ctx.args) < 2:
+        await ctx.reply("fun.reminder.no_args")
+        return
+
+    try:
+        time = int(ctx.args[0])
+    except ValueError:
+        await ctx.reply("generic.not_int")
+        return
+
+    loop.create_task(_remind_task(time, ' '.join(ctx.args[1:])))
+    await ctx.reply("fun.reminder.reminding")

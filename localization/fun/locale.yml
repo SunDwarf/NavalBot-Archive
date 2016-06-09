@@ -29,6 +29,9 @@ help.urban: |
 help.subreddit: |
         Returns a random link from the subreddit you specify.
 
+help.remindme: |
+        Reminds you in <x> seconds about <y>.
+
 # fun strings
 # ech
 fun.chosen: "My choice was: `{choice}`"
@@ -62,6 +65,7 @@ fun.stats.response: |
         {shardm}Currently running on `{servcount}` server(s). Processed `{msgcount}` messages since startup.
         Connected to `{vcount}` voice channels, with `{scount}` streams currently playing.
         Using `{memcount}MB` of memory.
+        `{tasks}` pending.
 
 fun.urban: |
   **Your search for `{search}` returned the following:
@@ -70,3 +74,7 @@ fun.urban: |
   ***Example:*** {example}
 
 fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
+
+fun.reminder: "{mention} Reminder for: `{message}`"
+fun.reminder.no_args: ":x: You must provide a time and a message,"
+fun.reminder.reminding: ":heavy_check_mark: Reminder set."
