@@ -32,6 +32,7 @@ import praw
 import psutil
 import pyowm
 import urbandict
+import pytz
 from google import search
 
 from navalbot.api import db, util
@@ -239,3 +240,24 @@ async def remindme(ctx: CommandContext):
 
     loop.create_task(_remind_task(time, ' '.join(ctx.args[1:])))
     await ctx.reply("fun.reminder.reminding")
+
+
+@command("tz", argcount="+")
+async def timezone(ctx: CommandContext):
+    """
+    Checks the current time in the time zone specified.
+    """
+    try:
+        timezone = ctx.args[0]
+    except IndexError:
+        timezone = "UTC"
+
+    try:
+        tz = pytz.timezone(timezone)
+    except pytz.UnknownTimeZoneError:
+        await ctx.reply("fun.tz.unknown", timezone=timezone)
+        return
+
+    curr = datetime.datetime.now(tz=tz)
+    ts = curr.strftime("%Y-%m-%d %H:%M:%S %z")
+    await ctx.reply("fun.tz.result", t=ts)

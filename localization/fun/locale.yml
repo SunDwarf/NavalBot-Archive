@@ -32,6 +32,9 @@ help.subreddit: |
 help.remindme: |
         Reminds you in <x> seconds about <y>.
 
+help.tz: |
+        Shows the current time in the specified time zone.
+
 # fun strings
 # ech
 fun.chosen: "My choice was: `{choice}`"
@@ -78,3 +81,6 @@ fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
 fun.reminder: "{mention} Reminder for: `{message}`"
 fun.reminder.no_args: ":x: You must provide a time and a message,"
 fun.reminder.reminding: ":heavy_check_mark: Reminder set."
+
+fun.tz.unknown: ":x: No such time zone: `{timezone}`"
+fun.tz.result: "It is currently `{t}` in the specified timezone."
