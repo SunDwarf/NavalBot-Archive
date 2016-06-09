@@ -155,6 +155,7 @@ async def stats(ctx: CommandContext):
     # Memory stats
     used_memory = psutil.Process().memory_info().rss
     used_memory = round(used_memory / 1024 / 1024, 2)
+    tasks = len(asyncio.Task.all_tasks())
     if hasattr(ctx.client, "shard_id") and ctx.client.shard_id is not None:
         shardm = ctx.locale["fun.stats.shard"].format(shard_id=ctx.client.shard_id + 1,
                                                       shard_count=ctx.client.shard_count) + "\n"
@@ -162,7 +163,7 @@ async def stats(ctx: CommandContext):
         shardm = ""
     await ctx.reply("fun.stats.response",
                     shardm=shardm, servcount=server_count, msgcount=msgcount, vcount=voice_clients,
-                    scount=streams, memcount=used_memory)
+                    scount=streams, memcount=used_memory, tasks=tasks)
 
 
 def _get_urban(get):
