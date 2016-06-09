@@ -297,9 +297,6 @@ class NavalClient(discord.Client):
         # Check for a valid server.
         if message.server is not None:
             prefix = await db.get_config(message.server.id, "command_prefix", "?")
-            autodelete = True if await db.get_config(message.server.id, "autodelete") == "True" else False
-            if autodelete and message.content.startswith(prefix):
-                await self.delete_message(message)
             logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
         else:
             # No DMs
@@ -342,6 +339,10 @@ class NavalClient(discord.Client):
             try:
                 if isinstance(coro, Command):
                     await coro.invoke(self, message)
+                    # Delete automatically, only if invocation was successful.
+                    autodelete = True if await db.get_config(message.server.id, "autodelete") == "True" else False
+                    if autodelete and message.content.startswith(prefix):
+                        await self.delete_message(message)
                 else:
                     await coro(self, message)
             except Exception as e:
