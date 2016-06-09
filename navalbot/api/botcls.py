@@ -316,6 +316,7 @@ class NavalClient(discord.Client):
             # Ignore the message.
             logger.info("Ignoring message from blacklisted member {message.author.display_name}"
                         .format(message=message))
+            return
 
         if len(message.content) == 0:
             logger.info("Ignoring (presumably) image-only message.")
