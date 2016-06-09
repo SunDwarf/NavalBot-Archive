@@ -44,6 +44,8 @@ help.globalblacklist: |
 
         This command is irreversible unless you have access to the redis database.
 
+help.clean: |
+        Cleans all messages from the bot in the last 100 messages.
 
 # Moderation keys.
 moderation.low_permission: ":x: My role (`{role}`) does not have permission to modify this user."

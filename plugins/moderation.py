@@ -302,6 +302,18 @@ async def purge(ctx: CommandContext):
         return
 
 
+@command("clean")
+async def clean(ctx: CommandContext):
+    """
+    Cleans bot messages.
+
+    Removes all messages from the bot in the last 100 messages.
+    """
+    check = lambda msg: msg.author == ctx.me
+    msgs = await ctx.client.purge_from(ctx.channel, limit=100, check=check)
+    await ctx.reply("moderation.deleted_messages", count=len(msgs))
+
+
 @command("blacklist", argcount=1, role={NavalRole.ADMIN})
 async def blacklist(ctx: CommandContext):
     """
