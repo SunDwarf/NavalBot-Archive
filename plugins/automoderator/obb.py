@@ -24,7 +24,7 @@ class Action(object):
 
         self._ctx = ctx
 
-        self.items = {"users": [], "channels": [], "permissions": [], "attrs": {}}
+        self.items = {"users": [], "channels": [], "permissions": [], "roles": [], "attrs": {}}
 
         # Parse it out.
         self._parse_action()
@@ -85,55 +85,83 @@ class Action(object):
                         if not chan:
                             raise NoSuchItem(item[1:])
                         self.items["channels"].append(chan)
+                # If it starts with a `@`, it's a role
+                if item.startswith("@"):
+                    r = discord.utils.get(self._ctx.server.roles, name=item[1:])
+                    if not r:
+                        raise NoSuchItem(item[1:])
+                    self.items["roles"].append(r)
             # Dict items, for stuff like create-role.
             elif isinstance(item, dict):
                 self.items["attrs"].update(item)
+
+    async def action_mute(self):
+        """
+        Runs a mute action.
+        """
+        users = self.items["users"]
+        channels = self.items["channels"]
+        # Mute the specified users on the specified channels.
+        perms = discord.Permissions.text()
+        # Give them some perms, like read.
+        perms.read_messages = True
+        perms.read_message_history = True
+        for user in users:
+            for chan in channels:
+                assert isinstance(user, discord.User)
+                assert isinstance(chan, discord.Channel)
+                await self._ctx.client.edit_channel_permissions(chan, user, deny=perms)
+                await self._ctx.reply("automod.actions.mute", chan=chan.name, user=user.display_name)
+
+    async def action_clean_perms(self):
+        # Clear special permissions on each channel.
+        items = self.items["users"] + self.items["roles"]
+        channels = self.items["channels"]
+        for item in items:
+            for chan in channels:
+                assert isinstance(item, (discord.User, discord.Role))
+                assert isinstance(chan, discord.Channel)
+                await self._ctx.client.delete_channel_permissions(chan, item)
+                await self._ctx.reply("automod.actions.clean_perms", chan=chan, user=item.name)
+
+    async def action_create_role(self):
+        """
+        Create role action.
+        """
+        attrs = self.items["attrs"]
+        # Create a new role.
+        # Load the attrs from self.items["attrs"]
+        name = attrs.get("name", None)
+        if not name:
+            raise NoSuchItem("Name is not specified in items")
+        colour = attrs.get("colour", 0)
+        try:
+            if isinstance(colour, str):
+                colour = int(colour, 16)
+            colour = discord.Colour(colour)
+        except ValueError:
+            await self._ctx.reply("generic.not_int", val=colour)
+            return
+        # Create the role.
+        role = await self._ctx.client.create_role(self._ctx.server, name=name, colour=colour,
+                                                  hoist=attrs.get("hoist", False),
+                                                  permissions=self.items["permissions"])
+        await self._ctx.reply("automod.actions.role_create", serv=self._ctx.server, name=name)
+        # Move it if you want.
+        try:
+            pos = int(attrs.get("position", 0))
+        except ValueError:
+            await self._ctx.reply("generic.not_int", val=attrs.get("position"))
+            return
+        if pos:
+            await self._ctx.client.move_role(self._ctx.server, role=role, position=pos)
+            await self._ctx.reply("automod.actions.move_role", role=name, pos=pos)
 
     async def run(self):
         """
         Runs the Automod action.
         """
-        users = self.items["users"]
-        channels = self.items["channels"]
-        attrs = self.items["attrs"]
-        if self.action == "mute":
-            # Mute the specified users on the specified channels.
-            perms = discord.Permissions.text()
-            # Give them some perms, like read.
-            perms.read_messages = True
-            perms.read_message_history = True
-            for user in users:
-                for chan in channels:
-                    assert isinstance(user, discord.User)
-                    assert isinstance(chan, discord.Channel)
-                    await self._ctx.client.edit_channel_permissions(chan, user, deny=perms)
-                    await self._ctx.reply("automod.actions.mute", chan=chan.name, user=user.display_name)
-        elif self.action == "clean-perms":
-            # Clear special permissions on each channel.
-            for user in users:
-                for chan in channels:
-                    assert isinstance(user, discord.User)
-                    assert isinstance(chan, discord.Channel)
-                    await self._ctx.client.delete_channel_permissions(chan, user)
-                    await self._ctx.reply("automod.actions.clean_perms", chan=chan, user=user.display_name)
-        elif self.action == "create-role":
-            # Create a new role.
-            # Load the attrs from self.items["attrs"]
-            name = attrs.get("name", None)
-            if not name:
-                raise NoSuchItem("Name is not specified in items")
-            colour = attrs.get("colour", 0)
-            try:
-                if isinstance(colour, str):
-                    colour = int(colour, 16)
-                colour = discord.Colour(colour)
-            except ValueError:
-                await self._ctx.reply("generic.not_int", val=colour)
-                return
-            # Create the permission.
-            await self._ctx.client.create_role(self._ctx.server, name=name, colour=colour,
-                                               hoist=attrs.get("hoist", False), permissions=self.items["permissions"])
-            await self._ctx.reply("automod.actions.role_create", serv=self._ctx.server, name=name)
-        # The action does not exist.
-        else:
+        try:
+            await getattr(self, "action_{}".format(self.action.replace("-", "_")))()
+        except AttributeError:
             await self._ctx.reply("automod.actions.none", action=self.action)
