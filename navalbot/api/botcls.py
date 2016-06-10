@@ -150,10 +150,15 @@ class NavalClient(discord.Client):
         self.modules = {}
         self.hooks = {}
 
-        if not os.path.exists("config.yml"):
-            shutil.copyfile("config.example.yml", "config.yml")
+        try:
+            config_file = sys.argv[1]
+        except IndexError:
+            config_file = "config.yml"
 
-        with open("config.yml", "r") as f:
+        if not os.path.exists(config_file):
+            shutil.copyfile("config.example.yml", config_file)
+
+        with open(config_file, "r") as f:
             self.config = yaml.load(f)
 
         # Create a client if the config says so.
