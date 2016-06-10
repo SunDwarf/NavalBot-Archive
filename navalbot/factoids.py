@@ -73,7 +73,8 @@ async def set_factoid(ctx: CommandContext, match):
     if fac.startswith("http") and 'youtube' not in fac:
         # download the file, with a filename.
         fname = await get_image(url=fac)
-        fac = "file:{}".format(fname)
+        if fname:
+            fac = "file:{}".format(fname)
 
     await ctx.set_config("fac:{}".format(name), fac)
     await ctx.reply("core.factoids.set", name=name, content=fac)
@@ -105,7 +106,7 @@ async def get_factoid(ctx: CommandContext, data: str):
 
         # Check if it is in commands.
         if command_word not in commands:
-            await ctx.reply("generic.cannot_find_command".format(command_word))
+            await ctx.reply("generic.cannot_find_command", cmd=command_word)
             return
 
         # Load out the command.
