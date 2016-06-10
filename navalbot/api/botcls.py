@@ -265,7 +265,7 @@ class NavalClient(discord.Client):
                 continue
 
         # Set the game.
-        await self.change_status(discord.Game(name="Type ?info for help!"))
+        await self.change_status(discord.Game(name=self.config.get("game_text", "Type ?info for help!")))
 
     async def on_message(self, message: discord.Message):
         # Increment the message count.
