@@ -31,6 +31,7 @@ import shutil
 import sys
 import traceback
 
+import aiohttp
 import aioredis
 import discord
 import yaml
@@ -167,6 +168,8 @@ class NavalClient(discord.Client):
             self._raven_client = Client(dsn=self.config.get("sentry_dsn"), transport=AioHttpTransport)
         else:
             self._raven_client = None
+
+        self.tb_session = aiohttp.ClientSession()
 
     def __del__(self):
         # Fuck off asyncio
@@ -351,7 +354,15 @@ class NavalClient(discord.Client):
                 else:
                     await coro(self, message)
             except Exception as e:
-                await self.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
+                tb = traceback.format_exc()
+                # The limit is 2000.
+                # But use 1500 anyway.
+                if len(tb) > 1500:
+                    async with self.tb_session.post("http://dpaste.com/api/v2/", data={"content": tb}) as p:
+                        await self.send_message(message.channel,
+                                                ":exclamation: Error encountered: {}".format(await p.text()))
+                else:
+                    await self.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
                 # Allow it to fall through.
                 raise
 
