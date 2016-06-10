@@ -1,0 +1,10 @@
+automod.no_subcommand: ":x: You must provide a sub command."
+automod.no_data: ":x: You must provide YAML data wrapped in \\`\\`\\`."
+automod.no_mod: ":x: YAML document must have `mod` as the root element."
+
+# Automod actions.
+automod.actions.mute: ":heavy_check_mark: Applied action: Mute `{user}` on `{chan}`"
+automod.actions.clean_perms: ":heavy_check_mark: Applied action: Cleaned permissions for `{user}` on `{chan}`"
+automod.actions.role_create: ":heavy_check_mark: Applied action: Created role on `{serv.name}` -> `{name}`"
+
+automod.actions.none: ":x: Action `{action}` does not exist."
