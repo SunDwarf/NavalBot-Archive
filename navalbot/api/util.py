@@ -36,9 +36,9 @@ from math import floor
 import aiohttp
 import aioredis
 import discord
-import yaml
 
 from navalbot.api import db
+from navalbot.api import botcls
 
 startup = datetime.datetime.fromtimestamp(time.time())
 
@@ -55,9 +55,6 @@ redis_pool = None
 # Load config.
 if not os.path.exists("config.yml"):
     shutil.copyfile("config.example.yml", "config.yml")
-
-with open("config.yml", "r") as f:
-    global_config = yaml.load(f)
 
 logger = logging.getLogger("NavalBot")
 
@@ -115,6 +112,7 @@ async def get_pool() -> aioredis.RedisPool:
     Gets the redis connection pool.
     """
     global redis_pool
+    global_config = botcls.NavalClient.get_navalbot().config
     if not redis_pool:
         redis_pool = await aioredis.create_pool(
             (global_config["redis"]["ip"], global_config["redis"]["port"]),
@@ -185,6 +183,7 @@ def prov_dec_func(func1, func2):
 
 
 def get_global_config(key, default=0, type_: type = None):
+    global_config = botcls.NavalClient.get_navalbot().config
     if type_ is not None:
         return type_(global_config.get(key, default))
     else:
