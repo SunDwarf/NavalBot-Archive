@@ -103,3 +103,9 @@ class CommandContext:
         if len(self.args) >= 1:
             u = self.message.server.get_member_named(' '.join(self.args))
             return u
+
+    def get_named_user(self, name) -> typing.Union[discord.Member, None]:
+        """
+        Attempts to get a user by name.
+        """
+        return self.message.server.get_member_named(name)
