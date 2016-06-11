@@ -122,7 +122,7 @@ async def getbtag(ctx: CommandContext):
     Gets a battletag.
     """
     user = ctx.get_user() or ctx.author
-    btag = await ctx.db.get_key("overwatch:{}".format(ctx.author.id))
+    btag = await ctx.db.get_key("overwatch:{}".format(user))
 
     if btag is None:
         await ctx.reply("ow.btag_not_set")
