@@ -23,6 +23,7 @@ class Action(object):
         self._document = doc
 
         self.items = {"users": [], "channels": [], "permissions": [], "roles": [], "attrs": {}}
+        self.parsed = False
 
     def _parse_action(self, ctx: CommandContext):
         """
@@ -39,6 +40,8 @@ class Action(object):
         # Parse the permissions.
         self._perms = self._document.get("permissions", [])
         self._parse_permissions(ctx)
+
+        self.parsed = True
 
     def _parse_permissions(self, ctx: CommandContext):
         """
@@ -186,7 +189,8 @@ class Action(object):
         Runs the Automod action.
         """
         # Parse the action.
-        self._parse_action(ctx)
+        if not self.parsed:
+            self._parse_action(ctx)
         try:
             await getattr(self, "action_{}".format(self.action.replace("-", "_")))(ctx)
         except AttributeError:
