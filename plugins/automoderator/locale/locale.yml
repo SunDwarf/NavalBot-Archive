@@ -7,5 +7,6 @@ automod.actions.mute: ":heavy_check_mark: Applied action: Mute `{user}` on `{cha
 automod.actions.clean_perms: ":heavy_check_mark: Applied action: Cleaned permissions for `{user}` on `{chan}`"
 automod.actions.role_create: ":heavy_check_mark: Applied action: Created role on `{serv.name}` -> `{name}`"
 automod.actions.move_role: ":heavy_check_mark: Applied action: Moved role `{role}` to position `{pos}`."
+automod.actions.add_role: ":heavy_check_mark: Added role(s) `{roles}` to `{user}`."
 
 automod.actions.none: ":x: Action `{action}` does not exist."

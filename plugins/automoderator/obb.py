@@ -157,6 +157,21 @@ class Action(object):
             await self._ctx.client.move_role(self._ctx.server, role=role, position=pos)
             await self._ctx.reply("automod.actions.move_role", role=name, pos=pos)
 
+    async def action_assign_role(self):
+        """
+        Assigns a role to a user.
+        """
+        if len(self.items["roles"]) < 1:
+            await self._ctx.reply("generic.no_role_provided")
+            return
+
+        for u in self.items["users"]:
+            assert isinstance(u, discord.User)
+            # Assign a role to the user
+            await self._ctx.client.add_roles(u, *self.items["roles"])
+            await self._ctx.reply("automod.actions.add_role", user=u.name,
+                                  roles=", ".join([r.name for r in self.items["roles"]]))
+
     async def run(self):
         """
         Runs the Automod action.
