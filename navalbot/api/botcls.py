@@ -218,6 +218,10 @@ class NavalClient(discord.Client):
                     name = entry.name
                 else:
                     continue
+            # Check in the config.
+            if name in self.config.get("disabled", []):
+                logger.info("Skipping disabled plugin {}.".format(name))
+                continue
             import_name = "plugins." + name
             # Import using importlib.
             try:
