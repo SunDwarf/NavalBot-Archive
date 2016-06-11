@@ -41,5 +41,5 @@ async def apply(ctx: CommandContext):
             continue
 
         # Construct the command to apply.
-        parsed = Action(ctx, root)
-        await parsed.run()
+        parsed = Action(root)
+        await parsed.run(ctx)

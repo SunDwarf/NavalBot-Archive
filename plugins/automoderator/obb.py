@@ -16,7 +16,7 @@ class Action(object):
     Represents an action to run.
     """
 
-    def __init__(self, ctx: CommandContext, doc: dict):
+    def __init__(self, doc: dict, ctx: CommandContext=None):
         """
         Defines a new moderation Action.
         """
@@ -172,10 +172,20 @@ class Action(object):
             await self._ctx.reply("automod.actions.add_role", user=u.name,
                                   roles=", ".join([r.name for r in self.items["roles"]]))
 
-    async def run(self):
+    async def action_remove_role(self):
+        """
+        Removes role(s) from user(s).
+        """
+        if len(self.items["roles"]) < 1:
+            await self._ctx.reply("generic.no_role_provided")
+            return
+
+    async def run(self, ctx: CommandContext):
         """
         Runs the Automod action.
         """
+        # Change the ctx.
+        self._ctx = ctx
         try:
             await getattr(self, "action_{}".format(self.action.replace("-", "_")))()
         except AttributeError:
