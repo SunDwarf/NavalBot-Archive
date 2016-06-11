@@ -22,11 +22,9 @@ class Action(object):
         """
         self._document = doc
 
-        self._ctx = ctx
-
         self.items = {"users": [], "channels": [], "permissions": [], "roles": [], "attrs": {}}
 
-    def _parse_action(self):
+    def _parse_action(self, ctx: CommandContext):
         """
         Parses the action and creates the appropriate data fields.
         """
@@ -36,13 +34,13 @@ class Action(object):
         self._items = self._document.get("items", [])
 
         # Parse them into objects.
-        self._parse_items()
+        self._parse_items(ctx)
 
         # Parse the permissions.
         self._perms = self._document.get("permissions", [])
-        self._parse_permissions()
+        self._parse_permissions(ctx)
 
-    def _parse_permissions(self):
+    def _parse_permissions(self, ctx: CommandContext):
         """
         Parse out the permissions.
         """
@@ -57,7 +55,7 @@ class Action(object):
         else:
             self.items["permissions"] = discord.Permissions.none()
 
-    def _parse_items(self):
+    def _parse_items(self, ctx: CommandContext):
         """
         Parses out the items in self._items and loads them.
         """
@@ -66,25 +64,25 @@ class Action(object):
             if isinstance(item, str):
                 # If it begins with an `!`, it's a user.
                 if item.startswith("!"):
-                    u = self._ctx.get_named_user(item[1:])
+                    u = ctx.get_named_user(item[1:])
                     if not u:
                         raise NoSuchItem(item[1:])
                     self.items["users"].append(u)
                 # If it starts with a `#`, it's a channel.
                 if item.startswith("#"):
-                    assert isinstance(self._ctx.server, discord.Server)
+                    assert isinstance(ctx.server, discord.Server)
                     # Check for the special case @all.
                     if item == "#@all":
-                        for chan in self._ctx.server.channels:
+                        for chan in ctx.server.channels:
                             self.items["channels"].append(chan)
                     else:
-                        chan = discord.utils.get(self._ctx.server.channels, name=item[1:])
+                        chan = discord.utils.get(ctx.server.channels, name=item[1:])
                         if not chan:
                             raise NoSuchItem(item[1:])
                         self.items["channels"].append(chan)
                 # If it starts with a `@`, it's a role
                 if item.startswith("@"):
-                    r = discord.utils.get(self._ctx.server.roles, name=item[1:])
+                    r = discord.utils.get(ctx.server.roles, name=item[1:])
                     if not r:
                         raise NoSuchItem(item[1:])
                     self.items["roles"].append(r)
@@ -92,7 +90,7 @@ class Action(object):
             elif isinstance(item, dict):
                 self.items["attrs"].update(item)
 
-    async def action_mute(self):
+    async def action_mute(self, ctx: CommandContext):
         """
         Runs a mute action.
         """
@@ -107,10 +105,10 @@ class Action(object):
             for chan in channels:
                 assert isinstance(user, discord.User)
                 assert isinstance(chan, discord.Channel)
-                await self._ctx.client.edit_channel_permissions(chan, user, deny=perms)
-                await self._ctx.reply("automod.actions.mute", chan=chan.name, user=user.display_name)
+                await ctx.client.edit_channel_permissions(chan, user, deny=perms)
+                await ctx.reply("automod.actions.mute", chan=chan.name, user=user.display_name)
 
-    async def action_clean_perms(self):
+    async def action_clean_perms(self, ctx: CommandContext):
         # Clear special permissions on each channel.
         items = self.items["users"] + self.items["roles"]
         channels = self.items["channels"]
@@ -118,10 +116,10 @@ class Action(object):
             for chan in channels:
                 assert isinstance(item, (discord.User, discord.Role))
                 assert isinstance(chan, discord.Channel)
-                await self._ctx.client.delete_channel_permissions(chan, item)
-                await self._ctx.reply("automod.actions.clean_perms", chan=chan, user=item.name)
+                await ctx.client.delete_channel_permissions(chan, item)
+                await ctx.reply("automod.actions.clean_perms", chan=chan, user=item.name)
 
-    async def action_create_role(self):
+    async def action_create_role(self, ctx: CommandContext):
         """
         Create role action.
         """
@@ -137,62 +135,59 @@ class Action(object):
                 colour = int(colour, 16)
             colour = discord.Colour(colour)
         except ValueError:
-            await self._ctx.reply("generic.not_int", val=colour)
+            await ctx.reply("generic.not_int", val=colour)
             return
         # Create the role.
-        role = await self._ctx.client.create_role(self._ctx.server, name=name, colour=colour,
-                                                  hoist=attrs.get("hoist", False),
-                                                  permissions=self.items["permissions"])
-        await self._ctx.reply("automod.actions.role_create", serv=self._ctx.server, name=name)
+        role = await ctx.client.create_role(ctx.server, name=name, colour=colour,
+                                            hoist=attrs.get("hoist", False),
+                                            permissions=self.items["permissions"])
+        await ctx.reply("automod.actions.role_create", serv=ctx.server, name=name)
         # Move it if you want.
         try:
             pos = int(attrs.get("position", 0))
         except ValueError:
-            await self._ctx.reply("generic.not_int", val=attrs.get("position"))
+            await ctx.reply("generic.not_int", val=attrs.get("position"))
             return
         if pos:
-            await self._ctx.client.move_role(self._ctx.server, role=role, position=pos)
-            await self._ctx.reply("automod.actions.move_role", role=name, pos=pos)
+            await ctx.client.move_role(ctx.server, role=role, position=pos)
+            await ctx.reply("automod.actions.move_role", role=name, pos=pos)
 
-    async def action_assign_role(self):
+    async def action_assign_role(self, ctx: CommandContext):
         """
         Assigns a role to a user.
         """
         if len(self.items["roles"]) < 1:
-            await self._ctx.reply("generic.no_role_provided")
+            await ctx.reply("generic.no_role_provided")
             return
 
         for u in self.items["users"]:
             assert isinstance(u, discord.User)
             # Assign a role to the user
-            await self._ctx.client.add_roles(u, *self.items["roles"])
-            await self._ctx.reply("automod.actions.add_role", user=u.name,
+            await ctx.client.add_roles(u, *self.items["roles"])
+            await ctx.reply("automod.actions.add_role", user=u.name,
                                   roles=", ".join([r.name for r in self.items["roles"]]))
 
-    async def action_remove_role(self):
+    async def action_remove_role(self, ctx: CommandContext):
         """
         Removes role(s) from user(s).
         """
         if len(self.items["roles"]) < 1:
-            await self._ctx.reply("generic.no_role_provided")
+            await ctx.reply("generic.no_role_provided")
             return
 
         for u in self.items["users"]:
             assert isinstance(u, discord.User)
-            await self._ctx.client.remove_roles(u, *self.items["roles"])
-            await self._ctx.reply("automod.actions.remove_role", user=u.name,
+            await ctx.client.remove_roles(u, *self.items["roles"])
+            await ctx.reply("automod.actions.remove_role", user=u.name,
                                   roles=", ".join([r.name for r in self.items["roles"]]))
 
     async def run(self, ctx: CommandContext):
         """
         Runs the Automod action.
         """
-
-        # Change the ctx.
-        self._ctx = ctx
         # Parse the action.
-        self._parse_action()
+        self._parse_action(ctx)
         try:
-            await getattr(self, "action_{}".format(self.action.replace("-", "_")))()
+            await getattr(self, "action_{}".format(self.action.replace("-", "_")))(ctx)
         except AttributeError:
-            await self._ctx.reply("automod.actions.none", action=self.action)
+            await ctx.reply("automod.actions.none", action=self.action)
