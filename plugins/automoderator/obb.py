@@ -26,9 +26,6 @@ class Action(object):
 
         self.items = {"users": [], "channels": [], "permissions": [], "roles": [], "attrs": {}}
 
-        # Parse it out.
-        self._parse_action()
-
     def _parse_action(self):
         """
         Parses the action and creates the appropriate data fields.
@@ -180,12 +177,21 @@ class Action(object):
             await self._ctx.reply("generic.no_role_provided")
             return
 
+        for u in self.items["users"]:
+            assert isinstance(u, discord.User)
+            await self._ctx.client.remove_roles(u, *self.items["roles"])
+            await self._ctx.reply("automod.actions.remove_role", user=u.name,
+                                  roles=", ".join([r.name for r in self.items["roles"]]))
+
     async def run(self, ctx: CommandContext):
         """
         Runs the Automod action.
         """
+
         # Change the ctx.
         self._ctx = ctx
+        # Parse the action.
+        self._parse_action()
         try:
             await getattr(self, "action_{}".format(self.action.replace("-", "_")))()
         except AttributeError:
