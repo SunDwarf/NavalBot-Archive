@@ -30,6 +30,7 @@ import os
 import shutil
 import time
 import typing
+from collections import OrderedDict
 from concurrent import futures
 from math import floor
 import functools
@@ -288,3 +289,23 @@ def get_regex(reg: str):
     Returns a compiled regular expression.
     """
     return re.compile(reg)
+
+
+def async_lru(size=100):
+    cache = OrderedDict()
+
+    def decorator(fn):
+        @functools.wraps(fn)
+        async def memoizer(*args, **kwargs):
+            key = str((args, kwargs))
+            try:
+                cache[key] = cache.pop(key)
+            except KeyError:
+                if len(cache) >= size:
+                    cache.popitem(last=False)
+                cache[key] = await fn(*args, **kwargs)
+            return cache[key]
+
+        return memoizer
+
+    return decorator

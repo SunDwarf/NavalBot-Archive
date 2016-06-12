@@ -26,7 +26,7 @@ import discord
 from navalbot.api import util, db
 from navalbot.api.commands.ctx import CommandContext
 from navalbot.api.locale import get_locale
-from navalbot.api.util import has_permissions_with_override
+from navalbot.api.util import has_permissions_with_override, async_lru
 
 
 class _RoleProxy:
@@ -51,6 +51,20 @@ class NavalRole:
         """
         got = await db.get_config(self.server_id, "role:{}".format(rl.name.lower()), default=rl.val)
         return got
+
+locale_cache = {}
+
+async def get_server_locale(id: str):
+    """
+    Get a LocaleLoader for the specified server.
+    """
+    if id in locale_cache:
+        return locale_cache[id]
+
+    loc = await db.get_config(id, "lang", default=None)
+    loc = get_locale(loc)
+    locale_cache[id] = loc
+    return loc
 
 
 class Command(object):
@@ -163,8 +177,7 @@ class Command(object):
         prefix = await db.get_config(message.server.id, "command_prefix", default="?")
 
         # Load the locale loader.
-        loc = await db.get_config(message.server.id, "lang", default=None)
-        loc = get_locale(loc)
+        loc = get_server_locale(message.server.id)
 
         # Do the checks before running the coroutine.
         # Owner check.
