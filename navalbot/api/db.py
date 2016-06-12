@@ -33,14 +33,13 @@ async def get_config(server_id: str, key: str, default=None, type_: type = str) 
     # Get the value of config:server_id:key.
     built = "config:{sid}:{key}".format(sid=server_id, key=key)
     async with pool.get() as conn:
-        if not await conn.exists(built):
+        data = await conn.get(built)
+        if not data:
             return default
-        else:
-            data = await conn.get(built)
-            try:
-                return type_(data.decode())
-            except (ValueError, AttributeError):
-                return default
+        try:
+            return type_(data.decode())
+        except (ValueError, AttributeError):
+            return default
 
 
 async def set_config(server_id: str, key: str, value: str):
