@@ -156,6 +156,7 @@ async def globalunblacklist(ctx: CommandContext):
     else:
         user_id = user.id
 
+    await ctx.db.remove_from_set("global_blacklist", user_id)
     await ctx.reply("core.ndc.globalunblacklist", u=user_id)
 
 
