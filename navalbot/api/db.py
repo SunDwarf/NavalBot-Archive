@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # This handles aioredis DB stuff.
+import aioredis
 
 from navalbot.api import util
 
@@ -61,7 +62,7 @@ async def delete_config(server_id: str, key: str):
     # Set config:server_id:key.
     built = "config:{sid}:{key}".format(sid=server_id, key=key)
     async with pool.get() as conn:
-        conn.delete(built)
+        return await conn.delete(built)
 
 
 async def get_key(key: str) -> str:
