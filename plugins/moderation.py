@@ -314,7 +314,7 @@ async def clean(ctx: CommandContext):
     await ctx.reply("moderation.deleted_messages", count=len(msgs))
 
 
-@command("blacklist", argcount=1, role={NavalRole.ADMIN})
+@command("blacklist", argcount=1, roles={NavalRole.ADMIN})
 async def blacklist(ctx: CommandContext):
     """
     Blacklists a user, so they cannot use the bot.
@@ -329,7 +329,7 @@ async def blacklist(ctx: CommandContext):
     await ctx.reply("moderation.blacklisted", user=user.display_name)
 
 
-@command("unblacklist", argcount=1, role={NavalRole.ADMIN})
+@command("unblacklist", argcount=1, roles={NavalRole.ADMIN})
 async def unblacklist(ctx: CommandContext):
     """
     Removes a user from the blacklist.
