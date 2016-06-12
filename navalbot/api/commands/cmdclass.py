@@ -203,15 +203,16 @@ class Command(object):
             # Load roles correctly.
             new_roles = await self._load_roles(message.server)
 
-            if not await has_permissions_with_override(message.author, new_roles, message.server.id,
-                                                       self._wrapped_coro.__name__):
-                # await client.send_message(
-                #    message.channel,
-                #    ":no_entry: You do not have any of the required roles: `{}`!"
-                #        .format({role.val for role in allowed_roles})
-                ss = loc['perms.bad_role'].format(roles={role for role in new_roles})
-                await client.send_message(message.channel, ss)
-                return
+            if not message.server.owner == message.author:
+                if not await has_permissions_with_override(message.author, new_roles, message.server.id,
+                                                           self._wrapped_coro.__name__):
+                    # await client.send_message(
+                    #    message.channel,
+                    #    ":no_entry: You do not have any of the required roles: `{}`!"
+                    #        .format({role.val for role in allowed_roles})
+                    ss = loc['perms.bad_role'].format(roles={role for role in new_roles})
+                    await client.send_message(message.channel, ss)
+                    return
 
         # Arguments check.
         if hasattr(self, "_args_type"):
