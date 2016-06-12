@@ -27,7 +27,7 @@ import discord
 
 from navalbot.api import db, decorators, util
 from navalbot.api.commands import oldcommand, commands, command
-from navalbot.api.commands.cmdclass import NavalRole
+from navalbot.api.commands.cmdclass import NavalRole, locale_cache
 from navalbot.api.commands.ctx import CommandContext
 
 
@@ -35,6 +35,9 @@ from navalbot.api.commands.ctx import CommandContext
 async def set_config(ctx: CommandContext):
     # Split the content with shlex.
     name, val = ctx.args[0:2]
+    if name == "lang":
+        # Delete locale cache.
+        del locale_cache[ctx.server.id]
 
     await db.set_config(ctx.message.server.id, name, val)
 
