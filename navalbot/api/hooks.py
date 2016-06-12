@@ -70,6 +70,7 @@ def on_event(name: str):
         # Use func.__name__ as the key.
         # This prevents multiple messages on a reload.
         instance.hooks[name][func.__name__] = func
+        logger.info("Registered hook for `{}` -> `{}`".format(name, func.__name__))
 
         return func
 
