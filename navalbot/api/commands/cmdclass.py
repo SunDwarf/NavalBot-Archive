@@ -177,7 +177,7 @@ class Command(object):
         prefix = await db.get_config(message.server.id, "command_prefix", default="?")
 
         # Load the locale loader.
-        loc = get_server_locale(message.server.id)
+        loc = await get_server_locale(message.server.id)
 
         # Do the checks before running the coroutine.
         # Owner check.
