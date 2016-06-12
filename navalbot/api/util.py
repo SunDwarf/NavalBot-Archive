@@ -32,6 +32,8 @@ import time
 import typing
 from concurrent import futures
 from math import floor
+import functools
+import re
 
 import aiohttp
 import aioredis
@@ -207,6 +209,7 @@ async def get_file(client: tuple, url, name):
                     f.write(data)
                 print("--> Saved file to {}".format(name))
 
+
 async def get_image(url: str) -> typing.Union[str, None]:
     """
     Get an image if the mime type says it's an image, otherwise return None.
@@ -272,9 +275,16 @@ async def with_cache(data, expires=300, miss=lambda data: None):
 
 
 def has_perm(perms: discord.Permissions, attr: str) -> bool:
-    print(attr, getattr(perms, attr, None))
     if perms.administrator:
         return True
     if getattr(perms, attr, False):
         return True
     return False
+
+
+@functools.lru_cache(maxsize=None)
+def get_regex(reg: str):
+    """
+    Returns a compiled regular expression.
+    """
+    return re.compile(reg)

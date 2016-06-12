@@ -158,9 +158,6 @@ class Command(object):
         """
         Invoke the function.
         """
-        # Set up the role loader.
-        role_loader = NavalRole(message.server.id)
-
         # Load the prefix, again.
         # This is so spaces in prefixes don't break everything.
         prefix = await db.get_config(message.server.id, "command_prefix", default="?")
