@@ -77,8 +77,7 @@ async def unlock(ctx: CommandContext):
     """
     to_ulock = ctx.args[0]
     locked = await db.get_config(ctx.message.server.id, "fac:{}:locked".format(to_ulock), type_=str, default=None)
-    unlock_exception = discord.utils.get(ctx.message.server.roles, name='Admin')
-    if locked and locked != ctx.message.author.id and not unlock_exception:
+    if locked and locked != ctx.message.author.id:
         # get username
         await ctx.reply("core.factoids.cannot_edit", fac=to_ulock, u=locked)
         return
