@@ -207,6 +207,8 @@ class NavalClient(discord.Client):
         if not os.path.exists(os.path.join(os.getcwd(), "plugins/")):
             logger.critical("No plugins directory exists. Your bot is effectively useless.")
             return
+        # Add cwd to sys.path
+        sys.path.insert(0, os.path.join(os.getcwd()))
         # Loop over things in plugins/
         for entry in os.scandir("plugins/"):
             if entry.name == "__pycache__" or entry.name == "__init__.py":
@@ -233,7 +235,10 @@ class NavalClient(discord.Client):
             except Exception as e:
                 logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
                 traceback.print_exc()
-                return
+                continue
+        # Remove from path.
+        sys.path.pop(0)
+
 
     async def on_ready(self):
         # Get the OAuth2 URL, or something
