@@ -33,7 +33,7 @@ from navalbot.api.commands import CommandContext, commands
 # Factoid matcher compiled
 from navalbot.api.util import sanitize, get_file, get_image
 
-factoid_matcher = re.compile(r'(\S*?) is (.*)')
+factoid_matcher = re.compile(r'(.*?) is (.*)', re.S)
 
 # Command matcher compiled
 command_matcher = re.compile(r'{(.*)}')
@@ -86,8 +86,7 @@ async def get_factoid(ctx: CommandContext, data: str):
     """
     prefix = await ctx.get_config("command_prefix", "?")
     # Split data apart and load that factoid, because fuck spaces.
-    to_load = data.split(" ")[0]
-    content = await ctx.get_config("fac:{}".format(to_load))
+    content = await ctx.get_config("fac:{}".format(data))
     if not content:
         # Don't do anything.
         return
