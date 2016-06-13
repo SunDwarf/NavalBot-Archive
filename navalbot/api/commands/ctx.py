@@ -45,17 +45,28 @@ class CommandContext:
         self.args = args
 
         # Other useful properties.
-        self.server = self.message.server
         assert isinstance(self.server, discord.Server)
 
-        self.author = self.message.author
-
-        self.channel = self.message.channel
-        self.me = self.server.me
         if self.me is not None:
             assert isinstance(self.me, discord.Member)
 
         self.db = db
+
+    @property
+    def server(self) -> discord.Server:
+        return self.message.server
+
+    @property
+    def channel(self) -> discord.Channel:
+        return self.message.channel
+
+    @property
+    def me(self) -> discord.Member:
+        return self.server.me
+
+    @property
+    def author(self) -> discord.Member:
+        return self.message.author
 
     async def get_config(self, name, default=None, type_: type = str):
         """
