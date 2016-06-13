@@ -308,7 +308,6 @@ class NavalClient(discord.Client):
 
         # Check for a valid server.
         if message.server is not None:
-            prefix = await db.get_config(message.server.id, "command_prefix", "?")
             logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
         else:
             # No DMs
@@ -339,36 +338,6 @@ class NavalClient(discord.Client):
                 logger.error("Caught exception in hook on_message -> {}".format(hook.__name__))
                 traceback.print_exc()
                 continue
-
-        if message.content.startswith(prefix):
-            cmd_content = message.content[len(prefix):]
-            cmd_word = cmd_content.split(" ")[0].lower()
-            try:
-                coro = commands[cmd_word]
-            except KeyError as e:
-                logger.warning("-> No such command: " + str(e))
-                coro = builtins.default
-            try:
-                if isinstance(coro, Command):
-                    await coro.invoke(self, message)
-                    # Delete automatically, only if invocation was successful.
-                    autodelete = True if await db.get_config(message.server.id, "autodelete") == "True" else False
-                    if autodelete and message.content.startswith(prefix):
-                        await self.delete_message(message)
-                else:
-                    await coro(self, message)
-            except Exception as e:
-                tb = traceback.format_exc()
-                # The limit is 2000.
-                # But use 1500 anyway.
-                if len(tb) > 1500:
-                    async with self.tb_session.post("http://dpaste.com/api/v2/", data={"content": tb}) as p:
-                        await self.send_message(message.channel,
-                                                ":exclamation: Error encountered: {}".format(await p.text()))
-                else:
-                    await self.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
-                # Allow it to fall through.
-                raise
 
     def navalbot(self):
         # Switch login method based on args.
