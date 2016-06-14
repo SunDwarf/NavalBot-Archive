@@ -1,3 +1,15 @@
+help.get_ow_profile_data: |
+      Sucht nach einem Overwatch Profil.
+
+      Wenn du nichts als Argument angibt, wird nach deinem Battletag gesucht.
+      Wenn du ein Argument angibst, kannst du entweder nach einem Battletag oder einem Benutzer suchen.
+
+help.setbtag: |
+      Legt deinen Battletag fest.
+
+help.getbtag: |
+      Gibt den Battletag eines anderen Nutzers an.
+
 ow.btag_not_set: ":x: Battletag ist nicht festgelegt. Lege es mit `setbtag` fest."
 ow.no_such_btag: ":x: Konnte kein Profil mit dem Battletag `{btag}` finden."
 ow.set_btag: ":heavy_check_mark: Battletag wurde zu `{btag}` festgelegt."
