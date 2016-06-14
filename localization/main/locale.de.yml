@@ -1,15 +1,3 @@
-# Allgemeine Schlüssel.
-generic.not_int: ":x: Wert {val} ist kein gültiger Integer."
-generic.file_too_big: ":x: Datei {fname} ist zu groß zum Downloaden."
-generic.no_mention: ":x: Du musst den Nutzer erwähnen."
-generic.cannot_find_user: ":x: Konnte Nutzer `{user}` nicht finden."
-generic.cannot_find_command: ":x: Konnte Befehl `{cmd}` nicht finden."
-
-# Berechtigungs-Schlüssel
-perms.not_owner: ":no_entry: Dieser Befehl ist auf den Bot-Besitzer beschränkt."
-perms.cannot_determine_role: ":no_entry: Konnte Role nicht bestimmen!"
-perms.bad_role: ":no_entry: Du hast keine der erforderten Rollen!: `{roles}`!"
-
 # Hilfe Schlüssel.
 help.None: |
         Dieser Befehl hat keine Hilfe in dieser Sprache.
@@ -68,7 +56,7 @@ help.factoid: |
 help.version: |
         Informiert dich über die aktuelle Version des Bots.
 
-# Hauptprogramm
+# Hauptprogramm.
 core.cfg.setcfg_updated: ":heavy_check_mark: Konfiguration aktualisiert: `{name}` -> `{val}`"
 core.cfg.no_such_config: ":x: Konfigurationswert `{name}` ist nicht vorhanden."
 core.cfg.cfg_deleted: ":heavy_check_mark: Konfigurationswert `{name}` wurde gelöscht."
@@ -112,3 +100,16 @@ core.ndc.globalblacklist: ":warning: Bist du sicher? Schreibe `y`, um fortzufahr
 core.ndc.globalblacklist_abort: ":x: Abbruch vom globalen Hinzufügen zur Blacklist."
 core.ndc.globalblacklist_success: ":gun: Okay, Nutzer `{u}` wurde vom Benutzen des Bots ausgeschlossen."
 core.ndc.globalunblacklist: ":angel: Globaler Ausschluss von `{u}` wurde aufgehoben."
+
+# Berechtigungs-Schlüssel.
+perms.not_owner: ":no_entry: Dieser Befehl ist auf den Bot-Besitzer beschränkt."
+perms.cannot_determine_role: ":no_entry: Konnte Role nicht bestimmen!"
+perms.bad_role: ":no_entry: Du hast keine der erforderten Rollen!: `{roles}`!"
+
+# Allgemeine Schlüssel.
+generic.not_int: ":x: Wert {val} ist kein gültiger Integer."
+generic.file_too_big: ":x: Datei {fname} ist zu groß zum Downloaden."
+generic.no_mention: ":x: Du musst den Nutzer erwähnen."
+generic.cannot_find_user: ":x: Konnte Nutzer `{user}` nicht finden."
+generic.cannot_find_command: ":x: Konnte Befehl `{cmd}` nicht finden."
+generic.no_role_provided: ":x: Du musst mindestens eine oder mehrere Rollen angeben"
