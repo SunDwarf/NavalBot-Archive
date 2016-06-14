@@ -20,6 +20,21 @@ help.whois: |
 help.uptime: |
         Zeigt, wie lange der Bot schon läuft.
 
+help.aesthetic: |
+        ﻿Ｇｉｂｔ  Ｔｅｘｔ  ｓｏ  ａｎ．
+
+help.urban: |
+        Sucht nach einer Definition auf Urban Dictionary.
+
+help.subreddit: |
+        Gibt einen zufälligen Link von einem Subreddit an, den du festlegst.
+
+help.remindme: |
+        Erinnert dich in <x> Sekunden an <y>.
+
+help.tz: |
+        Zeigt die momentane Uhrzeit in der angeforderten Zeitzone.
+
 # Spaßbefehle
 fun.chosen: "Meine Wahl war: `{choice}`"
 
@@ -59,3 +74,24 @@ fun.urban: |
   ***Beispiel:*** {example}
 
 fun.sr.no_sr: ":x: Subreddit existiert nicht oder ist NSFW."
+
+fun.reminder: "{mention} Erinnerung für: `{message}`"
+fun.reminder.no_args: ":x: Du musst eine Zeit und Nachricht angeben,"
+fun.reminder.reminding: ":heavy_check_mark: Erinnerung erstellt."
+
+fun.tz.unknown: ":x: Diese Zeitzone existiert nicht: `{timezone}`"
+fun.tz.result: "Momentan ist es `{t}` in der angeforderten Zeitzone."
+
+fun.servinfo: |
+      ```xl
+      Name: {server.name}
+      Server ID: {server.id}
+      Region: {server.region}
+      Großer Server: {server.large}
+
+      Kanäle: {channels}
+      Mitglieder: {server.member_count}
+      Erstellt am: {created}
+
+      Besitzer: {server.owner.display_name}
+      ```
