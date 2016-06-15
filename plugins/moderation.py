@@ -25,7 +25,8 @@ import logging
 import aioredis
 import discord
 
-from navalbot.api.commands import command, CommandContext
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
 from navalbot.api.commands.cmdclass import NavalRole
 
 logger = logging.getLogger("NavalBot")

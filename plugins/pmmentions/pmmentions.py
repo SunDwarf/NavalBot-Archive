@@ -4,7 +4,8 @@ PMs you if you get mentioned.
 import discord
 
 from navalbot.api import db
-from navalbot.api.commands import command, CommandContext
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
 from navalbot.api.hooks import on_message
 
 

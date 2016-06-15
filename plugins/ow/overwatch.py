@@ -5,7 +5,8 @@ import logging
 
 import aiohttp
 
-from navalbot.api.commands import command, CommandContext
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
 
 OWAPI_BASE_URL = "https://owapi.net"
 

@@ -1,51 +1,69 @@
 """
-Context class.
-
-=================================
-
-This file is part of NavalBot.
-Copyright (C) 2016 Isaac Dickinson
-Copyright (C) 2016 Nils Theres
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>
-
-=================================
+Contexts - contains files for contexts, such as CommandContext or EventContext.
 """
 import typing
 
 import aioredis
-import discord
 
+import discord
 from navalbot.api import db
+from navalbot.api.botcls import NavalClient
 from navalbot.api.locale import LocaleLoader
 from navalbot.api.util import get_pool
 
 
-class CommandContext:
+class Context:
+    """
+    A context is a simple way of storing attributes about an event or command.
+    """
+
+    def __init__(self, client: NavalClient):
+        """
+        Simple stub for the context class.
+        """
+        self.client = client
+
+
+class EventContext(Context):
+    """
+    An event context is passed to `on_` events.
+
+    It contains certain fields to be used, depending on the event.
+
+    This is normally subclassed. The event will automatically load the correct fields to be consistent
+    depending on the event.
+
+    This event will throw errors if you attempt to access a property that doesn't exist in a specific event.
+    """
+    @property
+    def server(self) -> discord.Server:
+        raise NotImplementedError
+
+    @property
+    def member(self) -> discord.Member:
+        raise NotImplementedError
+
+    @property
+    def channel(self) -> discord.Channel:
+        raise NotImplementedError
+
+    @property
+    def message(self) -> discord.Message:
+        raise NotImplementedError
+
+
+
+class CommandContext(Context):
     """
     This class is a simple thin wrapper that stores a few tidbits of data.
     """
 
-    def __init__(self, client: discord.Client, message: discord.Message, locale: LocaleLoader,
+    def __init__(self, client: NavalClient, message: discord.Message, locale: LocaleLoader,
                  args: list = None):
-        self.client = client
+        super().__init__(client)
         self.message = message
         self.locale = locale
         self.args = args
-
-        # Other useful properties.
-        assert isinstance(self.server, discord.Server)
 
         if self.me is not None:
             assert isinstance(self.me, discord.Member)
@@ -120,3 +138,12 @@ class CommandContext:
         Attempts to get a user by name.
         """
         return self.message.server.get_member_named(name)
+
+    def get_member_by_name_or_id(self, search: str) -> typing.Union[discord.Member, None]:
+        """
+        Attempts to get a user by ID or name.
+        """
+        u = self.server.get_member(search)
+        if not u:
+            u = self.get_named_user(search)
+        return u

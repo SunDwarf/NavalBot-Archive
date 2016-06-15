@@ -32,7 +32,7 @@ import discord
 import youtube_dl
 
 from navalbot.api import db
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 
 logger = logging.getLogger("NavalBot::Voice")
 

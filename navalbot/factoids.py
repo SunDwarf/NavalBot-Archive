@@ -29,7 +29,8 @@ import re
 import shlex
 import string
 
-from navalbot.api.commands import CommandContext, commands
+from navalbot.api.commands import commands
+from navalbot.api.contexts import CommandContext
 # Factoid matcher compiled
 from navalbot.api.util import sanitize, get_file, get_image
 

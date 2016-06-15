@@ -32,7 +32,8 @@ import aioredis
 
 from navalbot.api import util
 from navalbot.api.botcls import NavalClient
-from navalbot.api.commands import command, CommandContext
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
 
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```')

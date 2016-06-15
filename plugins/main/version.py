@@ -23,7 +23,7 @@ import re
 import aiohttp
 # =============== Commands
 from navalbot.api.commands import command
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 from navalbot.version import VERSION, VERSIONT, VERSUFF
 
 

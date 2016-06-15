@@ -24,7 +24,7 @@ import shlex
 import discord
 
 from navalbot.api import util, db
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 from navalbot.api.locale import get_locale
 from navalbot.api.util import has_permissions_with_override, async_lru
 

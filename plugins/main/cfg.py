@@ -28,7 +28,7 @@ import discord
 from navalbot.api import db, decorators, util
 from navalbot.api.commands import oldcommand, commands, command
 from navalbot.api.commands.cmdclass import NavalRole, locale_cache
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 
 
 @command("setcfg", argcount=2, roles={NavalRole.ADMIN})

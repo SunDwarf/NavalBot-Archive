@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 from .cmdclass import Command
-from .ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 
 commands = {}
 _func_cmd_mapping = {}

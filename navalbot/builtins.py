@@ -29,7 +29,8 @@ import discord
 
 from navalbot import factoids
 from navalbot.api import db
-from navalbot.api.commands import commands, command, Command, CommandContext
+from navalbot.api.commands import commands, command, Command
+from navalbot.api.contexts import CommandContext
 from navalbot.api.locale import get_locale
 
 # Factoid matcher compiled
