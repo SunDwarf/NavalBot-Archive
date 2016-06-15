@@ -52,6 +52,21 @@ class EventContext(Context):
     def message(self) -> discord.Message:
         raise NotImplementedError
 
+    def get_named_user(self, name: str) -> typing.Union[discord.Member, None]:
+        """
+        Gets a user by name from the server.
+        """
+        return self.server.get_member_named(name)
+
+    def get_member_by_name_or_id(self, search: str) -> typing.Union[discord.Member, None]:
+        """
+        Attempts to get a user by ID or name.
+        """
+        u = self.server.get_member(search)
+        if not u:
+            u = self.get_named_user(search)
+        return u
+
 
 class OnMessageEventContext(EventContext):
     """
@@ -161,17 +176,3 @@ class CommandContext(OnMessageEventContext):
             u = self.message.server.get_member_named(' '.join(self.args))
             return u
 
-    def get_named_user(self, name) -> typing.Union[discord.Member, None]:
-        """
-        Attempts to get a user by name.
-        """
-        return self.message.server.get_member_named(name)
-
-    def get_member_by_name_or_id(self, search: str) -> typing.Union[discord.Member, None]:
-        """
-        Attempts to get a user by ID or name.
-        """
-        u = self.server.get_member(search)
-        if not u:
-            u = self.get_named_user(search)
-        return u
