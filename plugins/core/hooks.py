@@ -40,7 +40,7 @@ async def command_processor(ctx: OnMessageEventContext):
             coro = builtins.default
         try:
             if isinstance(coro, Command):
-                await coro.invoke(ctx.client, ctx.message)
+                await coro.invoke(ctx)
                 # Delete automatically, only if invocation was successful.
                 autodelete = True if await db.get_config(ctx.message.server.id, "autodelete") == "True" else False
                 if autodelete and ctx.message.content.startswith(prefix):
