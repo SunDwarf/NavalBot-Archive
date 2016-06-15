@@ -76,7 +76,7 @@ def on_event(name: str, err_func=None):
                 await func(ctx)  # Await the hook, wrapped inside a try.
             except Exception as e:
                 if err_func:
-                    await err_func(e)
+                    await err_func(ctx, e)
                 else:
                     raise
 

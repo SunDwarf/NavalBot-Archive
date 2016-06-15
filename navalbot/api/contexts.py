@@ -67,6 +67,15 @@ class EventContext(Context):
             u = self.get_named_user(search)
         return u
 
+    def get_channel(self, name_or_id) -> discord.Channel:
+        """
+        Gets a channel by name or ID from the server.
+        """
+        chan = self.server.get_channel(name_or_id)
+        if not chan:
+            chan = discord.utils.get(self.server.channels, name=name_or_id)
+        return chan
+
 
 class OnMessageEventContext(EventContext):
     """
