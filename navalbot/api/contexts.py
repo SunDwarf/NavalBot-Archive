@@ -35,6 +35,7 @@ class EventContext(Context):
 
     This event will throw errors if you attempt to access a property that doesn't exist in a specific event.
     """
+
     @property
     def server(self) -> discord.Server:
         raise NotImplementedError
@@ -51,6 +52,32 @@ class EventContext(Context):
     def message(self) -> discord.Message:
         raise NotImplementedError
 
+
+class OnMessageEventContext(EventContext):
+    """
+    Context for on_message events.
+    """
+
+    def __init__(self, client: NavalClient, message: discord.Message):
+        super().__init__(client)
+
+        self._message = message
+
+    @property
+    def server(self):
+        return self._message.server
+
+    @property
+    def member(self):
+        return self._message.author
+
+    @property
+    def channel(self):
+        return self._message.channel
+
+    @property
+    def message(self):
+        return self._message
 
 
 class CommandContext(Context):
