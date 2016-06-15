@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 # Subclass of discord.Client.
 import asyncio
+import copy
 import importlib
 import json
 import logging
@@ -38,10 +39,8 @@ import yaml
 from raven import Client
 from raven_aiohttp import AioHttpTransport
 
-from navalbot import builtins
 from navalbot.api import db
 from navalbot.api import util
-from navalbot.api.commands import commands, Command
 from navalbot.api.contexts import OnMessageEventContext
 from navalbot.api.util import get_pool
 from navalbot.voice import voiceclient
@@ -338,7 +337,7 @@ class NavalClient(discord.Client):
             return
 
         # Run on_message hooks.
-        for hook in self.hooks.get("on_message", {}).values():
+        for hook in copy.copy(self.hooks.get("on_message", {})).values():
             ctx = OnMessageEventContext(self, message)
             try:
                 await hook(ctx)
