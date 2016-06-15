@@ -24,7 +24,7 @@ import shlex
 import discord
 
 from navalbot.api import util, db
-from navalbot.api.contexts import CommandContext
+from navalbot.api.contexts import CommandContext, OnMessageEventContext
 from navalbot.api.locale import get_locale
 from navalbot.api.util import has_permissions_with_override, async_lru
 
@@ -51,20 +51,6 @@ class NavalRole:
         """
         got = await db.get_config(self.server_id, "role:{}".format(rl.name.lower()), default=rl.val)
         return got
-
-locale_cache = {}
-
-async def get_server_locale(id: str):
-    """
-    Get a LocaleLoader for the specified server.
-    """
-    if id in locale_cache:
-        return locale_cache[id]
-
-    loc = await db.get_config(id, "lang", default=None)
-    loc = get_locale(loc)
-    locale_cache[id] = loc
-    return loc
 
 
 class Command(object):
@@ -168,48 +154,46 @@ class Command(object):
 
         return new_roles
 
-    async def invoke(self, client: discord.Client, message: discord.Message):
+    async def invoke(self, ctx: OnMessageEventContext):
         """
         Invoke the function.
         """
         # Load the prefix, again.
         # This is so spaces in prefixes don't break everything.
-        prefix = await db.get_config(message.server.id, "command_prefix", default="?")
-
+        prefix = await db.get_config(ctx.message.server.id, "command_prefix", default="?")
 
         # Do the checks before running the coroutine.
         # Owner check.
 
         if self._only_owner:
             owner = util.get_global_config("RCE_ID", default=0, type_=int)
-            u_id = int(message.author.id)
+            u_id = int(ctx.message.author.id)
             # Check if it is in the ids specified.
             if not u_id == owner:
                 # await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
-                await client.send_message(message.channel, loc["perms.not_owner"])
+                await ctx.client.send_message(ctx.message.channel, ctx.loc["perms.not_owner"])
                 return
-        # Role check.
 
         # Get the user's roles.
         if hasattr(self, "_roles"):
             try:
-                assert isinstance(message.author, discord.Member)
+                assert isinstance(ctx.message.author, discord.Member)
             except AssertionError:
-                await client.send_message(message.channel, loc["perms.cannot_determine_role"])
+                await ctx.client.send_message(ctx.message.channel, ctx.loc["perms.cannot_determine_role"])
                 return
 
             # Load roles correctly.
-            new_roles = await self._load_roles(message.server)
+            new_roles = await self._load_roles(ctx.message.server)
 
-            if not message.server.owner == message.author:
-                if not await has_permissions_with_override(message.author, new_roles, message.server.id,
+            if not ctx.message.server.owner == ctx.message.author:
+                if not await has_permissions_with_override(ctx.message.author, new_roles, ctx.message.server.id,
                                                            self._wrapped_coro.__name__):
                     # await client.send_message(
                     #    message.channel,
                     #    ":no_entry: You do not have any of the required roles: `{}`!"
                     #        .format({role.val for role in allowed_roles})
-                    ss = loc['perms.bad_role'].format(roles={role for role in new_roles})
-                    await client.send_message(message.channel, ss)
+                    ss = ctx.loc['perms.bad_role'].format(roles={role for role in new_roles})
+                    await ctx.client.send_message(ctx.message.channel, ss)
                     return
 
         # Arguments check.
@@ -217,7 +201,7 @@ class Command(object):
             if self._args_type in [0, 2]:
                 # Get the content, with the content split.
 
-                ctt = message.content[len(prefix):]
+                ctt = ctx.message.content[len(prefix):]
 
                 # Split out the args into a list.
                 if not self._force_normal_split:
@@ -228,22 +212,22 @@ class Command(object):
                 else:
                     args = ctt.split(" ")[1:]
                 if self._args_type == 0 and len(args) < 1:
-                    await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
+                    await ctx.client.send_message(
+                        ctx.message.channel, await self._construct_arg_error_msg(ctx.message.server)
+                    )
                     return
             elif self._args_type == 1:
-                ctt = message.content[len(prefix):]
+                ctt = ctx.message.content[len(prefix):]
                 args = shlex.split(ctt)[1:]
                 if len(args) != self._args_count:
-                    await client.send_message(message.channel, await self._construct_arg_error_msg(message.server))
+                    await ctx.client.send_message(ctx.message.channel,
+                                                  await self._construct_arg_error_msg(ctx.message.server))
                     return
         # Create the context.
-        ctx = CommandContext(client, message, locale=loc)
+        ctx = CommandContext(ctx.client, ctx.message, locale=ctx.loc)
 
         # Now that we've gotten all of the returns out of the way, invoke the coroutine.
         if hasattr(self, "_args_type"):
             ctx.args = args
 
-        result = await self._wrapped_coro(ctx)
-
-        if result:
-            await client.send_message(message.channel, result)
+        await self._wrapped_coro(ctx)  # Await the sub command.

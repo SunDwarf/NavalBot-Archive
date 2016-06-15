@@ -80,6 +80,10 @@ class OnMessageEventContext(EventContext):
     def message(self):
         return self._message
 
+    @property
+    def loc(self):
+        return self._locale
+
     async def reply(self, key: str, **fmt):
         """
         Wrapper around self.locale["key"] and self.client.send_message(self.message.channel, whatever)
