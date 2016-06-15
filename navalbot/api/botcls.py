@@ -42,6 +42,7 @@ from navalbot import builtins
 from navalbot.api import db
 from navalbot.api import util
 from navalbot.api.commands import commands, Command
+from navalbot.api.contexts import OnMessageEventContext
 from navalbot.api.util import get_pool
 from navalbot.voice import voiceclient
 
@@ -286,8 +287,9 @@ class NavalClient(discord.Client):
 
         # Run on_message_before_blacklist
         for hook in self.hooks.get("on_message_before_blacklist", {}).values():
+            ctx = OnMessageEventContext(self, message)
             try:
-                result = await hook(self, message)
+                result = await hook(ctx)
             except:
                 logger.error("Caught exception in hook on_message_before_blacklist -> {}".format(hook.__name__))
                 traceback.print_exc()
@@ -337,8 +339,9 @@ class NavalClient(discord.Client):
 
         # Run on_message hooks.
         for hook in self.hooks.get("on_message", {}).values():
+            ctx = OnMessageEventContext(self, message)
             try:
-                await hook(self, message)
+                await hook(ctx)
             except Exception:
                 logger.error("Caught exception in hook on_message -> {}".format(hook.__name__))
                 traceback.print_exc()

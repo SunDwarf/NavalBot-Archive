@@ -30,11 +30,12 @@ import typing
 import discord
 
 from navalbot.api.botcls import NavalClient
+from navalbot.api.contexts import EventContext
 
 logger = logging.getLogger("NavalBot")
 
 
-def on_message(func: typing.Callable[[NavalClient, discord.Message], None]) -> types.FunctionType:
+def on_message(func: typing.Callable[[EventContext], None]) -> types.FunctionType:
     """
     Registers a hook to be ran every message.
     """
@@ -42,7 +43,7 @@ def on_message(func: typing.Callable[[NavalClient, discord.Message], None]) -> t
     return on_event("on_message")(func)
 
 
-def on_generic_event(func: typing.Callable[[NavalClient, dict], None]) -> types.FunctionType:
+def on_generic_event(func: typing.Callable[[EventContext], None]) -> types.FunctionType:
     """
     Registers a hook to be ran on every event.
     """
