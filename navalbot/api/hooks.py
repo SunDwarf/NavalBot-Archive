@@ -51,9 +51,12 @@ def on_generic_event(func: typing.Callable[[EventContext], None]) -> types.Funct
     return on_event("on_recv")(func)
 
 
-def on_event(name: str):
+def on_event(name: str, err_func=None):
     """
     Registers a hook to be run on a any event you specify.
+
+    You can optionally provide an err function.
+    In the event of an error, this function is called with the error object.
     """
 
     def _inner(func: typing.Callable[[EventContext], None]):
@@ -68,9 +71,18 @@ def on_event(name: str):
         if name not in instance.hooks:
             instance.hooks[name] = {}
 
+        async def __event_wrapper(ctx: EventContext):
+            try:
+                await func(ctx)  # Await the hook, wrapped inside a try.
+            except Exception as e:
+                if err_func:
+                    await err_func(e)
+                else:
+                    raise
+
         # Use func.__name__ as the key.
         # This prevents multiple messages on a reload.
-        instance.hooks[name][func.__name__] = func
+        instance.hooks[name][func.__name__] = __event_wrapper
         logger.info("Registered hook for `{}` -> `{}`".format(name, func.__name__))
 
         return func
