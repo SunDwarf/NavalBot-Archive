@@ -42,6 +42,7 @@ from raven_aiohttp import AioHttpTransport
 from navalbot.api import db
 from navalbot.api import util
 from navalbot.api.contexts import OnMessageEventContext
+from navalbot.api.locale import get_locale
 from navalbot.api.util import get_pool
 from navalbot.voice import voiceclient
 
@@ -336,9 +337,13 @@ class NavalClient(discord.Client):
             logger.info("Ignoring (presumably) image-only message.")
             return
 
+        # Load locale.
+        _loc_key = await db.get_config(message.server.id, "lang", default=None)
+        loc = get_locale(_loc_key)
+
         # Run on_message hooks.
         for hook in copy.copy(self.hooks.get("on_message", {})).values():
-            ctx = OnMessageEventContext(self, message)
+            ctx = OnMessageEventContext(self, message, loc)
             try:
                 await hook(ctx)
             except Exception:

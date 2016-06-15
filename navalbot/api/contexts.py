@@ -58,10 +58,11 @@ class OnMessageEventContext(EventContext):
     Context for on_message events.
     """
 
-    def __init__(self, client: 'botcls.NavalClient', message: discord.Message):
+    def __init__(self, client: 'botcls.NavalClient', message: discord.Message, locale: LocaleLoader):
         super().__init__(client)
 
         self._message = message
+        self._locale = locale
 
     @property
     def server(self):
@@ -79,21 +80,26 @@ class OnMessageEventContext(EventContext):
     def message(self):
         return self._message
 
+    async def reply(self, key: str, **fmt):
+        """
+        Wrapper around self.locale["key"] and self.client.send_message(self.message.channel, whatever)
+        """
+        key = self._locale[key]
+        key = key.format(**fmt)
+        await self.client.send_message(self.message.channel, key)
+        return key
 
-class CommandContext(Context):
+
+class CommandContext(OnMessageEventContext):
     """
     This class is a simple thin wrapper that stores a few tidbits of data.
     """
 
     def __init__(self, client: 'botcls.NavalClient', message: discord.Message, locale: LocaleLoader,
                  args: list = None):
-        super().__init__(client)
-        self.message = message
+        super().__init__(client, message, locale)
         self.locale = locale
         self.args = args
-
-        if self.me is not None:
-            assert isinstance(self.me, discord.Member)
 
         self.db = db
 
@@ -134,15 +140,6 @@ class CommandContext(Context):
         Deletes a config value from the DB.
         """
         await db.delete_config(self.server.id, name)
-
-    async def reply(self, key: str, **fmt):
-        """
-        Wrapper around self.locale["key"] and self.client.send_message(self.message.channel, whatever)
-        """
-        key = self.locale[key]
-        key = key.format(**fmt)
-        await self.client.send_message(self.message.channel, key)
-        return key
 
     async def send(self, message: str):
         """
