@@ -56,7 +56,7 @@ def on_event(name: str):
     Registers a hook to be run on a any event you specify.
     """
 
-    def _inner(func: typing.Callable[[NavalClient, dict], None]):
+    def _inner(func: typing.Callable[[EventContext], None]):
         try:
             instance = NavalClient.instance
             assert isinstance(instance, NavalClient)
