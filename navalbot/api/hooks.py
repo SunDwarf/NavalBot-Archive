@@ -76,9 +76,12 @@ def on_event(name: str, err_func=None):
                 await func(ctx)  # Await the hook, wrapped inside a try.
             except Exception as e:
                 if err_func:
-                    await err_func(ctx, e)
+                    reraise = await err_func(ctx, e)
                 else:
-                    raise
+                    reraise = True
+                # Re-raise the error if we need to.
+                if reraise:
+                    raise e
 
         # Use func.__name__ as the key.
         # This prevents multiple messages on a reload.

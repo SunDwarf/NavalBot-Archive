@@ -132,20 +132,12 @@ class CommandContext(OnMessageEventContext):
         self.db = db
 
     @property
-    def server(self) -> discord.Server:
-        return self.message.server
-
-    @property
-    def channel(self) -> discord.Channel:
-        return self.message.channel
-
-    @property
     def me(self) -> discord.Member:
         return self.server.me
 
     @property
     def author(self) -> discord.Member:
-        return self.message.author
+        return self.member
 
     async def get_config(self, name, default=None, type_: type = str):
         """
