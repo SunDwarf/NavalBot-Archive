@@ -128,7 +128,7 @@ async def get_factoid(ctx: CommandContext, data: str):
 
         # Invoke the new function.
         command = commands[command_word]
-        await command.invoke(client, message)
+        await command.invoke(ctx)
         return
 
     # Check if it's a file.
