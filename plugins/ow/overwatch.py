@@ -52,7 +52,7 @@ Top 5 heroes:
     # Build the two formatted strings.
     gst = ""
     for name, stat in st["game_stats"].items():
-        gst += "{}: {} Total\n".format(name.capitalize(),
+        gst += "{}: {} Total\n".format(name.replace("_", " ").capitalize(),
                                        stat)
 
     # Build the hero string.
