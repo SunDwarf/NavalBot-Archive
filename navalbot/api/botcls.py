@@ -172,6 +172,8 @@ class NavalClient(discord.Client):
 
         self.tb_session = aiohttp.ClientSession()
 
+        self.loaded = False
+
     def __del__(self):
         # Fuck off asyncio
         self.loop.set_exception_handler(lambda *args, **kwargs: None)
@@ -239,6 +241,7 @@ class NavalClient(discord.Client):
                 continue
         # Remove from path.
         sys.path.pop(0)
+        self.loaded = True
 
     async def on_ready(self):
         # Get the OAuth2 URL, or something
@@ -277,6 +280,9 @@ class NavalClient(discord.Client):
         await self.change_status(discord.Game(name=self.config.get("game_text", "Type ?info for help!")))
 
     async def on_message(self, message: discord.Message):
+        if not self.loaded:
+            logger.info("Ignoring messages until plugins are loaded.")
+            return
         # Increment the message count.
         util.msgcount += 1
 
