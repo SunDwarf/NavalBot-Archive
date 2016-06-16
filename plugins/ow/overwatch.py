@@ -51,10 +51,9 @@ Top 5 heroes:
 ```"""
     # Build the two formatted strings.
     gst = ""
-    for stat in st["game_stats"]:
-        gst += "{}: {} AVG / {} Total\n".format(stat["name"].capitalize(),
-                                                stat["avg"] if stat["avg"] is not None else "N/A",
-                                                stat["value"])
+    for name, stat in st["game_stats"].items():
+        gst += "{}: {} Total\n".format(name.capitalize(),
+                                       stat)
 
     # Build the hero string.
     hero_data = await get_profile_json(btag, endpoint="heroes")
