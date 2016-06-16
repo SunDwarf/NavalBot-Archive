@@ -46,11 +46,15 @@ async def check_pm_mention(ctx: OnMessageEventContext):
             await ctx.client.send_message(mentioner, constructed)
 
 
-@command("pmmentions", argcount=1)
+@command("pmmentions", argcount="+")
 async def pmmentions(ctx: CommandContext):
     """
     Enable or disable PM mentions.
     """
+    if len(ctx.args) == 0:
+        await ctx.reply("pmmentions.current", status=await ctx.get_config("{}:pmmentions".format(ctx.author.id)))
+        return
+
     if ctx.args[0] == "on":
         await ctx.set_config("{}:pmmentions".format(ctx.author.id), "on")
         await ctx.reply("pmmentions.status", status="on")

@@ -182,7 +182,7 @@ class NavalClient(discord.Client):
 
         This is only used to dispatch to hooks.
         """
-        for hook in self.hooks.get("on_recv", {}).values()  :
+        for hook in self.hooks.get("on_recv", {}).values():
             self.loop.create_task(hook(raw_data))
 
     async def on_error(self, event_method, *args, **kwargs):
@@ -239,7 +239,6 @@ class NavalClient(discord.Client):
                 continue
         # Remove from path.
         sys.path.pop(0)
-
 
     async def on_ready(self):
         # Get the OAuth2 URL, or something
