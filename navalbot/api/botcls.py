@@ -281,13 +281,22 @@ class NavalClient(discord.Client):
         # Increment the message count.
         util.msgcount += 1
 
+        if self.config.get("self_bot"):
+            if message.author != message.server.me:
+                logger.info("Ignoring message from not me.")
+                return
+
         if message.author.bot:
             logger.info("Ignoring message from bot account.")
             return
 
+        # Load locale.
+        _loc_key = await db.get_config(message.server.id, "lang", default=None)
+        loc = get_locale(_loc_key)
+
         # Run on_message_before_blacklist
         for hook in self.hooks.get("on_message_before_blacklist", {}).values():
-            ctx = OnMessageEventContext(self, message)
+            ctx = OnMessageEventContext(self, message, loc)
             try:
                 result = await hook(ctx)
             except:
@@ -337,10 +346,6 @@ class NavalClient(discord.Client):
             logger.info("Ignoring (presumably) image-only message.")
             return
 
-        # Load locale.
-        _loc_key = await db.get_config(message.server.id, "lang", default=None)
-        loc = get_locale(_loc_key)
-
         # Run on_message hooks.
         for hook in copy.copy(self.hooks.get("on_message", {})).values():
             ctx = OnMessageEventContext(self, message, loc)
@@ -353,14 +358,12 @@ class NavalClient(discord.Client):
 
     def navalbot(self):
         # Switch login method based on args.
-        use_oauth = self.config.get("client", {}).get("use_oauth", False)
-        if use_oauth:
-            login = (self.config.get("client", {}).get("oauth_bot_token", ""),)
-        else:
-            login = (self.config.get("client", {}).get("old_bot_user", "lol"),
-                     self.config.get("client", {}).get("old_bot_pw", "aaaa"))
+        login = (self.config.get("client", {}).get("oauth_bot_token", ""),)
         try:
-            self.loop.run_until_complete(self.login(*login))
+            if self.config.get("self_bot", False):
+                self.loop.run_until_complete(self.login(*login, bot=False))
+            else:
+                self.loop.run_until_complete(self.login(*login))
         except discord.errors.HTTPException as e:
             if e.response.status == 401:
                 logger.error("Your bot token is incorrect. Cannot login.")
