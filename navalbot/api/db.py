@@ -21,10 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # This handles aioredis DB stuff.
+import aioredis
 
 from navalbot.api import util
 
-async def get_config(server_id: str, key: str, default=None, type_: type=str) -> str:
+
+async def get_config(server_id: str, key: str, default=None, type_: type = str) -> str:
     """
     Gets a config from the redis DB.
     """
@@ -32,14 +34,14 @@ async def get_config(server_id: str, key: str, default=None, type_: type=str) ->
     # Get the value of config:server_id:key.
     built = "config:{sid}:{key}".format(sid=server_id, key=key)
     async with pool.get() as conn:
-        if not await conn.exists(built):
+        data = await conn.get(built)
+        if not data:
             return default
-        else:
-            data = await conn.get(built)
-            try:
-                return type_(data.decode())
-            except (ValueError, AttributeError):
-                return default
+        try:
+            return type_(data.decode())
+        except (ValueError, AttributeError):
+            return default
+
 
 async def set_config(server_id: str, key: str, value: str):
     """
@@ -60,7 +62,7 @@ async def delete_config(server_id: str, key: str):
     # Set config:server_id:key.
     built = "config:{sid}:{key}".format(sid=server_id, key=key)
     async with pool.get() as conn:
-        conn.delete(built)
+        return await conn.delete(built)
 
 
 async def get_key(key: str) -> str:
@@ -70,6 +72,7 @@ async def get_key(key: str) -> str:
             return (await conn.get(key)).decode()
         except AttributeError:
             return None
+
 
 async def set_key(key: str, value):
     pool = await util.get_pool()

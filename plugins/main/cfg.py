@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 import os
-import shlex
 
 import aioredis
 import discord
@@ -29,20 +28,7 @@ import discord
 from navalbot.api import db, decorators, util
 from navalbot.api.commands import oldcommand, commands, command
 from navalbot.api.commands.cmdclass import NavalRole
-from navalbot.api.commands.ctx import CommandContext
-
-
-@oldcommand("ggetcfg")
-@decorators.owner
-@decorators.enforce_args(1, ":x: Config set must be in `getcfg 'key'` format, "
-                            "with quotation marks surrounding the spaces")
-async def g_get_config(client: discord.Client, message: discord.Message, args: list):
-    """
-    Globally set a config value.
-    Owner-only.
-    """
-    val = util.get_global_config(args[0])
-    await client.send_message(message.channel, "`{}` -> `{}`".format(args[0], val))
+from navalbot.api.contexts import CommandContext
 
 
 @command("setcfg", argcount=2, roles={NavalRole.ADMIN})

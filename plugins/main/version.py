@@ -21,11 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import re
 
 import aiohttp
-import discord
-
 # =============== Commands
 from navalbot.api.commands import command
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 from navalbot.version import VERSION, VERSIONT, VERSUFF
 
 

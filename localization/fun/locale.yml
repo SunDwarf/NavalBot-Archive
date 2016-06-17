@@ -20,6 +20,21 @@ help.whois: |
 help.uptime: |
         Display the uptime of the bot.
 
+help.aesthetic: |
+        Ｆｕｌｌｗｉｄｔｈ ｓｏｍｅ ｔｅｘｔ．
+
+help.urban: |
+        Looks up your term on Urban Dictionary.
+
+help.subreddit: |
+        Returns a random link from the subreddit you specify.
+
+help.remindme: |
+        Reminds you in <x> seconds about <y>.
+
+help.tz: |
+        Shows the current time in the specified time zone.
+
 # fun strings
 # ech
 fun.chosen: "My choice was: `{choice}`"
@@ -27,8 +42,17 @@ fun.chosen: "My choice was: `{choice}`"
 fun.weather.bad_api_key: ":exclamation: No API key has been installed into the bot. Pester the owner to install it."
 fun.weather.rate_limit: ":exclamation: Hit the rate limit. Please wait."
 fun.weather.result: |
-        :cloud: _Weather for {place}:_
-        **Temperature:** {temp} °C **Humidity:** {hum} % **Wind:** {wind} m/s
+        {emoji} Weather for {place[0]}, {place[1]}:
+
+        The status is **{status}**.
+
+        **Temperature:** {temperature} °C
+        **Humidity:** {humidity} %
+        **Wind:** {wind} m/s
+
+fun.weather.rain: |
+        :umbrella: Rain in the last hour: {rain}cm
+
 fun.weather.no_such_place: ":x: {place} does not seem to exist."
 
 fun.commands: "**See https://github.com/SunDwarf/NavalBot/wiki for more info.**"
@@ -41,6 +65,7 @@ fun.whois.response: |
         ID: {author.id}
         Created at: {author.created_at}
         Colour: {author.colour}
+        Roles: {roles}
         Avatar URL: {author.avatar_url}
         ```
 
@@ -51,7 +76,7 @@ fun.stats.shard: "Currently shard `{shard_id}/{shard_count}`\n"
 fun.stats.response: |
         {shardm}Currently running on `{servcount}` server(s). Processed `{msgcount}` messages since startup.
         Connected to `{vcount}` voice channels, with `{scount}` streams currently playing.
-        Using `{memcount}MB` of memory.
+        Using `{memcount}MB` of memory. `{tasks}` tasks running.
 
 fun.urban: |
   **Your search for `{search}` returned the following:
@@ -60,3 +85,24 @@ fun.urban: |
   ***Example:*** {example}
 
 fun.sr.no_sr: ":x: Subreddit either doesn't exist or is NFSW."
+
+fun.reminder: "{mention} Reminder for: `{message}`"
+fun.reminder.no_args: ":x: You must provide a time and a message,"
+fun.reminder.reminding: ":heavy_check_mark: Reminder set."
+
+fun.tz.unknown: ":x: No such time zone: `{timezone}`"
+fun.tz.result: "It is currently `{t}` in the specified timezone."
+
+fun.servinfo: |
+      ```xl
+      Name: {server.name}
+      Server ID: {server.id}
+      Region: {server.region}
+      Large server: {server.large}
+
+      Channels: {channels}
+      Members: {server.member_count}
+      Created at: {created}
+
+      Owner: {server.owner.display_name}
+      ```

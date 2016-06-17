@@ -1,13 +1,13 @@
 """
 This allows setting up of the bot.
 """
+import logging
+
 import discord
 
 from navalbot.api import util
-from navalbot.api.commands import command, CommandContext
-
-import logging
-
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
 from navalbot.voice.voice_util import find_voice_channel
 
 logger = logging.getLogger("NavalBot")
@@ -172,7 +172,7 @@ async def setup(ctx: CommandContext):
     moderate = all((util.has_perm(perms, "ban_members"), util.has_perm(perms, "kick_members"),
                     util.has_perm(perms, "manage_messages")))
 
-    manage_channels = all((util.has_perm(perms, "manage_channels"),))
+    manage_channels = util.has_perm(perms, "manage_channels")
 
     # Could be done better.
     ps += _gen_message(manage_server, "Manage server")
@@ -187,6 +187,7 @@ async def setup(ctx: CommandContext):
         next_msg = await ctx.client.wait_for_message(timeout=10, author=ctx.author, channel=ctx.channel)
         if not next_msg or next_msg.content.lower() != "y":
             await ctx.send("Cancelling setup.")
+            return
 
     # First step, is create roles.
     if manage_roles:

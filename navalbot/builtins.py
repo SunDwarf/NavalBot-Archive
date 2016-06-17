@@ -22,18 +22,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-import os
 
-import discord
 import re
 
-from navalbot.api.commands import commands, command, Command, CommandContext
-from navalbot.api import db
-from navalbot.api.locale import get_locale
-from navalbot.api.util import sanitize, get_file
+import discord
 
 from navalbot import factoids
-
+from navalbot.api import db
+from navalbot.api.commands import commands, command, Command
+from navalbot.api.contexts import CommandContext
+from navalbot.api.locale import get_locale
 
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(\S*?) is (.*)')
@@ -57,6 +55,7 @@ async def help(ctx: CommandContext):
     h = await func.help(ctx.server)
 
     await ctx.client.send_message(ctx.channel, h)
+
 
 # region factoids
 async def default(client: discord.Client, message: discord.Message):

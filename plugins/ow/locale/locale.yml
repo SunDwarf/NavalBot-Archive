@@ -1,3 +1,15 @@
+help.get_ow_profile_data: |
+      Looks up an Overwatch profile.
+
+      If you do not pass an argument, it will look up yours.
+      If you do pass one, it can either be a battletag, or a user to look up their battletag.
+
+help.setbtag: |
+      Sets your battle.net battletag.
+
+help.getbtag: |
+      Gets the battletag of a user.
+
 ow.btag_not_set: ":x: Battletag is not set. Set it with `setbtag`."
 ow.no_such_btag: ":x: Could not find a profile for `{btag}`."
 ow.set_btag: ":heavy_check_mark: Battletag set to `{btag}`."

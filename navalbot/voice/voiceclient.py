@@ -23,17 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 # Contains the overridded voice client class.
 import asyncio
+import functools
 import logging
 import random
-from collections import deque
 from math import trunc, ceil
 
 import discord
-import functools
 import youtube_dl
 
 from navalbot.api import db
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 
 logger = logging.getLogger("NavalBot::Voice")
 
@@ -49,6 +48,7 @@ def set_bitrate(self, kbps):
         raise OpusError(ret)
 
     return kbps
+
 
 # Monkey-patch the opus encoder to accept high bit rate
 discord.opus.Encoder.set_bitrate = set_bitrate
@@ -247,7 +247,7 @@ class NavalVoiceClient(discord.VoiceClient):
             else:
                 title = i[1].get("title")
                 # get duration
-                dm, ds = divmod(i[1].get("duration"), 60)
+                dm, ds = divmod(i[1].get("duration", 0), 60)
                 df = "`[{:02d}:{:02d}]`".format(trunc(dm), trunc(ds))
             song_str += "{}. `{}` `{}`\n".format(item + 1, title, df)
 
@@ -496,4 +496,3 @@ class NavalVoiceClient(discord.VoiceClient):
         await self.disconnect()
         self.playing = False
         self.player = None
-

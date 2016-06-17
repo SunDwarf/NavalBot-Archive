@@ -11,12 +11,11 @@ class _AsyncMeta(type):
     Metaclass that allows you to have an async __init__.
     """
 
-    def __call__(cls, *args, **kwargs):
+    async def __call__(cls, *args, **kwargs):
         # Manually call __init__
         logger.info("Creating async class `{}`".format(cls.__name__))
-        coro = cls.__init__(cls, *args, **kwargs)
-        # Ensure it.
-        asyncio.ensure_future(coro, loop=loop)
+        # Call __init__ method async.
+        await cls.__init__(cls, *args, **kwargs)
         return cls
 
 

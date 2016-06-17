@@ -3,8 +3,10 @@ Plugin for overwatch stuff.
 """
 import logging
 
-from navalbot.api.commands import command, CommandContext
 import aiohttp
+
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
 
 OWAPI_BASE_URL = "https://owapi.net"
 
@@ -49,10 +51,9 @@ Top 5 heroes:
 ```"""
     # Build the two formatted strings.
     gst = ""
-    for stat in st["game_stats"]:
-        gst += "{}: {} AVG / {} Total\n".format(stat["name"].capitalize(),
-                                                stat["avg"] if stat["avg"] is not None else "N/A",
-                                                stat["value"])
+    for name, stat in st["game_stats"].items():
+        gst += "{}: {} Total\n".format(name.replace("_", " ").capitalize(),
+                                       stat)
 
     # Build the hero string.
     hero_data = await get_profile_json(btag, endpoint="heroes")
@@ -121,7 +122,7 @@ async def getbtag(ctx: CommandContext):
     Gets a battletag.
     """
     user = ctx.get_user() or ctx.author
-    btag = await ctx.db.get_key("overwatch:{}".format(ctx.author.id))
+    btag = await ctx.db.get_key("overwatch:{}".format(user))
 
     if btag is None:
         await ctx.reply("ow.btag_not_set")

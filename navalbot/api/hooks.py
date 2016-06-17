@@ -30,51 +30,36 @@ import typing
 import discord
 
 from navalbot.api.botcls import NavalClient
+from navalbot.api.contexts import EventContext
 
 logger = logging.getLogger("NavalBot")
 
 
-def on_message(func: typing.Callable[[NavalClient, discord.Message], None]) -> types.FunctionType:
+def on_message(func: typing.Callable[[EventContext], None]) -> types.FunctionType:
     """
     Registers a hook to be ran every message.
     """
-    try:
-        instance = NavalClient.instance
-        assert isinstance(instance, NavalClient)
-    except (AssertionError, AttributeError):
-        logger.critical("Attempted to register on_message for function `{}` before bot is created."
-                        .format(func.__name__))
-        return
 
-    if 'on_message' not in instance.hooks:
-        instance.hooks["on_message"] = []
-
-    instance.hooks["on_message"].append(func)
+    return on_event("on_message")(func)
 
 
-def on_generic_event(func: typing.Callable[[NavalClient, dict], None]) -> types.FunctionType:
+def on_generic_event(func: typing.Callable[[EventContext], None]) -> types.FunctionType:
     """
     Registers a hook to be ran on every event.
     """
-    try:
-        instance = NavalClient.instance
-        assert isinstance(instance, NavalClient)
-    except (AssertionError, AttributeError):
-        logger.critical("Attempted to register on_message for function `{}` before bot is created."
-                        .format(func.__name__))
-        return
 
-    if 'on_recv' not in instance.hooks:
-        instance.hooks['on_recv'] = []
-
-    instance.hooks['on_recv'].append(func)
+    return on_event("on_recv")(func)
 
 
-def on_event(name: str):
+def on_event(name: str, err_func=None):
     """
     Registers a hook to be run on a any event you specify.
+
+    You can optionally provide an err function.
+    In the event of an error, this function is called with the error object.
     """
-    def _inner(func: typing.Callable[[NavalClient, dict], None]):
+
+    def _inner(func: typing.Callable[[EventContext], None]):
         try:
             instance = NavalClient.instance
             assert isinstance(instance, NavalClient)
@@ -84,9 +69,24 @@ def on_event(name: str):
             return
 
         if name not in instance.hooks:
-            instance.hooks[name] = []
+            instance.hooks[name] = {}
 
-        instance.hooks[name].append(func)
+        async def __event_wrapper(ctx: EventContext):
+            try:
+                await func(ctx)  # Await the hook, wrapped inside a try.
+            except Exception as e:
+                if err_func:
+                    reraise = await err_func(ctx, e)
+                else:
+                    reraise = True
+                # Re-raise the error if we need to.
+                if reraise:
+                    raise e
+
+        # Use func.__name__ as the key.
+        # This prevents multiple messages on a reload.
+        instance.hooks[name][func.__name__] = __event_wrapper
+        logger.info("Registered hook for `{}` -> `{}`".format(name, func.__name__))
 
         return func
 

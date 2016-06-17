@@ -27,15 +27,19 @@ import functools
 import os
 import random
 
+import discord
 import praw
 import psutil
 import pyowm
+from pyowm.webapi25.weather import Weather
+from pyowm.webapi25.location import Location
 import urbandict
-
+import pytz
 from google import search
+
 from navalbot.api import db, util
 from navalbot.api.commands import command
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 
 VERSION = "1.0.0"
 
@@ -71,14 +75,9 @@ async def google(ctx: CommandContext):
 
 
 def _get_weather(api_key, userinput):
-    owm = pyowm.OWM(api_key)
+    owm = pyowm.OWM(api_key, version='2.5')
     observation = owm.weather_at_place(userinput)
-    # Get the weather and stuff.
-    w = observation.get_weather()
-    wind = w.get_wind()['speed']
-    humidity = w.get_humidity()
-    temp = w.get_temperature('celsius')['temp']
-    return wind, humidity, temp
+    return observation
 
 
 @command("weather", argcount="?", argerror=":x: You must specify a village/town/city/settlement to query!")
@@ -90,12 +89,45 @@ async def weather(ctx: CommandContext):
     if not api_key:
         await ctx.reply("fun.weather.bad_api_key")
         return
-    try:
-        userinput = ' '.join(ctx.args)
-        wind, humidity, temp = await util.with_threading(functools.partial(_get_weather, api_key, userinput))
-        await ctx.reply("fun.weather.result", place=userinput, temp=temp, hum=humidity, wind=wind)
-    except AttributeError:
+    userinput = ' '.join(ctx.args)
+    observation = await util.with_threading(functools.partial(_get_weather, api_key, userinput))
+    if not observation:
         await ctx.reply("fun.weather.no_such_place", place=userinput)
+        return
+
+    # Load out the weather.
+    weather = observation.get_weather()
+    assert isinstance(weather, Weather)
+
+    place = observation.get_location()
+    assert isinstance(place, Location)
+
+    place_name = place.get_name()
+    country = place.get_country()
+
+    # Load the status.
+    status = weather.get_status()
+    extended_status = weather.get_detailed_status()
+    temperature = weather.get_temperature("celsius")['temp']
+    humidity = weather.get_humidity()
+    wind = weather.get_wind()['speed']
+
+    # Pick an emoji.
+    if 'rain' in status.lower():
+        emoji = ":cloud_rain:"
+    elif 'clear' in status.lower():
+        emoji = ":sunny:"
+    else:
+        emoji = ":cloud:"
+
+    # First, send the generic result.
+    await ctx.reply("fun.weather.result", emoji=emoji, place=(place_name, country),
+                    temperature=temperature, humidity=humidity, wind=wind, status=extended_status)
+
+    if 'rain' in status.lower():
+        # Send rain information.
+        rain = weather.get_rain()['1h']
+        await ctx.reply("fun.weather.rain", rain=rain)
 
 
 @command("commands", "info")
@@ -115,8 +147,19 @@ async def whois(ctx: CommandContext):
 
     if not user:
         await ctx.reply("generic.cannot_find_user", user=ctx.args[0])
+        return
 
-    await ctx.reply("fun.whois.response", author=user)
+    # Get the roles.
+    s_roles = sorted(user.roles, key=lambda role: role.position)
+    # Remove the @everyone mention
+    n_roles = []
+    for r in s_roles:
+        assert isinstance(r, discord.Role)
+        if not r.is_everyone:
+            n_roles.append(r)
+    roles = ', '.join(r.name for r in n_roles)
+
+    await ctx.reply("fun.whois.response", author=user, roles=roles)
 
 
 @command("uptime")
@@ -142,6 +185,7 @@ async def stats(ctx: CommandContext):
     # Memory stats
     used_memory = psutil.Process().memory_info().rss
     used_memory = round(used_memory / 1024 / 1024, 2)
+    tasks = len(asyncio.Task.all_tasks())
     if hasattr(ctx.client, "shard_id") and ctx.client.shard_id is not None:
         shardm = ctx.locale["fun.stats.shard"].format(shard_id=ctx.client.shard_id + 1,
                                                       shard_count=ctx.client.shard_count) + "\n"
@@ -149,7 +193,7 @@ async def stats(ctx: CommandContext):
         shardm = ""
     await ctx.reply("fun.stats.response",
                     shardm=shardm, servcount=server_count, msgcount=msgcount, vcount=voice_clients,
-                    scount=streams, memcount=used_memory)
+                    scount=streams, memcount=used_memory, tasks=tasks)
 
 
 def _get_urban(get):
@@ -203,3 +247,59 @@ async def aesthetic(ctx: CommandContext):
         # Add 65248 to the ord() value to get the fullwidth counterpart.
         final_c += chr(ord(char) + 65248)
     await ctx.client.send_message(ctx.message.channel, final_c)
+
+
+@command("remind", "remindme", argcount="?")
+async def remindme(ctx: CommandContext):
+    """
+    Remind you to do stuff
+    """
+
+    async def _remind_task(time: int, s: str):
+        await asyncio.sleep(time)
+        await ctx.reply("fun.reminder", mention=ctx.author.mention, message=s)
+
+    if len(ctx.args) < 2:
+        await ctx.reply("fun.reminder.no_args")
+        return
+
+    try:
+        time = int(ctx.args[0])
+    except ValueError:
+        await ctx.reply("generic.not_int")
+        return
+
+    loop.create_task(_remind_task(time, ' '.join(ctx.args[1:])))
+    await ctx.reply("fun.reminder.reminding")
+
+
+@command("tz", argcount="+")
+async def timezone(ctx: CommandContext):
+    """
+    Checks the current time in the time zone specified.
+    """
+    try:
+        timezone = ctx.args[0]
+    except IndexError:
+        timezone = "UTC"
+
+    try:
+        tz = pytz.timezone(timezone)
+    except pytz.UnknownTimeZoneError:
+        await ctx.reply("fun.tz.unknown", timezone=timezone)
+        return
+
+    curr = datetime.datetime.now(tz=tz)
+    ts = curr.strftime("%Y-%m-%d %H:%M:%S %z")
+    await ctx.reply("fun.tz.result", t=ts)
+
+
+@command("servinfo")
+async def get_server_info(ctx: CommandContext):
+    """
+    Gets information about the server.
+    """
+    created_time = ctx.server.created_at.strftime("%Y-%m-%d %H:%M:%S %z")
+    await ctx.reply("fun.servinfo",
+                    server=ctx.server, channels=len(ctx.server.channels),
+                    created=created_time)

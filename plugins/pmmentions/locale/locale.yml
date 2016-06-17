@@ -1,2 +1,13 @@
+help.pmmentions: |
+      Messages you when you are mentioned.
+
+      There are three possible options:
+        - `on` -> Message you on every mention.
+        - `away` -> Only message you if you're away or offline.
+        - `off` (default) -> Do not message you.
+
+      You can check your current status by running the command without an argument.
+
 pmmentions.status: ":heavy_check_mark: Your pmmentions status is now `{status}`."
 pmmentions.unknown: ":x: Unknown option."
+pmmentions.current: "Your current pmmentions status is `{status}`."

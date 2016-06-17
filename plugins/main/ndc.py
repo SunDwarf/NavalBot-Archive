@@ -23,16 +23,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 # Owner commands.
 import asyncio
+import copy
 import importlib
+import inspect
 import logging
 import re
 import sys
+import traceback
 
 import aioredis
 
 from navalbot.api import util
 from navalbot.api.botcls import NavalClient
-from navalbot.api.commands import command, CommandContext
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
 
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```')
@@ -66,15 +70,7 @@ async def reload_all(ctx: CommandContext):
     """
     Reloads all modules.
     """
-    # Reload all navalbot stuff FIRST
-    for mod in sys.modules:
-        if mod.startswith("navalbot."):
-            # Reload it.
-            logger.info("Reloading module: {}".format(mod))
-            importlib.reload(sys.modules[mod])
-            logger.info("Reloaded module.")
-
-    # Then re-load plugins.
+    # Re-load plugins.
     for mod in sys.modules:
         if mod.startswith("plugins."):
             # Reload it.
@@ -101,6 +97,59 @@ async def py(ctx: CommandContext):
 
             exec(match_multi[0])
 
+
+@command("repl", owner=True)
+async def repl(ctx: CommandContext):
+    """
+    Shameless copy of R. Danny's REPL.
+    """
+    loc = copy.copy(locals())
+    glob = copy.copy(globals())
+
+    await ctx.send("Inside REPL session, type `exit` or `quit` to exit.")
+    while True:
+        command = await ctx.client.wait_for_message(author=ctx.author, channel=ctx.channel)
+        if command.content in ["exit", "quit"]:
+            await ctx.send("Exiting.")
+            break
+
+        executor = exec
+        if command.content.count('\n') == 0:
+            # single statement, potentially 'eval'
+            try:
+                code = compile(command.content, '<REPL>', 'eval')
+            except SyntaxError:
+                pass
+            else:
+                executor = eval
+
+        if executor is exec:
+            try:
+                code = compile(command.content, '<repl session>', 'exec')
+            except SyntaxError as e:
+                await ctx.send("```{}```".format(traceback.format_exc()))
+                continue
+
+        fmt = None
+
+        try:
+            result = executor(code, glob, loc)
+            if inspect.isawaitable(result):
+                result = await result
+        except Exception as e:
+            fmt = '```py\n{}\n```'.format(traceback.format_exc())
+        else:
+            if result is not None:
+                fmt = '```py\n{}\n```'.format(result)
+                loc["last"] = result
+
+        if fmt is not None:
+            if len(fmt) > 2000:
+                async with ctx.client.tb_session.post("http://dpaste.com/api/v2/", data={"content": fmt}) as p:
+                    await ctx.client.send_message(ctx.message.channel,
+                                                  ":exclamation: Error encountered: {}".format(await p.text()))
+            else:
+                await ctx.send(fmt)
 
 @command("rget", owner=True)
 async def redis_get(ctx: CommandContext):
@@ -164,6 +213,7 @@ async def globalunblacklist(ctx: CommandContext):
     else:
         user_id = user.id
 
+    await ctx.db.remove_from_set("global_blacklist", user_id)
     await ctx.reply("core.ndc.globalunblacklist", u=user_id)
 
 

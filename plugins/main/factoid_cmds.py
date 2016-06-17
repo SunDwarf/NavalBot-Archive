@@ -25,7 +25,7 @@ import discord
 
 from navalbot.api import db, util
 from navalbot.api.commands import command
-from navalbot.api.commands.ctx import CommandContext
+from navalbot.api.contexts import CommandContext
 
 
 @command("lock", argcount=1, errormsg=":x: You must provide a factoid to lock.")
@@ -45,7 +45,7 @@ async def lock(ctx: CommandContext):
         return
     # Lock it.
     await db.set_config(ctx.message.server.id, "fac:{}:locked".format(to_lock), str(ctx.message.author.id))
-    await ctx.reply("core.factoids.locked", fac=to_lock, u=ctx.message.author.id    )
+    await ctx.reply("core.factoids.locked", fac=to_lock, u=ctx.message.author.id)
 
 
 @command("del", "delfactoid", argcount=1, errormsg=":x: You must provide a factoid to delete.")
@@ -77,8 +77,7 @@ async def unlock(ctx: CommandContext):
     """
     to_ulock = ctx.args[0]
     locked = await db.get_config(ctx.message.server.id, "fac:{}:locked".format(to_ulock), type_=str, default=None)
-    unlock_exception = discord.utils.get(ctx.message.server.roles, name='Admin')
-    if locked and locked != ctx.message.author.id and not unlock_exception:
+    if locked and locked != ctx.message.author.id:
         # get username
         await ctx.reply("core.factoids.cannot_edit", fac=to_ulock, u=locked)
         return

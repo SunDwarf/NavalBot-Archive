@@ -19,7 +19,7 @@ help.unmute: |
 
         Der Bot muss `Manage Roles` als Berechtigung für diesen Befehl haben.
 
-help.colour: |
+help.change_colour: |
         Ändert die Farbe deines Namen zu einem hexadezimalen Wert, den du bestimmst
 
         Der Bot muss `Manage Roles` als Berechtigung für diesen Befehl haben.
@@ -29,6 +29,23 @@ help.purge: |
 
         Erwähne einen oder mehrere Benutzer, um ihre Nachrichten zu löschen.
 
+help.blacklist: |
+        Schließt einen Benutzer von der Benutzung des Bots in diesem Server aus.
+
+        Du musst die `Admin` Rolle besitzen, um diesen Befehl auszuführen.
+
+help.unblacklist: |
+        Hebt den Auschluss von der Benutzuung des Bots für einen Nutzer in diesem Server auf.
+
+        Du musst die `Admin` Rolle besitzen, um diesen Befehl auszuführen.
+
+help.globalblacklist: |
+        Für sehr schlimme oder nervige Benutzer. Nur der Besitzer des Bots kann diesen Befehl ausführen.
+
+        Dieser Befehl ist irreversibel außer du hast Zugriff auf die Redis Datenbank.
+
+help.clean: |
+        Löscht die letzten 100 Nachrichten des Bots.
 
 # Moderationsschlüssel
 moderation.low_permission: ":x: Meine Rolle (`{role}`) hat keine Berechtigung, diesen Nutzer zu ändern."

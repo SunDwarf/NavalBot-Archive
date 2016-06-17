@@ -22,16 +22,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
+import hashlib
 import os
+import random
 import re
 import shlex
+import string
 
-from navalbot.api.commands import CommandContext, commands
-
+from navalbot.api.commands import commands
+from navalbot.api.contexts import CommandContext
 # Factoid matcher compiled
-from navalbot.api.util import sanitize, get_file
+from navalbot.api.util import sanitize, get_file, get_image
 
-factoid_matcher = re.compile(r'(\S*?) is (.*)')
+factoid_matcher = re.compile(r'(.*?) is (.*)', re.S)
 
 # Command matcher compiled
 command_matcher = re.compile(r'{(.*)}')
@@ -69,13 +72,14 @@ async def set_factoid(ctx: CommandContext, match):
 
     # Download the factoid, if applicable.
     if fac.startswith("http") and 'youtube' not in fac:
-        # download as a file
-        file = sanitize(fac.split('/')[-1])
-        await get_file((ctx.client, ctx.message), url=fac, name=file)
-        fac = "file:{}".format(file)
+        # download the file, with a filename.
+        fname = await get_image(url=fac)
+        if fname:
+            fac = "file:{}".format(fname)
 
     await ctx.set_config("fac:{}".format(name), fac)
     await ctx.reply("core.factoids.set", name=name, content=fac)
+
 
 async def get_factoid(ctx: CommandContext, data: str):
     """
@@ -83,8 +87,7 @@ async def get_factoid(ctx: CommandContext, data: str):
     """
     prefix = await ctx.get_config("command_prefix", "?")
     # Split data apart and load that factoid, because fuck spaces.
-    to_load = data.split(" ")[0]
-    content = await ctx.get_config("fac:{}".format(to_load))
+    content = await ctx.get_config("fac:{}".format(data))
     if not content:
         # Don't do anything.
         return
@@ -103,7 +106,7 @@ async def get_factoid(ctx: CommandContext, data: str):
 
         # Check if it is in commands.
         if command_word not in commands:
-            await ctx.reply("generic.cannot_find_command".format(command_word))
+            await ctx.reply("generic.cannot_find_command", cmd=command_word)
             return
 
         # Load out the command.
@@ -116,8 +119,6 @@ async def get_factoid(ctx: CommandContext, data: str):
             old_args = old_content.split(" ")[1:]
 
         # Format the new content, using the inline command args.
-        message = ctx.message
-        client = ctx.client
         try:
             ctx.message.content = data.format(*old_args, full=' '.join(old_args))
         except ValueError:
@@ -125,7 +126,7 @@ async def get_factoid(ctx: CommandContext, data: str):
 
         # Invoke the new function.
         command = commands[command_word]
-        await command.invoke(client, message)
+        await command.invoke(ctx)
         return
 
     # Check if it's a file.

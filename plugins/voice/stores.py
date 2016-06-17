@@ -30,5 +30,3 @@ try:
     voice_locks
 except NameError:
     voice_locks = {}
-
-

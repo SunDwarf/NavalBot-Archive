@@ -20,11 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 =================================
 """
-import aioredis
-import discord
 import logging
 
-from navalbot.api.commands import command, CommandContext
+import aioredis
+import discord
+
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
 from navalbot.api.commands.cmdclass import NavalRole
 
 logger = logging.getLogger("NavalBot")
@@ -301,7 +303,19 @@ async def purge(ctx: CommandContext):
         return
 
 
-@command("blacklist", argcount=1, role={NavalRole.ADMIN})
+@command("clean")
+async def clean(ctx: CommandContext):
+    """
+    Cleans bot messages.
+
+    Removes all messages from the bot in the last 100 messages.
+    """
+    check = lambda msg: msg.author == ctx.me
+    msgs = await ctx.client.purge_from(ctx.channel, limit=100, check=check)
+    await ctx.reply("moderation.deleted_messages", count=len(msgs))
+
+
+@command("blacklist", argcount=1, roles={NavalRole.ADMIN})
 async def blacklist(ctx: CommandContext):
     """
     Blacklists a user, so they cannot use the bot.
@@ -316,7 +330,7 @@ async def blacklist(ctx: CommandContext):
     await ctx.reply("moderation.blacklisted", user=user.display_name)
 
 
-@command("unblacklist", argcount=1, role={NavalRole.ADMIN})
+@command("unblacklist", argcount=1, roles={NavalRole.ADMIN})
 async def unblacklist(ctx: CommandContext):
     """
     Removes a user from the blacklist.

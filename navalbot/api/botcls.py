@@ -22,29 +22,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # Subclass of discord.Client.
+import asyncio
+import copy
 import importlib
 import json
-import os
 import logging
-import traceback
+import os
 import shutil
 import sys
-import time
+import traceback
 
-import asyncio
-
+import aiohttp
 import aioredis
-import yaml
 import discord
+import yaml
 from raven import Client
 from raven_aiohttp import AioHttpTransport
 
-from navalbot import builtins
 from navalbot.api import db
-from navalbot.api.commands import commands, Command
 from navalbot.api import util
+from navalbot.api.contexts import OnMessageEventContext
+from navalbot.api.locale import get_locale
 from navalbot.api.util import get_pool
-
 from navalbot.voice import voiceclient
 
 logger = logging.getLogger("NavalBot")
@@ -153,10 +152,15 @@ class NavalClient(discord.Client):
         self.modules = {}
         self.hooks = {}
 
-        if not os.path.exists("config.yml"):
-            shutil.copyfile("config.example.yml", "config.yml")
+        try:
+            config_file = sys.argv[1]
+        except IndexError:
+            config_file = "config.yml"
 
-        with open("config.yml", "r") as f:
+        if not os.path.exists(config_file):
+            shutil.copyfile("config.example.yml", config_file)
+
+        with open(config_file, "r") as f:
             self.config = yaml.load(f)
 
         # Create a client if the config says so.
@@ -165,6 +169,10 @@ class NavalClient(discord.Client):
             self._raven_client = Client(dsn=self.config.get("sentry_dsn"), transport=AioHttpTransport)
         else:
             self._raven_client = None
+
+        self.tb_session = aiohttp.ClientSession()
+
+        self.loaded = False
 
     def __del__(self):
         # Fuck off asyncio
@@ -176,7 +184,7 @@ class NavalClient(discord.Client):
 
         This is only used to dispatch to hooks.
         """
-        for hook in self.hooks.get("on_recv", []):
+        for hook in self.hooks.get("on_recv", {}).values():
             self.loop.create_task(hook(raw_data))
 
     async def on_error(self, event_method, *args, **kwargs):
@@ -202,6 +210,8 @@ class NavalClient(discord.Client):
         if not os.path.exists(os.path.join(os.getcwd(), "plugins/")):
             logger.critical("No plugins directory exists. Your bot is effectively useless.")
             return
+        # Add cwd to sys.path
+        sys.path.insert(0, os.path.join(os.getcwd()))
         # Loop over things in plugins/
         for entry in os.scandir("plugins/"):
             if entry.name == "__pycache__" or entry.name == "__init__.py":
@@ -213,6 +223,10 @@ class NavalClient(discord.Client):
                     name = entry.name
                 else:
                     continue
+            # Check in the config.
+            if name in self.config.get("disabled", []):
+                logger.info("Skipping disabled plugin {}.".format(name))
+                continue
             import_name = "plugins." + name
             # Import using importlib.
             try:
@@ -224,7 +238,10 @@ class NavalClient(discord.Client):
             except Exception as e:
                 logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
                 traceback.print_exc()
-                return
+                continue
+        # Remove from path.
+        sys.path.pop(0)
+        self.loaded = True
 
     async def on_ready(self):
         # Get the OAuth2 URL, or something
@@ -251,7 +268,7 @@ class NavalClient(discord.Client):
         await self.load_plugins()
 
         # Run on_ready hooks
-        for hook in self.hooks.get("on_ready", []):
+        for hook in self.hooks.get("on_ready", {}).values():
             try:
                 await hook(self)
             except:
@@ -260,20 +277,33 @@ class NavalClient(discord.Client):
                 continue
 
         # Set the game.
-        await self.change_status(discord.Game(name="Type ?info for help!"))
+        await self.change_status(discord.Game(name=self.config.get("game_text", "Type ?info for help!")))
 
     async def on_message(self, message: discord.Message):
+        if not self.loaded:
+            logger.info("Ignoring messages until plugins are loaded.")
+            return
         # Increment the message count.
         util.msgcount += 1
+
+        if self.config.get("self_bot"):
+            if message.author != message.server.me:
+                logger.info("Ignoring message from not me.")
+                return
 
         if message.author.bot:
             logger.info("Ignoring message from bot account.")
             return
 
+        # Load locale.
+        _loc_key = await db.get_config(message.server.id, "lang", default=None)
+        loc = get_locale(_loc_key)
+
         # Run on_message_before_blacklist
-        for hook in self.hooks.get("on_message_before_blacklist", []):
+        for hook in self.hooks.get("on_message_before_blacklist", {}).values():
+            ctx = OnMessageEventContext(self, message, loc)
             try:
-                result = await hook(self, message)
+                result = await hook(ctx)
             except:
                 logger.error("Caught exception in hook on_message_before_blacklist -> {}".format(hook.__name__))
                 traceback.print_exc()
@@ -299,10 +329,6 @@ class NavalClient(discord.Client):
 
         # Check for a valid server.
         if message.server is not None:
-            prefix = await db.get_config(message.server.id, "command_prefix", "?")
-            autodelete = True if await db.get_config(message.server.id, "autodelete") == "True" else False
-            if autodelete and message.content.startswith(prefix):
-                await self.delete_message(message)
             logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
         else:
             # No DMs
@@ -319,51 +345,30 @@ class NavalClient(discord.Client):
             # Ignore the message.
             logger.info("Ignoring message from blacklisted member {message.author.display_name}"
                         .format(message=message))
+            return
 
         if len(message.content) == 0:
             logger.info("Ignoring (presumably) image-only message.")
             return
 
-        # Run on_message hooks
-        # for hook in cmds.message_hooks.values():
-        #    logger.info("Running hook {}".format(hook.__name__))
-        #    try:
-        #        await hook(client, message)
-        #    except StopProcessing:
-        #        return
-
         # Run on_message hooks.
-        for hook in self.hooks.get("on_message", []):
-            self.loop.create_task(hook(self, message))
-
-        if message.content.startswith(prefix):
-            cmd_content = message.content[len(prefix):]
-            cmd_word = cmd_content.split(" ")[0].lower()
+        for hook in copy.copy(self.hooks.get("on_message", {})).values():
+            ctx = OnMessageEventContext(self, message, loc)
             try:
-                coro = commands[cmd_word]
-            except KeyError as e:
-                logger.warning("-> No such command: " + str(e))
-                coro = builtins.default
-            try:
-                if isinstance(coro, Command):
-                    await coro.invoke(self, message)
-                else:
-                    await coro(self, message)
-            except Exception as e:
-                await self.send_message(message.channel, content="```\n{}\n```".format(traceback.format_exc()))
-                # Allow it to fall through.
-                raise
+                await hook(ctx)
+            except Exception:
+                logger.error("Caught exception in hook on_message -> {}".format(hook.__name__))
+                traceback.print_exc()
+                continue
 
     def navalbot(self):
         # Switch login method based on args.
-        use_oauth = self.config.get("client", {}).get("use_oauth", False)
-        if use_oauth:
-            login = (self.config.get("client", {}).get("oauth_bot_token", ""),)
-        else:
-            login = (self.config.get("client", {}).get("old_bot_user", "lol"),
-                     self.config.get("client", {}).get("old_bot_pw", "aaaa"))
+        login = (self.config.get("client", {}).get("oauth_bot_token", ""),)
         try:
-            self.loop.run_until_complete(self.login(*login))
+            if self.config.get("self_bot", False):
+                self.loop.run_until_complete(self.login(*login, bot=False))
+            else:
+                self.loop.run_until_complete(self.login(*login))
         except discord.errors.HTTPException as e:
             if e.response.status == 401:
                 logger.error("Your bot token is incorrect. Cannot login.")

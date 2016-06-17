@@ -1,0 +1,12 @@
+help.pmmentions: |
+     Benachrichtigt dich, wenn du erwähnst wirst.
+
+      Es gibt drei verschiedene Optionen:
+        - `on` -> Benachrichtigt dich bei jeder Erwähnung.
+        - `away` -> Benachrichtigt dich nur, wenn du offline oder abwesend bist.
+        - `off` (standard) -> Benachrichtigt dich nicht.
+
+      Du kannst deinen aktuellen `pmmentions` Status einsehen, indem du den Befehl ohne weiteres Argument ausführst.
+
+pmmentions.status: ":heavy_check_mark: Dein pmmentions-Status ist nun `{status}`."
+pmmentions.unknown: ":x: Unbekannte Option."

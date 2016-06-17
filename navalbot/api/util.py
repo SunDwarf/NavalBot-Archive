@@ -23,21 +23,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import asyncio
 import datetime
+import hashlib
 import logging
+import mimetypes
 import os
-import shlex
 import shutil
 import time
 import typing
+from collections import OrderedDict
 from concurrent import futures
 from math import floor
+import functools
+import re
 
 import aiohttp
 import aioredis
 import discord
-import yaml
 
 from navalbot.api import db
+from navalbot.api import botcls
 
 startup = datetime.datetime.fromtimestamp(time.time())
 
@@ -55,10 +59,8 @@ redis_pool = None
 if not os.path.exists("config.yml"):
     shutil.copyfile("config.example.yml", "config.yml")
 
-with open("config.yml", "r") as f:
-    global_config = yaml.load(f)
-
 logger = logging.getLogger("NavalBot")
+
 
 async def with_threading(func):
     """
@@ -113,6 +115,7 @@ async def get_pool() -> aioredis.RedisPool:
     Gets the redis connection pool.
     """
     global redis_pool
+    global_config = botcls.NavalClient.get_navalbot().config
     if not redis_pool:
         redis_pool = await aioredis.create_pool(
             (global_config["redis"]["ip"], global_config["redis"]["port"]),
@@ -137,6 +140,7 @@ async def has_permissions_with_override(author: discord.Member, roles: set,
     allowed = roles.union(allowed)
 
     return has_permissions(author, allowed)
+
 
 async def _get_overrides(serv_id: int, cmd_name: str) -> set:
     async with (await get_pool()).get() as conn:
@@ -181,7 +185,8 @@ def prov_dec_func(func1, func2):
     return func2
 
 
-def get_global_config(key, default=0, type_: type=None):
+def get_global_config(key, default=0, type_: type = None):
+    global_config = botcls.NavalClient.get_navalbot().config
     if type_ is not None:
         return type_(global_config.get(key, default))
     else:
@@ -206,8 +211,48 @@ async def get_file(client: tuple, url, name):
                 print("--> Saved file to {}".format(name))
 
 
+async def get_image(url: str) -> typing.Union[str, None]:
+    """
+    Get an image if the mime type says it's an image, otherwise return None.
+
+    Then, return the file name with the appropriate extension.
+    """
+    with aiohttp.ClientSession() as sess:
+        async with sess.head(url) as hh:
+            assert isinstance(hh, aiohttp.ClientResponse)
+            if "image" not in hh.headers.get("Content-Type", ""):
+                # Not an image, return.
+                return
+
+        # Get the image.
+        async with sess.get(url) as got:
+            assert isinstance(got, aiohttp.ClientResponse)
+            # Don't download big files.
+            if int(got.headers["content-length"]) > 1024 * 1024 * 8:
+                return None
+            # Generate the file name using the hash of the URL.
+            name = hashlib.sha224(url.encode()).hexdigest()
+            # Guess the extension.
+            ext = mimetypes.guess_extension(got.headers.get("Content-Type", ""))
+            if ext == ".jpe":
+                # .jpe is bad
+                ext = ".jpg"
+            if not ext:
+                # AAAA what
+                # Skip the file.
+                return
+            # Create the final file name.
+            final = name + ext
+            # Download the file.
+            with open(os.path.join(os.getcwd(), 'files', final), 'wb') as f:
+                f.write(await got.read())
+            # Return the name.
+            return final
+
+
 def sanitize(param):
-    ret = ''.join([c for c in param if c.isalnum()])
+    # Strip out `/` from the path to prevent transversal through directories.
+    ret = ''.join([c for c in param if c.isalnum() or c in [".", "_"]])
     return ret
 
 
@@ -236,3 +281,31 @@ def has_perm(perms: discord.Permissions, attr: str) -> bool:
     if getattr(perms, attr, False):
         return True
     return False
+
+
+@functools.lru_cache(maxsize=None)
+def get_regex(reg: str):
+    """
+    Returns a compiled regular expression.
+    """
+    return re.compile(reg)
+
+
+def async_lru(size=100):
+    cache = OrderedDict()
+
+    def decorator(fn):
+        @functools.wraps(fn)
+        async def memoizer(*args, **kwargs):
+            key = str((args, kwargs))
+            try:
+                cache[key] = cache.pop(key)
+            except KeyError:
+                if len(cache) >= size:
+                    cache.popitem(last=False)
+                cache[key] = await fn(*args, **kwargs)
+            return cache[key]
+
+        return memoizer
+
+    return decorator
