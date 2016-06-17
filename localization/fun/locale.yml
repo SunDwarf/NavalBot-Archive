@@ -42,8 +42,17 @@ fun.chosen: "My choice was: `{choice}`"
 fun.weather.bad_api_key: ":exclamation: No API key has been installed into the bot. Pester the owner to install it."
 fun.weather.rate_limit: ":exclamation: Hit the rate limit. Please wait."
 fun.weather.result: |
-        :cloud: _Weather for {place}:_
-        **Temperature:** {temp} °C **Humidity:** {hum} % **Wind:** {wind} m/s
+        {emoji} Weather for {place[0]}, {place[1]}:
+
+        The status is **{status}**.
+
+        **Temperature:** {temperature} °C
+        **Humidity:** {humidity} %
+        **Wind:** {wind} m/s
+
+fun.weather.rain: |
+        :umbrella: Rain in the last hour: {rain}cm
+
 fun.weather.no_such_place: ":x: {place} does not seem to exist."
 
 fun.commands: "**See https://github.com/SunDwarf/NavalBot/wiki for more info.**"

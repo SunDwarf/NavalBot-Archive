@@ -119,8 +119,6 @@ async def get_factoid(ctx: CommandContext, data: str):
             old_args = old_content.split(" ")[1:]
 
         # Format the new content, using the inline command args.
-        message = ctx.message
-        client = ctx.client
         try:
             ctx.message.content = data.format(*old_args, full=' '.join(old_args))
         except ValueError:
