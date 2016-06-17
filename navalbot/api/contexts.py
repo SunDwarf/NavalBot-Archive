@@ -36,6 +36,8 @@ class EventContext(Context):
     This event will throw errors if you attempt to access a property that doesn't exist in a specific event.
     """
 
+    event = "UNKNOWN"
+
     @property
     def server(self) -> discord.Server:
         raise NotImplementedError
@@ -76,11 +78,18 @@ class EventContext(Context):
             chan = discord.utils.get(self.server.channels, name=name_or_id)
         return chan
 
+    def __repr__(self):
+        return "<{} for client {} in event `{}`>".format(
+            self.__class__.__name__, str(self.client.user), self.event
+        )
+
 
 class OnMessageEventContext(EventContext):
     """
     Context for on_message events.
     """
+
+    event = "ON_MESSAGE"
 
     def __init__(self, client: 'botcls.NavalClient', message: discord.Message, locale: LocaleLoader):
         super().__init__(client)
@@ -176,4 +185,3 @@ class CommandContext(OnMessageEventContext):
         if len(self.args) >= 1:
             u = self.message.server.get_member_named(' '.join(self.args))
             return u
-
