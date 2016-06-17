@@ -55,7 +55,7 @@ fun.weather.rain: |
 
 fun.weather.no_such_place: ":x: {place} does not seem to exist."
 
-fun.commands: "**See https://github.com/SunDwarf/NavalBot/wiki for more info.**"
+fun.commands: "**See https://github.com/NavalBot/NavalBot-core for more info.**"
 
 fun.whois.response: |
         :mag_right: Whois for {author.name}:

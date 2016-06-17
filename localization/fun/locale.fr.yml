@@ -31,7 +31,7 @@ fun.weather.result: |
         **Température:** {temp} °C **Humidité:** {hum} % **Vents:** {wind} m/s
 fun.weather.no_such_place: ":x: {place} n'existe pas."
 
-fun.commands: "**Pour plus d'informations, consultez le wiki:  https://github.com/SunDwarf/NavalBot/wiki (en anglais)**"
+fun.commands: "**Pour plus d'informations, consultez le wiki: https://github.com/NavalBot/NavalBot-core/wiki (en anglais)**"
 
 fun.whois.response: |
         :mag_right: Whois pour {author.name}:
