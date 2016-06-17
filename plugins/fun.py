@@ -126,7 +126,7 @@ async def weather(ctx: CommandContext):
 
     if 'rain' in status.lower():
         # Send rain information.
-        rain = weather.get_rain()['1h']
+        rain = weather.get_rain().get("1h", 0)
         await ctx.reply("fun.weather.rain", rain=rain)
 
 
