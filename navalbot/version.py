@@ -18,6 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-VERSION = "6.0.0"
+VERSION = "6.0.1"
 VERSUFF = ""
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
