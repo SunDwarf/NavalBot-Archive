@@ -20,7 +20,7 @@ async def get_profile_json(btag: str, endpoint: str = "stats", version=1) -> dic
     url = OWAPI_BASE_URL + "/api/v{}/u/{}/{}".format(version, btag, endpoint)
     logger.info("GET => {}".format(url))
     async with aiohttp.ClientSession() as sess:
-        async with sess.get(OWAPI_BASE_URL + "/api/v1/u/{}/{}".format(btag, endpoint)) as r:
+        async with sess.get(url) as r:
             assert isinstance(r, aiohttp.ClientResponse)
             if r.status != 200:
                 # Usually a 404.
