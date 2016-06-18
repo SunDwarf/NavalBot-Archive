@@ -39,6 +39,7 @@ from google import search
 
 from navalbot.api import db, util
 from navalbot.api.commands import command
+from navalbot.api.commands.cmdclass import NavalRole
 from navalbot.api.contexts import CommandContext
 
 VERSION = "1.0.0"
@@ -303,3 +304,18 @@ async def get_server_info(ctx: CommandContext):
     await ctx.reply("fun.servinfo",
                     server=ctx.server, channels=len(ctx.server.channels),
                     created=created_time)
+
+
+@command("timetravel", roles={NavalRole.ADMIN})
+async def timetravel(ctx: CommandContext):
+    """
+    Time-travel to the past.
+    """
+    i = ctx.client.logs_from(ctx.channel, after=ctx.channel, limit=1)
+    msg = []
+    async for m in i:
+        msg.append(m)
+
+    msg = msg[0]
+    await ctx.client.pin_message(msg)
+    await ctx.send(msg.id)
