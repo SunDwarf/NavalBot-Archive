@@ -13,11 +13,11 @@ OWAPI_BASE_URL = "https://owapi.net"
 logger = logging.getLogger("NavalBot")
 
 
-async def get_profile_json(btag: str, endpoint: str = "stats") -> dict:
+async def get_profile_json(btag: str, endpoint: str = "stats", version=1) -> dict:
     """
     Get the profile JSON using owapi.
     """
-    url = OWAPI_BASE_URL + "/api/v1/u/{}/{}".format(btag, endpoint)
+    url = OWAPI_BASE_URL + "/api/v{}/u/{}/{}".format(version, btag, endpoint)
     logger.info("GET => {}".format(url))
     async with aiohttp.ClientSession() as sess:
         async with sess.get(OWAPI_BASE_URL + "/api/v1/u/{}/{}".format(btag, endpoint)) as r:
@@ -33,7 +33,7 @@ async def get_stats_formatted(btag: str) -> str:
     Gets the formatted stats output of a user.
     """
     # First, get the stats endpoint.
-    st = await get_profile_json(btag, endpoint="stats")
+    st = await get_profile_json(btag, endpoint="stats", version=2)
     if st is None:
         return None
 
