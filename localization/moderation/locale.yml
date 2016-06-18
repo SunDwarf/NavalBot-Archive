@@ -64,3 +64,6 @@ moderation.deleted_messages: ":bomb: {count} messages deleted."
 
 moderation.blacklisted: ":heavy_check_mark: Blacklisted user {user}."
 moderation.unblacklisted: ":heavy_check_mark: Unblacklisted user {user}."
+
+moderation.hidden: ":heavy_check_mark: Hidden channel `{channel}`."
+moderation.unhidden: ":heavy_check_mark: Unhid channel `{channel}`."

@@ -291,6 +291,9 @@ class NavalClient(discord.Client):
                 logger.info("Ignoring message from not me.")
                 return
 
+            if message.content.startswith("`"):
+                return
+
         if message.author.bot:
             logger.info("Ignoring message from bot account.")
             return

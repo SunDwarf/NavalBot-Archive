@@ -134,13 +134,13 @@ async def ensure_muted(ctx: CommandContext):
     if created:
         # Add `muted` denial to all channels.
         # This may seem like allowed perms, but the True means 'deny this'.
-        allowed_perms = discord.Permissions.none()
-        allowed_perms.send_messages = True
-        allowed_perms.send_tts_messages = True
-        allowed_perms.speak = True
+        allowed_perms = discord.PermissionOverwrite()
+        allowed_perms.send_messages = False
+        allowed_perms.send_tts_messages = False
+        allowed_perms.speak = False
 
         for chan in ctx.server.channels:
-            await ctx.client.edit_channel_permissions(chan, muted, deny=allowed_perms)
+            await ctx.client.edit_channel_permissions(chan, muted, allowed_perms)
 
     return muted
 
@@ -342,3 +342,49 @@ async def unblacklist(ctx: CommandContext):
 
     await ctx.db.remove_from_set("blacklist:{}".format(ctx.server.id), user.id)
     await ctx.reply("moderation.unblacklisted", user=user.display_name)
+
+
+@command("hide", argcount=1)
+async def hide_channel(ctx: CommandContext):
+    """
+    Hides a channel from you.
+    """
+    if len(ctx.message.channel_mentions) < 1:
+        channel = ctx.get_channel(ctx.args[0])
+    else:
+        channel = ctx.message.channel_mentions[0]
+    if not channel:
+        await ctx.reply("generic.cannot_find_channel", channel=ctx.args[0])
+        return
+    # Create the perms overwrite
+    perms = discord.PermissionOverwrite()
+    perms.read_messages = False
+    try:
+        await ctx.client.edit_channel_permissions(channel, ctx.author, perms)
+        await ctx.reply("moderation.hidden", channel=channel.name)
+    except discord.Forbidden:
+        await ctx.reply("moderation.cannot_edit_server")
+        return
+
+
+@command("unhide", argcount=1)
+async def unhide_channel(ctx: CommandContext):
+    """
+    Un-hides a channel from you.
+    """
+    if len(ctx.message.channel_mentions) < 1:
+        channel = ctx.get_channel(ctx.args[0])
+    else:
+        channel = ctx.message.channel_mentions[0]
+    if not channel:
+        await ctx.reply("generic.cannot_find_channel", channel=ctx.args[0])
+        return
+
+    perms = discord.PermissionOverwrite()
+    perms.read_messages = None
+    try:
+        await ctx.client.edit_channel_permissions(channel, ctx.author, perms)
+        await ctx.reply("moderation.unhidden", channel=channel.name)
+    except discord.Forbidden:
+        await ctx.reply("moderation.cannot_edit_server")
+        return
