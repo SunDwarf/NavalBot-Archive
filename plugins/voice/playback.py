@@ -186,19 +186,20 @@ async def play(ctx: CommandContext):
         try:
             lock.release()
         except RuntimeError:
-            pass
+            try:
+                del voice_locks[ctx.message.server.id]
+            except Exception:
+                pass
     except Exception as e:
         await ctx.reply("voice.playback.ytdl_error", err=e)
         try:
             lock.release()
         except RuntimeError:
-            pass
+            try:
+                del voice_locks[ctx.message.server.id]
+            except Exception:
+                pass
         return
-
-    try:
-        del voice_locks[ctx.message.server.id]
-    except IndexError:
-        pass
 
     if not info:
         await ctx.reply("voice.playback.bad_info")
@@ -221,10 +222,6 @@ async def play(ctx: CommandContext):
             info["duration"] = 0
 
         pl_data = None
-
-    # Contrary to the name, this file DOES use queues.
-    # However, unlike voice_queue, OAuth2 bots can run on multiple voice servers at once.
-    # This means multiple queues can be used per bot.
 
     # What this coroutine does:
     # 1. Checks for the queue of a specific server.
