@@ -66,6 +66,9 @@ async def reset(ctx: CommandContext):
     if lock:
         del voice_locks[ctx.message.server.id]
 
+    # Send a voice state to kill the connection, even if it doesn't exist.
+    await ctx.client.ws.voice_state(ctx.server.id, None, self_mute=True)
+
     vc = ctx.client.voice_client_in(ctx.message.server)
     if not vc:
         await ctx.reply("voice.reset.success")
@@ -289,7 +292,6 @@ async def play(ctx: CommandContext):
             # Add it to the queue.
             try:
                 # Create the coro factory
-
                 fac = coro_factory(voice_client.oauth2_play, ctx, item["url"], item)
                 queue.put_nowait((fac, item))
             except asyncio.QueueFull:
