@@ -29,10 +29,12 @@ import re
 import shlex
 import string
 
+import discord
+
 from navalbot.api.commands import commands
 from navalbot.api.contexts import CommandContext
 # Factoid matcher compiled
-from navalbot.api.util import sanitize, get_file, get_image
+from navalbot.api.util import sanitize, get_file, get_image, logger
 
 factoid_matcher = re.compile(r'(.*?) is (.*)', re.S)
 
@@ -118,14 +120,43 @@ async def get_factoid(ctx: CommandContext, data: str):
         except ValueError:
             old_args = old_content.split(" ")[1:]
 
-        # Format the new content, using the inline command args.
-        try:
-            ctx.message.content = data.format(*old_args, full=' '.join(old_args))
-        except ValueError:
-            await ctx.reply("core.factoids.bad_args")
+        if not ('{' in old_content and '}' in old_content):
+            # Just replace the data with the factoid data, instead of parsing out args.
+            ctx.message.content = prefix + data
+        else:
+            # Format the new content, using the inline command args.
+            try:
+                ctx.message.content = prefix + data.format(*old_args, full=' '.join(old_args))
+            except ValueError:
+                await ctx.reply("core.factoids.bad_args")
+
+        # Re-calculate mentions.
+        user_ids = ctx.message.raw_mentions
+        ctx.message.mentions = []
+        for id in user_ids:
+            user = ctx.message.server.get_member(id)
+            if not user:
+                # User left since factoid was made.
+                continue
+            ctx.message.mentions.append(user)
+
+        ctx.message.channel_mentions = []
+        for id in ctx.message.raw_channel_mentions:
+            chan = ctx.message.server.get_channel(id)
+            if not chan:
+                continue
+            ctx.message.channel_mentions.append(chan)
+
+        ctx.message.role_mentions = []
+        for id in ctx.message.raw_role_mentions:
+            role = discord.utils.get(ctx.message.server.roles, id=id)
+            if not role:
+                continue
+            ctx.message.role_mentions = []
 
         # Invoke the new function.
         command = commands[command_word]
+        logger.info("Invoking factoid command `{}` with args `{}`".format(command_word, ctx.message.content))
         await command.invoke(ctx)
         return
 
