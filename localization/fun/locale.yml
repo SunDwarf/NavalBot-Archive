@@ -35,6 +35,11 @@ help.remindme: |
 help.tz: |
         Shows the current time in the specified time zone.
 
+help.timezone: |
+        Gets the current time in the specified time zone.
+
+        The time zone must be in the format of the Olson TZ DB keys, e.g Europe/London.
+
 # fun strings
 # ech
 fun.chosen: "My choice was: `{choice}`"

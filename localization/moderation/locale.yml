@@ -47,6 +47,17 @@ help.globalblacklist: |
 help.clean: |
         Cleans all messages from the bot in the last 100 messages.
 
+help.hide_channel: |
+        Hides a channel from you.
+
+        This will revoke your `Read Messages` permissions on the channel.
+
+help.unhide_channel: |
+        Unhides a channel from you.
+
+        This will set your `Read Messages` back to neutral on the channel.
+
+
 # Moderation keys.
 moderation.low_permission: ":x: My role (`{role}`) does not have permission to modify this user."
 moderation.ban.banned: ":heavy_check_mark: User `{target}` banned."
