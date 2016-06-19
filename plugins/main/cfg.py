@@ -25,8 +25,8 @@ import os
 import aioredis
 import discord
 
-from navalbot.api import db, decorators, util
-from navalbot.api.commands import oldcommand, commands, command
+from navalbot.api import db, util
+from navalbot.api.commands import commands, command
 from navalbot.api.commands.cmdclass import NavalRole
 from navalbot.api.contexts import CommandContext
 
