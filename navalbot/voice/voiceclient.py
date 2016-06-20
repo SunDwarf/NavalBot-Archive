@@ -218,7 +218,7 @@ class NavalVoiceClient(discord.VoiceClient):
         qsize = await db.get_config(self.channel.server.id, "max_queue", default=99, type_=int)
 
         if len(queue) != 0 and start_pos + 1 > len(queue):
-            await ctx.reply("voice.queue_too_short", num=len(queue))
+            await ctx.reply("voice.queue_too_short", num=start_pos)
             return
         if start_pos < 0:
             await ctx.reply("voice.queue_negative")
