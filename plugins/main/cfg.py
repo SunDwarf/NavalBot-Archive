@@ -128,3 +128,51 @@ async def remove_role_override(ctx: CommandContext):
         conn.srem("override:{}:{}".format(ctx.message.server.id, command_name), role)
 
     await ctx.reply("core.cfg_removed_role_override", cmd=command_name)
+
+
+@command("disable", argcount="?", roles={NavalRole.ADMIN})
+async def disable_command(ctx: CommandContext):
+    """
+    Disable a command, either globally or per user.
+    """
+    user = ctx.get_user(offset=1)
+    command_name = ctx.args[0]
+    if command_name not in commands:
+        await ctx.reply("core.cfg.bad_override")
+        return
+
+    name = commands[command_name]._wrapped_coro.__name__
+    # If the user exists, use that.
+    if user:
+        key = "disabled:{}:{}".format(name, user.id)
+        repkey = "core.disabled.disabled_user"
+    else:
+        key = "disabled:{}".format(name)
+        repkey = "core.disabled.disabled"
+
+    await ctx.set_config(key, "True")
+    await ctx.reply(repkey, command=command_name, user=user)
+
+
+@command("enable", argcount="?", roles={NavalRole.ADMIN})
+async def enable_command(ctx: CommandContext):
+    """
+    Enable a command, either globally or per user.
+    """
+    user = ctx.get_user(offset=1)
+    command_name = ctx.args[0]
+    if command_name not in commands:
+        await ctx.reply("core.cfg.bad_override")
+        return
+
+    name = commands[command_name]._wrapped_coro.__name__
+    # If the user exists, use that.
+    if user:
+        key = "disabled:{}:{}".format(name, user.id)
+        repkey = "core.disabled.enabled_user"
+    else:
+        key = "disabled:{}".format(name)
+        repkey = "core.disabled.enabled"
+
+    await ctx.delete_config(key)
+    await ctx.reply(repkey, command=command_name, user=user)

@@ -138,6 +138,8 @@ class CommandContext(OnMessageEventContext):
         self.locale = locale
         self.args = args
 
+        self.command_name = ""
+
         self.db = db
 
     @property
@@ -176,12 +178,14 @@ class CommandContext(OnMessageEventContext):
         """
         await self.client.send_message(self.channel, message)
 
-    def get_user(self) -> typing.Union[discord.Member, None]:
+    def get_user(self, offset=0) -> typing.Union[discord.Member, None]:
         """
         Attempts to get a user from the message.
+
+        If offset is provided, it will use this offset when scanning the args.
         """
         if len(self.message.mentions) >= 1:
             return self.message.mentions[0]
         if len(self.args) >= 1:
-            u = self.message.server.get_member_named(' '.join(self.args))
+            u = self.message.server.get_member_named(' '.join(self.args[offset:]))
             return u

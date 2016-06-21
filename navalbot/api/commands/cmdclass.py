@@ -162,6 +162,8 @@ class Command(object):
         # This is so spaces in prefixes don't break everything.
         prefix = await db.get_config(ctx.message.server.id, "command_prefix", default="?")
 
+        command_name = ctx.message.content[len(prefix):].split(" ")[0]
+
         # Do the checks before running the coroutine.
         # Owner check.
 
@@ -172,6 +174,24 @@ class Command(object):
             if not u_id == owner:
                 # await client.send_message(message.channel, ":no_entry: This command is restricted to bot owners.")
                 await ctx.client.send_message(ctx.message.channel, ctx.loc["perms.not_owner"])
+                return
+
+        # Check if the command is disabled.
+        # Don't do this check on `enable_command`.
+        # Otherwise, you can disable enabling of commands.
+        if self._wrapped_coro.__name__ != "enable_command":
+            disabled = await db.get_config(ctx.message.server.id, "disabled:{}".format(self._wrapped_coro.__name__),
+                                           default=False, type_=bool)
+            if not disabled:
+                user_disabled = await db.get_config(ctx.message.server.id,
+                                                    "disabled:{}:{}".format(self._wrapped_coro.__name__, ctx.member.id),
+                                                    default=False, type_=bool)
+            else:
+                user_disabled = False
+            if disabled: key = "generic.command_disabled"
+            elif user_disabled: key = "generic.command_user_disabled"
+            if disabled or user_disabled:
+                await ctx.reply(key, command=command_name)
                 return
 
         # Get the user's roles.
@@ -225,6 +245,7 @@ class Command(object):
                     return
         # Create the context.
         ctx = CommandContext(ctx.client, ctx.message, locale=ctx.loc)
+        ctx.command_name = command_name
 
         # Now that we've gotten all of the returns out of the way, invoke the coroutine.
         if hasattr(self, "_args_type"):
