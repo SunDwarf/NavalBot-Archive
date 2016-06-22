@@ -17,7 +17,7 @@ class Context:
     A context is a simple way of storing attributes about an event or command.
     """
 
-    def __init__(self, client: 'botcls.NavalClient', locale: LocaleLoader=None):
+    def __init__(self, client: 'botcls.NavalClient', locale: LocaleLoader = None):
         """
         Simple stub for the context class.
         """
@@ -40,6 +40,13 @@ class EventContext(Context):
     """
 
     event = "UNKNOWN"
+
+    async def _load_locale(self):
+        if self._locale is None:
+            _loc_key = await db.get_config(self.server.id, "locale", default=None)
+            self._locale = get_locale(_loc_key)
+        return self._locale
+
 
     @property
     def server(self) -> discord.Server:
@@ -94,7 +101,7 @@ class OnMessageEventContext(EventContext):
 
     event = "ON_MESSAGE"
 
-    def __init__(self, client: 'botcls.NavalClient', message: discord.Message, locale: LocaleLoader):
+    def __init__(self, client: 'botcls.NavalClient', message: discord.Message, locale: LocaleLoader = None):
         super().__init__(client)
 
         self._message = message
@@ -128,6 +135,52 @@ class OnMessageEventContext(EventContext):
         key = key.format(**fmt)
         await self.client.send_message(self.message.channel, key)
         return key
+
+
+class OnMessageDeleteEventContext(OnMessageEventContext):
+    pass
+
+
+class OnMessageEditEventContext(OnMessageEventContext):
+    def __init__(self, client: discord.Client, before: discord.Message, after: discord.Message):
+        # Init with the after message.
+        super().__init__(client, after, None)
+
+        self._before = before
+
+    @property
+    def before(self) -> discord.Message:
+        return self._before
+
+    @property
+    def after(self) -> discord.Message:
+        """
+        This is the "correct" way to access the after message.
+        Of course, you can still use `.message` but it's not as verbose or obvious what you're doing.
+        """
+        return self.message
+
+
+class OnMemberJoinEventContext(EventContext):
+    """
+    Used when a member joins the server.
+    """
+
+    def __init__(self, client: discord.Client, member: discord.Member):
+        super().__init__(client, None)
+        self._member = member
+
+    @property
+    def channel(self) -> discord.Channel:
+        return self.server.default_channel
+
+    @property
+    def member(self) -> discord.Member:
+        return self._member
+
+    @property
+    def server(self) -> discord.Server:
+        return self.member.server
 
 
 class CommandContext(OnMessageEventContext):

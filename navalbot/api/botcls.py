@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 # Subclass of discord.Client.
 import asyncio
 import copy
+import collections
 import importlib
 import json
 import logging
@@ -42,6 +43,7 @@ from raven_aiohttp import AioHttpTransport
 from navalbot.api import db
 from navalbot.api import util
 from navalbot.api.contexts import OnMessageEventContext
+from navalbot.api import contexts
 from navalbot.api.locale import get_locale
 from navalbot.api.util import get_pool
 from navalbot.voice import voiceclient
@@ -67,7 +69,7 @@ class NavalClient(discord.Client):
         super().__init__(*args, **kwargs)
 
         self.modules = {}
-        self.hooks = {}
+        self.hooks = collections.defaultdict(lambda *args, **kwargs: {})
 
         try:
             config_file = sys.argv[1]
@@ -94,6 +96,16 @@ class NavalClient(discord.Client):
     def __del__(self):
         # Fuck off asyncio
         self.loop.set_exception_handler(lambda *args, **kwargs: None)
+
+    def __new__(cls, *args, **kwargs):
+        """
+        Singleton class
+        """
+        if not cls.instance:
+            cls.init_logging()
+            cls.instance = super().__new__(cls, *args)
+
+        return cls.instance
 
     @classmethod
     def init_logging(cls):
@@ -212,6 +224,22 @@ class NavalClient(discord.Client):
         # Remove from path.
         sys.path.pop(0)
         self.loaded = True
+
+    async def _delegate_hooks(self, event: str, ctx: contexts.EventContext, pause=True):
+        """
+        Delegates hooks to the subhook handlers.
+        """
+        hook_handler = self.hooks[event]
+        for subhook in hook_handler.items():
+            if pause:
+                try:
+                    await subhook(ctx)
+                except Exception:
+                    logger.error("Caught exception in hook {} -> {}".format(event, subhook.__name__))
+                    traceback.print_exc()
+                    return
+            else:
+                self.loop.create_task(subhook)
 
     # Events.
     async def on_socket_response(self, raw_data: json):
@@ -361,6 +389,26 @@ class NavalClient(discord.Client):
                 logger.error("Caught exception in hook on_message -> {}".format(hook.__name__))
                 traceback.print_exc()
                 continue
+
+    async def on_message_delete(self, message: discord.Message):
+        """
+        Fired upon a message deletion.
+        """
+        ctx = contexts.OnMessageDeleteEventContext(self, message)
+        await ctx._load_locale()
+        await self._delegate_hooks("on_message_delete", ctx)
+
+    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        """
+        Fired upon a message edit.
+        """
+        ctx = contexts.OnMessageEditEventContext(self, before, after)
+        await ctx._load_locale()
+        await self._delegate_hooks("on_message_edit", ctx)
+
+    async def on_member_join(self, member: discord.Member):
+        ctx = contexts.OnMemberJoinEventContext(self, member)
+        await ctx._load_locale()
 
     # Main
     def navalbot(self):
