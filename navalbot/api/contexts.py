@@ -8,7 +8,7 @@ import aioredis
 import discord
 from navalbot.api import db
 from navalbot.api import botcls
-from navalbot.api.locale import LocaleLoader
+from navalbot.api.locale import LocaleLoader, get_locale
 from navalbot.api.util import get_pool
 
 
@@ -17,11 +17,14 @@ class Context:
     A context is a simple way of storing attributes about an event or command.
     """
 
-    def __init__(self, client: 'botcls.NavalClient'):
+    def __init__(self, client: 'botcls.NavalClient', locale: LocaleLoader=None):
         """
         Simple stub for the context class.
         """
         self.client = client
+        self.locale = locale
+        if not self.locale:
+            self.locale = get_locale(None)
 
 
 class EventContext(Context):
