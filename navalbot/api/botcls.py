@@ -62,6 +62,39 @@ class NavalClient(discord.Client):
         """
         return cls.instance
 
+    # Metamethods.
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.modules = {}
+        self.hooks = {}
+
+        try:
+            config_file = sys.argv[1]
+        except IndexError:
+            config_file = "config.yml"
+
+        if not os.path.exists(config_file):
+            shutil.copyfile("config.example.yml", config_file)
+
+        with open(config_file, "r") as f:
+            self.config = yaml.load(f)
+
+        # Create a client if the config says so.
+        if self.config.get("use_sentry"):
+            logger.info("Using Sentry for error reporting.")
+            self._raven_client = Client(dsn=self.config.get("sentry_dsn"), transport=AioHttpTransport)
+        else:
+            self._raven_client = None
+
+        self.tb_session = aiohttp.ClientSession()
+
+        self.loaded = False
+
+    def __del__(self):
+        # Fuck off asyncio
+        self.loop.set_exception_handler(lambda *args, **kwargs: None)
+
     @classmethod
     def init_logging(cls):
         if sys.platform == "win32":
@@ -76,6 +109,7 @@ class NavalClient(discord.Client):
         consoleHandler.setFormatter(formatter)
         root.addHandler(consoleHandler)
 
+    # Overrides.
     def vc_factory(self):
         """
         Method to return a new voice client class.
@@ -137,71 +171,7 @@ class NavalClient(discord.Client):
         self.connection._add_voice_client(server.id, voice)
         return voice
 
-    def __new__(cls, *args, **kwargs):
-        """
-        Singleton class
-        """
-        if not cls.instance:
-            cls.init_logging()
-            cls.instance = super().__new__(cls, *args)
-        return cls.instance
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.modules = {}
-        self.hooks = {}
-
-        try:
-            config_file = sys.argv[1]
-        except IndexError:
-            config_file = "config.yml"
-
-        if not os.path.exists(config_file):
-            shutil.copyfile("config.example.yml", config_file)
-
-        with open(config_file, "r") as f:
-            self.config = yaml.load(f)
-
-        # Create a client if the config says so.
-        if self.config.get("use_sentry"):
-            logger.info("Using Sentry for error reporting.")
-            self._raven_client = Client(dsn=self.config.get("sentry_dsn"), transport=AioHttpTransport)
-        else:
-            self._raven_client = None
-
-        self.tb_session = aiohttp.ClientSession()
-
-        self.loaded = False
-
-    def __del__(self):
-        # Fuck off asyncio
-        self.loop.set_exception_handler(lambda *args, **kwargs: None)
-
-    async def on_socket_response(self, raw_data: json):
-        """
-        Recieves raw JSON data.
-
-        This is only used to dispatch to hooks.
-        """
-        for hook in self.hooks.get("on_recv", {}).values():
-            self.loop.create_task(hook(raw_data))
-
-    async def on_error(self, event_method, *args, **kwargs):
-        """
-        Send the error to Sentry if applicable.
-
-        Otherwise, just traceback it.
-        """
-        if self._raven_client:
-            self._raven_client.captureException()
-        else:
-            logger.error("Caught error in {}".format(event_method))
-            traceback.print_exc()
-
-        # Run error hooks.
-        for hook in self.hooks.get("on_error", []):
-            self.loop.create_task(hook(event_method, *args, **kwargs))
+    # Misc utilities.
 
     async def load_plugins(self):
         """
@@ -242,6 +212,32 @@ class NavalClient(discord.Client):
         # Remove from path.
         sys.path.pop(0)
         self.loaded = True
+
+    # Events.
+    async def on_socket_response(self, raw_data: json):
+        """
+        Recieves raw JSON data.
+
+        This is only used to dispatch to hooks.
+        """
+        for hook in self.hooks.get("on_recv", {}).values():
+            self.loop.create_task(hook(raw_data))
+
+    async def on_error(self, event_method, *args, **kwargs):
+        """
+        Send the error to Sentry if applicable.
+
+        Otherwise, just traceback it.
+        """
+        if self._raven_client:
+            self._raven_client.captureException()
+        else:
+            logger.error("Caught error in {}".format(event_method))
+            traceback.print_exc()
+
+        # Run error hooks.
+        for hook in self.hooks.get("on_error", []):
+            self.loop.create_task(hook(event_method, *args, **kwargs))
 
     async def on_ready(self):
         # Get the OAuth2 URL, or something
@@ -287,6 +283,8 @@ class NavalClient(discord.Client):
         util.msgcount += 1
 
         if self.config.get("self_bot"):
+            if not message.server:
+                return
             if message.author != message.server.me:
                 logger.info("Ignoring message from not me.")
                 return
@@ -364,6 +362,7 @@ class NavalClient(discord.Client):
                 traceback.print_exc()
                 continue
 
+    # Main
     def navalbot(self):
         # Switch login method based on args.
         login = (self.config.get("client", {}).get("oauth_bot_token", ""),)
