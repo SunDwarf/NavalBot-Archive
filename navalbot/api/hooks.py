@@ -83,6 +83,8 @@ def on_event(name: str, err_func=None):
                 if reraise:
                     raise e
 
+        __event_wrapper.__name__ = func.__name__
+
         # Use func.__name__ as the key.
         # This prevents multiple messages on a reload.
         instance.hooks[name][func.__name__] = __event_wrapper
