@@ -47,7 +47,6 @@ class EventContext(Context):
             self._locale = get_locale(_loc_key)
         return self._locale
 
-
     @property
     def server(self) -> discord.Server:
         raise NotImplementedError
