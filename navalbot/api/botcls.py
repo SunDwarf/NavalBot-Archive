@@ -194,35 +194,44 @@ class NavalClient(discord.Client):
             return
         # Add cwd to sys.path
         sys.path.insert(0, os.path.join(os.getcwd()))
+        to_pop = 1
         # Loop over things in plugins/
-        for entry in os.scandir("plugins/"):
-            if entry.name == "__pycache__" or entry.name == "__init__.py":
-                continue
-            if entry.name.endswith(".py"):
-                name = entry.name.split(".")[0]
-            else:
-                if os.path.isdir(entry.path) or os.path.islink(entry.path):
-                    name = entry.name
-                else:
+        paths = ["./plugins", *self.config.get("plugin_dirs", [])]
+        for path in paths:
+            sys.path.insert(0, os.path.abspath(path))
+            for entry in os.scandir(path):
+                if entry.name == "__pycache__" or entry.name == "__init__.py" or entry.name.startswith("."):
                     continue
-            # Check in the config.
-            if name in self.config.get("disabled", []):
-                logger.info("Skipping disabled plugin {}.".format(name))
-                continue
-            import_name = "plugins." + name
-            # Import using importlib.
-            try:
-                mod = importlib.import_module(import_name)
-                if hasattr(mod, "load_plugin"):
-                    await mod.load_plugin(self)
-                self.modules[mod.__name__] = mod
-                logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
-            except Exception as e:
-                logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
-                traceback.print_exc()
-                continue
+                if entry.name.endswith(".py"):
+                    name = entry.name.split(".")[0]
+                else:
+                    if os.path.isdir(entry.path) or os.path.islink(entry.path):
+                        name = entry.name
+                    else:
+                        continue
+                # Check in the config.
+                if name in self.config.get("disabled", []):
+                    logger.info("Skipping disabled plugin {}.".format(name))
+                    continue
+                if path == "./plugins":
+                    import_name = "plugins." + name
+                else:
+                    import_name = name
+                # Import using importlib.
+                try:
+                    mod = importlib.import_module(import_name)
+                    if hasattr(mod, "load_plugin"):
+                        await mod.load_plugin(self)
+                    self.modules[mod.__name__] = mod
+                    logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
+                except Exception as e:
+                    logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
+                    traceback.print_exc()
+                    continue
+            sys.path.pop(0)
         # Remove from path.
-        sys.path.pop(0)
+        for x in range(to_pop):
+            sys.path.pop(0)
         self.loaded = True
 
     async def _delegate_hooks(self, event: str, ctx: contexts.EventContext, pause=True):
