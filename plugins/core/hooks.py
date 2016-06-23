@@ -28,6 +28,10 @@ async def command_processor(ctx: OnMessageEventContext):
 
     This handles messages and forwards them to commands as appropriate.
     """
+    if ctx.member.bot:
+        # Ignore bot messages.
+        return
+
     prefix = await db.get_config(ctx.message.server.id, "command_prefix", "?")
 
     if ctx.message.content.startswith(prefix):

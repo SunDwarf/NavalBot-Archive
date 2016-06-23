@@ -329,10 +329,6 @@ class NavalClient(discord.Client):
             if message.content.startswith("`"):
                 return
 
-        if message.author.bot:
-            logger.info("Ignoring message from bot account.")
-            return
-
         # Load locale.
         _loc_key = await db.get_config(message.server.id, "lang", default=None)
         loc = get_locale(_loc_key)
@@ -361,8 +357,8 @@ class NavalClient(discord.Client):
         if not isinstance(message.channel, discord.PrivateChannel):
             # print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
             #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
-            logger.info("Recieved message: {message.content} from {message.author.display_name}"
-                        .format(message=message))
+            logger.info("Recieved message: {message.content} from {message.author.display_name}{bot}"
+                        .format(message=message, bot=" [BOT]" if message.author.bot else ""))
             logger.info(" On channel: #{message.channel.name}".format(message=message))
 
         # Check for a valid server.
