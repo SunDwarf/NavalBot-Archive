@@ -23,4 +23,4 @@ six==1.10.0
 update-checker==0.11
 urbandict==0.5
 websockets==3.1
-youtube-dl==2016.6.3
+youtube-dl>=2016.6.23
