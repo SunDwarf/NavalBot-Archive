@@ -87,6 +87,13 @@ class EventContext(Context):
             chan = discord.utils.get(self.server.channels, name=name_or_id)
         return chan
 
+    def get_role(self, name_or_id):
+        """
+        Get a role by name or ID.
+        """
+        role = discord.utils.find(lambda r: r.id == name_or_id or r.name == name_or_id, self.server.roles)
+        return role
+
     def __repr__(self):
         return "<{} for client {} in event `{}`>".format(
             self.__class__.__name__, str(self.client.user), self.event
