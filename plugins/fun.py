@@ -319,3 +319,17 @@ async def timetravel(ctx: CommandContext):
     msg = msg[0]
     await ctx.client.pin_message(msg)
     await ctx.send(msg.id)
+
+
+@command("game", owner=True, argcount="?")
+async def game(ctx: CommandContext):
+    await ctx.client.change_status(discord.Game(name=' '.join(ctx.args)))
+
+    await ctx.send(":heavy_check_mark: Changed game to `{}`.".format(' '.join(ctx.args)))
+
+
+@command("gamestream", owner=True, argcount=2)
+async def changestream(ctx: CommandContext):
+    await ctx.client.change_status(discord.Game(name=ctx.args[0], url=ctx.args[1], type=1))
+
+    await ctx.send(":heavy_check_mark: Set bot as streaming.")
