@@ -239,12 +239,12 @@ class NavalClient(discord.Client):
         Delegates hooks to the subhook handlers.
         """
         hook_handler = self.hooks[event]
-        for subhook in hook_handler.items():
+        for name, subhook in hook_handler.items():
             if pause:
                 try:
                     await subhook(ctx)
                 except Exception:
-                    logger.error("Caught exception in hook {} -> {}".format(event, subhook.__name__))
+                    logger.error("Caught exception in hook {} -> {}".format(event, name))
                     traceback.print_exc()
                     return
             else:
@@ -414,6 +414,7 @@ class NavalClient(discord.Client):
     async def on_member_join(self, member: discord.Member):
         ctx = contexts.OnMemberJoinEventContext(self, member)
         await ctx._load_locale()
+        await self._delegate_hooks("on_member_join", ctx)
 
     # Main
     def navalbot(self):

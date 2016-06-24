@@ -22,9 +22,13 @@ class Context:
         Simple stub for the context class.
         """
         self.client = client
-        self.locale = locale
-        if not self.locale:
-            self.locale = get_locale(None)
+        self._locale = locale
+        if not self._locale:
+            self._locale = get_locale(None)
+
+    @property
+    def locale(self) -> LocaleLoader:
+        return self._locale
 
 
 class EventContext(Context):
@@ -42,9 +46,8 @@ class EventContext(Context):
     event = "UNKNOWN"
 
     async def _load_locale(self):
-        if self._locale is None:
-            _loc_key = await db.get_config(self.server.id, "locale", default=None)
-            self._locale = get_locale(_loc_key)
+        _loc_key = await db.get_config(self.server.id, "locale", default=None)
+        self._locale = get_locale(_loc_key)
         return self._locale
 
     @property
@@ -197,7 +200,6 @@ class CommandContext(OnMessageEventContext):
     def __init__(self, client: 'botcls.NavalClient', message: discord.Message, locale: LocaleLoader,
                  args: list = None):
         super().__init__(client, message, locale)
-        self.locale = locale
         self.args = args
 
         self.command_name = ""
