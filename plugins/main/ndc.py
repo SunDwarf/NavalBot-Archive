@@ -72,10 +72,21 @@ async def reload_all(ctx: CommandContext):
     """
     # Re-load plugins.
     for mod in sys.modules:
-        if mod.startswith("plugins."):
+        if mod.startswith("__"):
+            continue
+        if not mod.startswith("navalbot."):
             # Reload it.
-            logger.info("Reloading module: {}".format(mod))
-            importlib.reload(sys.modules[mod])
+            module = sys.modules[mod]
+            if hasattr(module, "__file__"):
+                if 'python3' in module.__file__ or 'site-packages' in module.__file__:
+                    # Do not reload built-in modules
+                    continue
+                elif '__' in module.__file__:
+                    continue
+            else:
+                continue
+            logger.info("Reloading module: {} / {}".format(mod, module))
+            importlib.reload(module)
             logger.info("Reloaded module.")
 
     await ctx.reply("core.ndc.reload_all")
