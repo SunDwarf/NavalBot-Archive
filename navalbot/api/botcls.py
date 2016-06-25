@@ -198,12 +198,29 @@ class NavalClient(discord.Client):
             method = 'on_' + event
             if hasattr(hook_subclass, method):
                 logger.info("Dispatching to hook class `{}` -> `{}`.".format(name, method))
-                self.loop.create_task(self._run_event(method, *args, **kwargs))
+                self.loop.create_task(self._n_run_event(method, *args, cls=hook_subclass, **kwargs))
+
+    async def _n_run_event(self, event, *args, cls: 'NavalClient'=None, **kwargs):
+        """
+        Run an event, delegating to a subclass if appropriate.
+        """
+        if cls is None:
+            cls = self
+        try:
+            await getattr(cls, event)(self, *args, **kwargs)
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            try:
+                await cls.on_error(self, event, *args, **kwargs)
+            except asyncio.CancelledError:
+                pass
 
     # Misc utilities.
 
     def register_hook_class(self, cls):
-        self._hook_subclasses[cls.__name__] = cls
+        logger.info("Registered new hook class -> {cls.__class__.__name__}".format(cls=cls))
+        self._hook_subclasses[cls.__class__.__name__] = cls
 
     async def load_plugins(self):
         """
