@@ -35,6 +35,17 @@ from navalbot.api.contexts import EventContext
 logger = logging.getLogger("NavalBot")
 
 
+def register_hook_class(cls):
+    """
+    Register a class as a hook class.
+
+    This will recieve a dispatch on EVERY event.
+    """
+    client = NavalClient.get_navalbot()
+    client.register_hook_class(cls)
+    return cls
+
+
 def on_message(func: typing.Callable[[EventContext], None]) -> types.FunctionType:
     """
     Registers a hook to be ran every message.
@@ -61,7 +72,7 @@ def on_event(name: str, err_func=None):
 
     def _inner(func: typing.Callable[[EventContext], None]):
         try:
-            instance = NavalClient.instance
+            instance = NavalClient._instance
             assert isinstance(instance, NavalClient)
         except (AssertionError, AttributeError):
             logger.critical("Attempted to register on_message for function `{}` before bot is created."

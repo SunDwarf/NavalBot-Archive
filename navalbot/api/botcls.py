@@ -55,14 +55,14 @@ class NavalClient(discord.Client):
     """
     An overridden discord Client.
     """
-    instance = None
+    _instance = None
 
     @classmethod
     def get_navalbot(cls) -> 'NavalClient':
         """
         Get the current instance of the bot.
         """
-        return cls.instance
+        return cls._instance
 
     # Metamethods.
     def __init__(self, *args, **kwargs):
@@ -70,6 +70,8 @@ class NavalClient(discord.Client):
 
         self.modules = {}
         self.hooks = collections.defaultdict(lambda *args, **kwargs: {})
+
+        self._hook_subclasses = {}
 
         try:
             config_file = sys.argv[1]
@@ -101,11 +103,11 @@ class NavalClient(discord.Client):
         """
         Singleton class
         """
-        if not cls.instance:
+        if not cls._instance:
             cls.init_logging()
-            cls.instance = super().__new__(cls, *args)
+            cls._instance = super().__new__(cls, *args)
 
-        return cls.instance
+        return cls._instance
 
     @classmethod
     def init_logging(cls):
@@ -183,7 +185,25 @@ class NavalClient(discord.Client):
         self.connection._add_voice_client(server.id, voice)
         return voice
 
+    def dispatch(self, event, *args, **kwargs):
+        """
+        Handles dispatching.
+
+        This is overriden so we can dispatch to hook-subclasses that handle ALL hooks, regardless of event.
+        """
+        super().dispatch(event, *args, **kwargs)
+
+        # Handle the hook subclasses.
+        for name, hook_subclass in self._hook_subclasses.items():
+            method = 'on_' + event
+            if hasattr(hook_subclass, method):
+                logger.info("Dispatching to hook class `{}` -> `{}`.".format(name, method))
+                self.loop.create_task(self._run_event(method, *args, **kwargs))
+
     # Misc utilities.
+
+    def register_hook_class(self, cls):
+        self._hook_subclasses[cls.__name__] = cls
 
     async def load_plugins(self):
         """

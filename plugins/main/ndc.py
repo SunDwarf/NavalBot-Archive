@@ -222,7 +222,7 @@ async def plugins(ctx: CommandContext):
     """
     Lists the currently loaded plugins.
     """
-    mods = NavalClient.instance.modules
+    mods = NavalClient._instance.modules
     s = ctx.locale["core.ndc.plugins_base"]
     plugin = ctx.locale["core.ndc.plugins"]
 
