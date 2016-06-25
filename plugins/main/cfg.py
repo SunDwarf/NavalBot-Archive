@@ -176,3 +176,12 @@ async def enable_command(ctx: CommandContext):
 
     await ctx.delete_config(key)
     await ctx.reply(repkey, command=command_name, user=user)
+
+
+@command("leave", roles={NavalRole.ADMIN})
+async def leave(ctx: CommandContext):
+    """
+    Leaves the current server.
+    """
+    await ctx.reply("core.leaving")
+    await ctx.client.leave_server(ctx.server)

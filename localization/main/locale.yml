@@ -122,6 +122,8 @@ core.disabled.disabled_user: ":heavy_check_mark: Command `{command}` disabled fo
 core.disabled.enabled: ":heavy_check_mark: Command `{command}` enabled for all."
 core.disabled.enabled_user: ":heavy_check_mark: Command `{command}` enabled for user `{user.display_name}`."
 
+core.leaving: ":wave:"
+
 # Permissions keys
 perms.not_owner: ":no_entry: This command is restricted to the bot owner."
 perms.cannot_determine_role: ":no_entry: Cannot determine your role!"
