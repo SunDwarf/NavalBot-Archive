@@ -33,6 +33,8 @@ from navalbot.api.commands import commands, command, Command
 from navalbot.api.contexts import CommandContext
 from navalbot.api.locale import get_locale
 
+from navalbot import version
+
 # Factoid matcher compiled
 factoid_matcher = re.compile(r'(\S*?) is (.*)')
 
