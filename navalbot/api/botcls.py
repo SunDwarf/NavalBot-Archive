@@ -95,6 +95,9 @@ class NavalClient(discord.Client):
 
         self.loaded = False
 
+        logging.getLogger().setLevel(getattr(logging, self.config.get("log_level", "INFO")))
+        logger.info("NavalBot is loading...")
+
     def __del__(self):
         # Fuck off asyncio
         self.loop.set_exception_handler(lambda *args, **kwargs: None)
@@ -197,7 +200,7 @@ class NavalClient(discord.Client):
         for name, hook_subclass in self._hook_subclasses.items():
             method = 'on_' + event
             if hasattr(hook_subclass, method):
-                logger.info("Dispatching to hook class `{}` -> `{}`.".format(name, method))
+                logger.debug("Dispatching to hook class `{}` -> `{}`.".format(name, method))
                 self.loop.create_task(self._n_run_event(method, *args, cls=hook_subclass, **kwargs))
 
     async def _n_run_event(self, event, *args, cls: 'NavalClient'=None, **kwargs):
