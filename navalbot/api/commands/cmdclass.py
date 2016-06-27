@@ -195,26 +195,28 @@ class Command(object):
                 return
 
         # Get the user's roles.
-        if hasattr(self, "_roles"):
-            try:
-                assert isinstance(ctx.message.author, discord.Member)
-            except AssertionError:
-                await ctx.client.send_message(ctx.message.channel, ctx.loc["perms.cannot_determine_role"])
-                return
-
-            # Load roles correctly.
-            new_roles = await self._load_roles(ctx.message.server)
-
-            if not ctx.message.server.owner == ctx.message.author:
-                if not await has_permissions_with_override(ctx.message.author, new_roles, ctx.message.server.id,
-                                                           self._wrapped_coro.__name__):
-                    # await client.send_message(
-                    #    message.channel,
-                    #    ":no_entry: You do not have any of the required roles: `{}`!"
-                    #        .format({role.val for role in allowed_roles})
-                    ss = ctx.loc['perms.bad_role'].format(roles={role for role in new_roles})
-                    await ctx.client.send_message(ctx.message.channel, ss)
+        # Ignore role checks if we're a self-bot.
+        if not ctx.client.config.get("self_bot"):
+            if hasattr(self, "_roles"):
+                try:
+                    assert isinstance(ctx.message.author, discord.Member)
+                except AssertionError:
+                    await ctx.client.send_message(ctx.message.channel, ctx.loc["perms.cannot_determine_role"])
                     return
+
+                # Load roles correctly.
+                new_roles = await self._load_roles(ctx.message.server)
+
+                if not ctx.message.server.owner == ctx.message.author:
+                    if not await has_permissions_with_override(ctx.message.author, new_roles, ctx.message.server.id,
+                                                               self._wrapped_coro.__name__):
+                        # await client.send_message(
+                        #    message.channel,
+                        #    ":no_entry: You do not have any of the required roles: `{}`!"
+                        #        .format({role.val for role in allowed_roles})
+                        ss = ctx.loc['perms.bad_role'].format(roles={role for role in new_roles})
+                        await ctx.client.send_message(ctx.message.channel, ss)
+                        return
 
         # Arguments check.
         if hasattr(self, "_args_type"):
