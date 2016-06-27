@@ -40,6 +40,11 @@ help.timezone: |
 
         The time zone must be in the format of the Olson TZ DB keys, e.g Europe/London.
 
+help.timetravel: |
+        Pins the first message of the channel.
+
+        This requires Manage Messages on the bot in this channel.
+
 # fun strings
 # ech
 fun.chosen: "My choice was: `{choice}`"
@@ -111,3 +116,5 @@ fun.servinfo: |
 
       Owner: {server.owner.display_name}
       ```
+
+fun.timetravel.cannot_pin: ":no_entry: I do not have permission to pin messages in this channel."

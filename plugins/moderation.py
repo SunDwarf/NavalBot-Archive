@@ -33,6 +33,11 @@ from navalbot.api.commands.cmdclass import NavalRole
 
 logger = logging.getLogger("NavalBot")
 
+try:
+    votebans
+except NameError:
+    votebans = {}
+
 
 def get_highest_role(user: discord.Member) -> discord.Role:
     """
@@ -146,6 +151,7 @@ async def ensure_muted(ctx: CommandContext):
 
     return muted
 
+
 async def restore_roles(ctx: CommandContext, user: discord.Member):
     async with await ctx.get_conn() as conn:
         assert isinstance(conn, aioredis.Redis)
@@ -220,6 +226,7 @@ async def mute(ctx: CommandContext):
             await ctx.client.remove_roles(user, muted)
             await restore_roles(ctx, user)
             await ctx.reply("moderation.muted.unmuted", user=user)
+
         ctx.client.loop.create_task(_unmute_after_duration())
 
 

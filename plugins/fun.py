@@ -317,7 +317,11 @@ async def timetravel(ctx: CommandContext):
         msg.append(m)
 
     msg = msg[0]
-    await ctx.client.pin_message(msg)
+    try:
+        await ctx.client.pin_message(msg)
+    except discord.Forbidden:
+        await ctx.reply("fun.timetravel.cannot_pin")
+        return
     await ctx.send(msg.id)
 
 
