@@ -36,6 +36,8 @@ import traceback
 import aiohttp
 import aioredis
 import discord
+import logbook
+from logbook import StreamHandler
 import yaml
 from raven import Client
 from raven_aiohttp import AioHttpTransport
@@ -48,7 +50,14 @@ from navalbot.api.locale import get_locale
 from navalbot.api.util import get_pool
 from navalbot.voice import voiceclient
 
-logger = logging.getLogger("NavalBot")
+from logbook.compat import redirect_logging
+redirect_logging()
+
+StreamHandler(sys.stderr).push_application()
+
+
+#logger = logging.getLogger("NavalBot")
+logger = logbook.Logger("NavalBot")
 
 
 class NavalClient(discord.Client):
@@ -95,7 +104,11 @@ class NavalClient(discord.Client):
 
         self.loaded = False
 
-        logging.getLogger().setLevel(getattr(logging, self.config.get("log_level", "INFO")))
+        logger.level = getattr(logbook, self.config.get("log_level", "INFO"))
+        # We still have to do this
+        logging.root.setLevel(getattr(logging, self.config.get("log_level", "INFO")))
+
+        #logging.getLogger().setLevel(getattr(logging, self.config.get("log_level", "INFO")))
         logger.info("NavalBot is loading...")
 
     def __del__(self):
@@ -107,24 +120,24 @@ class NavalClient(discord.Client):
         Singleton class
         """
         if not cls._instance:
-            cls.init_logging()
+            #cls.init_logging()
             cls._instance = super().__new__(cls, *args)
 
         return cls._instance
 
-    @classmethod
-    def init_logging(cls):
-        if sys.platform == "win32":
-            logging.basicConfig(filename='nul', level=logging.INFO)
-        else:
-            logging.basicConfig(filename='/dev/null', level=logging.INFO)
+    #@classmethod
+    #def init_logging(cls):
+    #    if sys.platform == "win32":
+    #        logging.basicConfig(filename='nul', level=logging.INFO)
+    #    else:
+    #        logging.basicConfig(filename='/dev/null', level=logging.INFO)
 
-        formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(name)s -> %(message)s')
-        root = logging.getLogger()
+    #    formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(name)s -> %(message)s')
+    #    root = logging.getLogger()
 
-        consoleHandler = logging.StreamHandler()
-        consoleHandler.setFormatter(formatter)
-        root.addHandler(consoleHandler)
+    #    consoleHandler = logging.StreamHandler()
+    #    consoleHandler.setFormatter(formatter)
+    #    root.addHandler(consoleHandler)
 
     # Overrides.
     def vc_factory(self):
