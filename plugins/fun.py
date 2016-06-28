@@ -27,6 +27,8 @@ import functools
 import os
 import random
 
+from dateutil.parser import parse
+
 import discord
 import praw
 import psutil
@@ -306,12 +308,15 @@ async def get_server_info(ctx: CommandContext):
                     created=created_time)
 
 
-@command("timetravel", roles={NavalRole.ADMIN})
+@command("timetravel", roles={NavalRole.ADMIN}, argcount="+")
 async def timetravel(ctx: CommandContext):
     """
     Time-travel to the past.
     """
-    i = ctx.client.logs_from(ctx.channel, after=ctx.channel, limit=1)
+    if not ctx.args:
+        i = ctx.client.logs_from(ctx.channel, after=ctx.channel, limit=1)
+    else:
+        i = ctx.client.logs_from(ctx.channel, after=parse(ctx.args[0]), limit=1)
     msg = []
     async for m in i:
         msg.append(m)
