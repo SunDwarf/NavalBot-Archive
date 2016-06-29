@@ -56,7 +56,6 @@ redirect_logging()
 StreamHandler(sys.stderr).push_application()
 
 
-#logger = logging.getLogger("NavalBot")
 logger = logbook.Logger("NavalBot")
 
 
@@ -120,24 +119,9 @@ class NavalClient(discord.Client):
         Singleton class
         """
         if not cls._instance:
-            #cls.init_logging()
             cls._instance = super().__new__(cls, *args)
 
         return cls._instance
-
-    #@classmethod
-    #def init_logging(cls):
-    #    if sys.platform == "win32":
-    #        logging.basicConfig(filename='nul', level=logging.INFO)
-    #    else:
-    #        logging.basicConfig(filename='/dev/null', level=logging.INFO)
-
-    #    formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(name)s -> %(message)s')
-    #    root = logging.getLogger()
-
-    #    consoleHandler = logging.StreamHandler()
-    #    consoleHandler.setFormatter(formatter)
-    #    root.addHandler(consoleHandler)
 
     # Overrides.
     def vc_factory(self):
