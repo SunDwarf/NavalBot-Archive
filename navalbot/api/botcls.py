@@ -288,6 +288,13 @@ class NavalClient(discord.Client):
                 self.loop.create_task(subhook)
 
     # Events.
+    async def on_server_join(self, server: discord.Server):
+        if await db.get_key("protection") == "y":
+            await self.send_message(server.default_channel, "Hi. I can't currently join new servers as I am in "
+                                                            "protection mode right now to prevent against abusive "
+                                                            "users. I am automatically leaving.")
+            await self.leave_server(server)
+
     async def on_socket_response(self, raw_data: json):
         """
         Recieves raw JSON data.

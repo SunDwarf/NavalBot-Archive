@@ -33,7 +33,7 @@ import traceback
 
 import aioredis
 
-from navalbot.api import util
+from navalbot.api import util, db
 from navalbot.api.botcls import NavalClient
 from navalbot.api.commands import command
 from navalbot.api.contexts import CommandContext
@@ -63,6 +63,16 @@ async def reload_f(ctx: CommandContext):
     # Update sys.modules
     sys.modules[mod] = new_mod
     await ctx.reply("core.ndc.reload_success")
+
+
+@command("protection", owner=True, argcount=1)
+async def protection(ctx: CommandContext):
+    if ctx.args[0] == "on":
+        await db.set_key("protection", "y")
+        await ctx.send("Enabled protection mode.")
+    elif ctx.args[0] == "off":
+        await db.set_key("protection", "n")
+        await ctx.send("Disabled protection mode.")
 
 
 @command("reloadall", owner=True)
@@ -161,6 +171,7 @@ async def repl(ctx: CommandContext):
                                                   ":exclamation: Error encountered: {}".format(await p.text()))
             else:
                 await ctx.send(fmt)
+
 
 @command("rget", owner=True)
 async def redis_get(ctx: CommandContext):
