@@ -21,12 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 # Declare variables, inside try to prevent overwrites on reload.
-try:
-    voice_params
-except NameError:
-    voice_params = {}
+import asyncio
+import collections
 
 try:
     voice_locks
 except NameError:
-    voice_locks = {}
+    voice_locks = collections.defaultdict(lambda x: asyncio.Lock())
