@@ -25,9 +25,10 @@ import aiohttp
 from navalbot.api.commands import command
 from navalbot.api.contexts import CommandContext
 
-VERSION = "6.0.1"
+VERSION = "6.0.2"
 VERSUFF = ""
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
+
 
 def read_version(data):
     regexp = re.compile(r"^\W*?VERSION\W*=\W*([\d.abrc]+)")
