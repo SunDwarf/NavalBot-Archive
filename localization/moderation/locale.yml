@@ -78,3 +78,5 @@ moderation.unblacklisted: ":heavy_check_mark: Unblacklisted user {user}."
 
 moderation.hidden: ":heavy_check_mark: Hidden channel `{channel}`."
 moderation.unhidden: ":heavy_check_mark: Unhid channel `{channel}`."
+
+moderation.cannot_clean: ":x: I do not have `Manage Messages` role on the server and this channel."

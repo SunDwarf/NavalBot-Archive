@@ -340,7 +340,11 @@ async def clean(ctx: CommandContext):
     Removes all messages from the bot in the last 100 messages.
     """
     check = lambda msg: msg.author == ctx.me
-    msgs = await ctx.client.purge_from(ctx.channel, limit=100, check=check)
+    try:
+        msgs = await ctx.client.purge_from(ctx.channel, limit=100, check=check)
+    except discord.Forbidden:
+        await ctx.reply("moderation.cannot_clean")
+        return
     await ctx.reply("moderation.deleted_messages", count=len(msgs))
 
 
