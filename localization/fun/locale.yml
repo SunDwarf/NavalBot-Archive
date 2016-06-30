@@ -118,3 +118,4 @@ fun.servinfo: |
       ```
 
 fun.timetravel.cannot_pin: ":no_entry: I do not have permission to pin messages in this channel."
+fun.timetravel.future: ":x: I cannot pin messages from the future."

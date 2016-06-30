@@ -321,6 +321,10 @@ async def timetravel(ctx: CommandContext):
     async for m in i:
         msg.append(m)
 
+    if not msg:
+        await ctx.reply("fun.timetravel.future")
+        return
+
     msg = msg[0]
     try:
         await ctx.client.pin_message(msg)
