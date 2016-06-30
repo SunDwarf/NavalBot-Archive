@@ -44,11 +44,18 @@ async def command_processor(ctx: OnMessageEventContext):
             coro = builtins.default
         try:
             if isinstance(coro, Command):
-                await coro.invoke(ctx)
+                try:
+                    await coro.invoke(ctx)
+                except discord.Forbidden:
+                    await ctx.client.send_message(ctx.channel, ctx.locale["generic.bad_permission"])
+                    return
                 # Delete automatically, only if invocation was successful.
                 autodelete = True if await db.get_config(ctx.message.server.id, "autodelete") == "True" else False
                 if autodelete and ctx.message.content.startswith(prefix):
-                    await ctx.client.delete_message(ctx.message)
+                    try:
+                        await ctx.client.delete_message(ctx.message)
+                    except discord.Forbidden:
+                        return
             else:
                 await coro(ctx.client, ctx.message)
         except Exception as e:
