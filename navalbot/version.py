@@ -29,6 +29,16 @@ VERSION = "6.0.1"
 VERSUFF = ""
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
 
+def read_version(data):
+    regexp = re.compile(r"^\W*?VERSION\W*=\W*([\d.abrc]+)")
+
+    for line in data:
+        match = regexp.match(line)
+        if match is not None:
+            return match.group(1)
+    else:
+        print("Cannot get new version from GitHub.")
+
 
 @command("version")
 async def version(ctx: CommandContext):
