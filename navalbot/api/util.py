@@ -160,31 +160,6 @@ async def get_prefix(id: str) -> str:
     """
     return await db.get_config(id, "command_prefix", default="?")
 
-
-def prov_dec_func(func1, func2):
-    """
-    Provides a decorated function with the right chains.
-
-    Func is the original func, func2 is the fake func.
-    """
-
-    func2.__doc__ = func1.__doc__
-    func2.__name__ = func1.__name__
-
-    if hasattr(func1, "__methods"):
-        func2.__methods = func1.__methods
-    else:
-        func2.__methods = {}
-
-    if hasattr(func1, "func"):
-        # chain the .func call for source function
-        func2.func = func1.func
-    else:
-        func2.func = func1
-
-    return func2
-
-
 def get_global_config(key, default=0, type_: type = None):
     global_config = botcls.NavalClient.get_navalbot().config
     if type_ is not None:

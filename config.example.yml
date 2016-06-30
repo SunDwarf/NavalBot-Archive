@@ -7,10 +7,6 @@ client:
   # Client ID
   oauth_client_id: 1234
 
-  # If not, use these values.
-  old_bot_username: quqwbdn
-  old_bot_pw: hunter2
-
 # Owner.
 RCE_ID: 0
 
@@ -38,6 +34,22 @@ shards:
 use_libuv: false
 
 # Graylog data.
+# Don't change this if you use Graylog.
 graylog:
   addr: 127.0.0.1
   port: 5000
+
+# Is this bot a self-bot?
+self_bot: false
+
+# Disabled plugins.
+disabled: []
+
+# Additional plugin directories.
+plugin_dirs: []
+
+# Initial game text.
+game_text: "Type ?info for help!"
+
+# Log level.
+log_level: INFO

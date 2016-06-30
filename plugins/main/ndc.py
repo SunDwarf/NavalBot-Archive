@@ -33,7 +33,7 @@ import traceback
 
 import aioredis
 
-from navalbot.api import util
+from navalbot.api import util, db
 from navalbot.api.botcls import NavalClient
 from navalbot.api.commands import command
 from navalbot.api.contexts import CommandContext
@@ -65,6 +65,16 @@ async def reload_f(ctx: CommandContext):
     await ctx.reply("core.ndc.reload_success")
 
 
+@command("protection", owner=True, argcount=1)
+async def protection(ctx: CommandContext):
+    if ctx.args[0] == "on":
+        await db.set_key("protection", "y")
+        await ctx.send("Enabled protection mode.")
+    elif ctx.args[0] == "off":
+        await db.set_key("protection", "n")
+        await ctx.send("Disabled protection mode.")
+
+
 @command("reloadall", owner=True)
 async def reload_all(ctx: CommandContext):
     """
@@ -72,10 +82,21 @@ async def reload_all(ctx: CommandContext):
     """
     # Re-load plugins.
     for mod in sys.modules:
-        if mod.startswith("plugins."):
+        if mod.startswith("__"):
+            continue
+        if not mod.startswith("navalbot."):
             # Reload it.
-            logger.info("Reloading module: {}".format(mod))
-            importlib.reload(sys.modules[mod])
+            module = sys.modules[mod]
+            if hasattr(module, "__file__"):
+                if 'python3' in module.__file__ or 'site-packages' in module.__file__:
+                    # Do not reload built-in modules
+                    continue
+                elif '__' in module.__file__:
+                    continue
+            else:
+                continue
+            logger.info("Reloading module: {} / {}".format(mod, module))
+            importlib.reload(module)
             logger.info("Reloaded module.")
 
     await ctx.reply("core.ndc.reload_all")
@@ -151,6 +172,7 @@ async def repl(ctx: CommandContext):
             else:
                 await ctx.send(fmt)
 
+
 @command("rget", owner=True)
 async def redis_get(ctx: CommandContext):
     key = getter.findall(ctx.message.content)
@@ -222,7 +244,7 @@ async def plugins(ctx: CommandContext):
     """
     Lists the currently loaded plugins.
     """
-    mods = NavalClient.instance.modules
+    mods = NavalClient._instance.modules
     s = ctx.locale["core.ndc.plugins_base"]
     plugin = ctx.locale["core.ndc.plugins"]
 

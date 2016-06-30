@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 import logging
 
 import aioredis
+import asyncio
+
 import discord
 
 from navalbot.api.commands import command
@@ -30,6 +32,11 @@ from navalbot.api.contexts import CommandContext
 from navalbot.api.commands.cmdclass import NavalRole
 
 logger = logging.getLogger("NavalBot")
+
+try:
+    votebans
+except NameError:
+    votebans = {}
 
 
 def get_highest_role(user: discord.Member) -> discord.Role:
@@ -134,22 +141,56 @@ async def ensure_muted(ctx: CommandContext):
     if created:
         # Add `muted` denial to all channels.
         # This may seem like allowed perms, but the True means 'deny this'.
-        allowed_perms = discord.Permissions.none()
-        allowed_perms.send_messages = True
-        allowed_perms.send_tts_messages = True
-        allowed_perms.speak = True
+        allowed_perms = discord.PermissionOverwrite()
+        allowed_perms.send_messages = False
+        allowed_perms.send_tts_messages = False
+        allowed_perms.speak = False
 
         for chan in ctx.server.channels:
-            await ctx.client.edit_channel_permissions(chan, muted, deny=allowed_perms)
+            await ctx.client.edit_channel_permissions(chan, muted, allowed_perms)
 
     return muted
 
 
-@command("mute", argcount=1, roles={NavalRole.ADMIN})
+async def restore_roles(ctx: CommandContext, user: discord.Member):
+    async with await ctx.get_conn() as conn:
+        assert isinstance(conn, aioredis.Redis)
+        sid, uid = ctx.server.id, user.id
+        rns = await conn.smembers("muted:saved:{}:{}".format(sid, uid))
+
+        to_restore = []
+
+        # Search for the role name
+        for rn in rns:
+            rn = rn.decode()
+            rl = discord.utils.find(lambda r: r.name == rn, ctx.server.roles)
+            if not rl:
+                continue
+            assert isinstance(rl, discord.Role)
+            to_restore.append(rl)
+
+        # Delete the saved key.
+
+        await ctx.client.add_roles(user, *to_restore)
+        await conn.delete("muted:saved:{}:{}".format(sid, uid))
+
+
+@command("mute", argcount="?", roles={NavalRole.ADMIN})
 async def mute(ctx: CommandContext):
     """
     Mutes a user.
     """
+    if len(ctx.args) < 1:
+        await ctx.reply("generic.no_user_provided")
+        return
+    if len(ctx.args) > 1:
+        try:
+            mute_time = int(ctx.args[1])
+        except ValueError:
+            await ctx.reply("generic.not_int", val=ctx.args[1])
+            return
+    else:
+        mute_time = 0
     # Ensure the muted role exists.
     muted = await ensure_muted(ctx)
     if not muted:
@@ -179,6 +220,14 @@ async def mute(ctx: CommandContext):
     # Add the muted role.
     await ctx.client.add_roles(user, muted)
     await ctx.reply("moderation.muted.success", user=user)
+    if mute_time:
+        async def _unmute_after_duration():
+            await asyncio.sleep(mute_time)
+            await ctx.client.remove_roles(user, muted)
+            await restore_roles(ctx, user)
+            await ctx.reply("moderation.muted.unmuted", user=user)
+
+        ctx.client.loop.create_task(_unmute_after_duration())
 
 
 @command("unmute", argcount=1, roles={NavalRole.ADMIN})
@@ -200,27 +249,7 @@ async def unmute(ctx: CommandContext):
         return
 
     # Restore roles
-    async with await ctx.get_conn() as conn:
-        assert isinstance(conn, aioredis.Redis)
-        sid, uid = ctx.server.id, user.id
-        rns = await conn.smembers("muted:saved:{}:{}".format(sid, uid))
-
-        to_restore = []
-
-        # Search for the role name
-        for rn in rns:
-            rn = rn.decode()
-            rl = discord.utils.find(lambda r: r.name == rn, ctx.server.roles)
-            if not rl:
-                continue
-            assert isinstance(rl, discord.Role)
-            to_restore.append(rl)
-
-        # Delete the saved key.
-
-        await ctx.client.add_roles(user, *to_restore)
-        await conn.delete("muted:saved:{}:{}".format(sid, uid))
-
+    await restore_roles(ctx, user)
     await ctx.client.remove_roles(user, muted)
     await ctx.reply("moderation.muted.unmuted", user=user)
 
@@ -311,7 +340,11 @@ async def clean(ctx: CommandContext):
     Removes all messages from the bot in the last 100 messages.
     """
     check = lambda msg: msg.author == ctx.me
-    msgs = await ctx.client.purge_from(ctx.channel, limit=100, check=check)
+    try:
+        msgs = await ctx.client.purge_from(ctx.channel, limit=100, check=check)
+    except discord.Forbidden:
+        await ctx.reply("moderation.cannot_clean")
+        return
     await ctx.reply("moderation.deleted_messages", count=len(msgs))
 
 
@@ -342,3 +375,49 @@ async def unblacklist(ctx: CommandContext):
 
     await ctx.db.remove_from_set("blacklist:{}".format(ctx.server.id), user.id)
     await ctx.reply("moderation.unblacklisted", user=user.display_name)
+
+
+@command("hide", argcount=1)
+async def hide_channel(ctx: CommandContext):
+    """
+    Hides a channel from you.
+    """
+    if len(ctx.message.channel_mentions) < 1:
+        channel = ctx.get_channel(ctx.args[0])
+    else:
+        channel = ctx.message.channel_mentions[0]
+    if not channel:
+        await ctx.reply("generic.cannot_find_channel", channel=ctx.args[0])
+        return
+    # Create the perms overwrite
+    perms = discord.PermissionOverwrite()
+    perms.read_messages = False
+    try:
+        await ctx.client.edit_channel_permissions(channel, ctx.author, perms)
+        await ctx.reply("moderation.hidden", channel=channel.name)
+    except discord.Forbidden:
+        await ctx.reply("moderation.cannot_edit_server")
+        return
+
+
+@command("unhide", argcount=1)
+async def unhide_channel(ctx: CommandContext):
+    """
+    Un-hides a channel from you.
+    """
+    if len(ctx.message.channel_mentions) < 1:
+        channel = ctx.get_channel(ctx.args[0])
+    else:
+        channel = ctx.message.channel_mentions[0]
+    if not channel:
+        await ctx.reply("generic.cannot_find_channel", channel=ctx.args[0])
+        return
+
+    perms = discord.PermissionOverwrite()
+    perms.read_messages = None
+    try:
+        await ctx.client.edit_channel_permissions(channel, ctx.author, perms)
+        await ctx.reply("moderation.unhidden", channel=channel.name)
+    except discord.Forbidden:
+        await ctx.reply("moderation.cannot_edit_server")
+        return

@@ -218,7 +218,7 @@ class NavalVoiceClient(discord.VoiceClient):
         qsize = await db.get_config(self.channel.server.id, "max_queue", default=99, type_=int)
 
         if len(queue) != 0 and start_pos + 1 > len(queue):
-            await ctx.reply("voice.queue_too_short", num=len(queue))
+            await ctx.reply("voice.queue_too_short", num=start_pos)
             return
         if start_pos < 0:
             await ctx.reply("voice.queue_negative")
@@ -401,10 +401,10 @@ class NavalVoiceClient(discord.VoiceClient):
         internal_queue = list(self._play_queue._queue)
 
         if start > end:
-            return await ctx.reply("ctx.remove.start_lt_end")
+            return await ctx.reply("voice.remove.start_lt_end")
 
         if start <= 0:
-            return await ctx.reply("ctx.mv.could_not_find")
+            return await ctx.reply("voice.mv.could_not_find")
 
         if start > len(internal_queue):
             return await ctx.reply("voice.queue_too_short", num=start)

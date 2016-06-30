@@ -27,6 +27,8 @@ import functools
 import os
 import random
 
+from dateutil.parser import parse
+
 import discord
 import praw
 import psutil
@@ -39,6 +41,7 @@ from google import search
 
 from navalbot.api import db, util
 from navalbot.api.commands import command
+from navalbot.api.commands.cmdclass import NavalRole
 from navalbot.api.contexts import CommandContext
 
 VERSION = "1.0.0"
@@ -126,7 +129,7 @@ async def weather(ctx: CommandContext):
 
     if 'rain' in status.lower():
         # Send rain information.
-        rain = weather.get_rain()['1h']
+        rain = weather.get_rain().get("1h", 0)
         await ctx.reply("fun.weather.rain", rain=rain)
 
 
@@ -303,3 +306,39 @@ async def get_server_info(ctx: CommandContext):
     await ctx.reply("fun.servinfo",
                     server=ctx.server, channels=len(ctx.server.channels),
                     created=created_time)
+
+
+@command("timetravel", roles={NavalRole.ADMIN}, argcount="+")
+async def timetravel(ctx: CommandContext):
+    """
+    Time-travel to the past.
+    """
+    if not ctx.args:
+        i = ctx.client.logs_from(ctx.channel, after=ctx.channel, limit=1)
+    else:
+        i = ctx.client.logs_from(ctx.channel, after=parse(ctx.args[0]), limit=1)
+    msg = []
+    async for m in i:
+        msg.append(m)
+
+    msg = msg[0]
+    try:
+        await ctx.client.pin_message(msg)
+    except discord.Forbidden:
+        await ctx.reply("fun.timetravel.cannot_pin")
+        return
+    await ctx.send(msg.id)
+
+
+@command("game", owner=True, argcount="?")
+async def game(ctx: CommandContext):
+    await ctx.client.change_status(discord.Game(name=' '.join(ctx.args)))
+
+    await ctx.send(":heavy_check_mark: Changed game to `{}`.".format(' '.join(ctx.args)))
+
+
+@command("gamestream", owner=True, argcount=2)
+async def changestream(ctx: CommandContext):
+    await ctx.client.change_status(discord.Game(name=ctx.args[0], url=ctx.args[1], type=1))
+
+    await ctx.send(":heavy_check_mark: Set bot as streaming.")

@@ -18,6 +18,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 =================================
 """
 
-VERSION = "6.0.1"
+import re
+
+import aiohttp
+# =============== Commands
+from navalbot.api.commands import command
+from navalbot.api.contexts import CommandContext
+
+VERSION = "6.0.2"
 VERSUFF = ""
 VERSIONT = tuple(int(i) for i in VERSION.split("."))
+
+
+def read_version(data):
+    regexp = re.compile(r"^\W*?VERSION\W*=\W*([\d.abrc]+)")
+
+    for line in data:
+        match = regexp.match(line)
+        if match is not None:
+            return match.group(1)
+    else:
+        print("Cannot get new version from GitHub.")
+
+
+@command("version")
+async def version(ctx: CommandContext):
+    """
+    Checks for the latest stable version of NavalBot.
+    """
+
+    # Version info is defined above so it can be reloaded as required.
+    await ctx.reply("core.version.base", ver=VERSION + VERSUFF)
+
+    # Download the latest version
+    async with aiohttp.ClientSession() as sess:
+        s = await sess.get("https://raw.githubusercontent.com/NavalBot/NavalBot-core/develop/navalbot/version.py")
+        assert isinstance(s, aiohttp.ClientResponse)
+        data = await s.read()
+        data = data.decode().split('\n')
+
+    version = read_version(data)
+    if not version:
+        await ctx.reply("core.version.no_dl")
+        return
+    if tuple(int(i) for i in version.split(".")) > VERSIONT:
+        await ctx.reply("core.version.new_ver", ver=version)
+    elif tuple(int(i) for i in version.split(".")) < VERSIONT:
+        await ctx.reply("core.version.local_newer", ver=version)
+    else:
+        await ctx.reply("core.version.same")

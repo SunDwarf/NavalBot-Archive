@@ -162,6 +162,8 @@ class Command(object):
         # This is so spaces in prefixes don't break everything.
         prefix = await db.get_config(ctx.message.server.id, "command_prefix", default="?")
 
+        command_name = ctx.message.content[len(prefix):].split(" ")[0]
+
         # Do the checks before running the coroutine.
         # Owner check.
 
@@ -174,27 +176,47 @@ class Command(object):
                 await ctx.client.send_message(ctx.message.channel, ctx.loc["perms.not_owner"])
                 return
 
-        # Get the user's roles.
-        if hasattr(self, "_roles"):
-            try:
-                assert isinstance(ctx.message.author, discord.Member)
-            except AssertionError:
-                await ctx.client.send_message(ctx.message.channel, ctx.loc["perms.cannot_determine_role"])
+        # Check if the command is disabled.
+        # Don't do this check on `enable_command`.
+        # Otherwise, you can disable enabling of commands.
+        if self._wrapped_coro.__name__ != "enable_command":
+            disabled = await db.get_config(ctx.message.server.id, "disabled:{}".format(self._wrapped_coro.__name__),
+                                           default=False, type_=bool)
+            if not disabled:
+                user_disabled = await db.get_config(ctx.message.server.id,
+                                                    "disabled:{}:{}".format(self._wrapped_coro.__name__, ctx.member.id),
+                                                    default=False, type_=bool)
+            else:
+                user_disabled = False
+            if disabled: key = "generic.command_disabled"
+            elif user_disabled: key = "generic.command_user_disabled"
+            if disabled or user_disabled:
+                await ctx.reply(key, command=command_name)
                 return
 
-            # Load roles correctly.
-            new_roles = await self._load_roles(ctx.message.server)
-
-            if not ctx.message.server.owner == ctx.message.author:
-                if not await has_permissions_with_override(ctx.message.author, new_roles, ctx.message.server.id,
-                                                           self._wrapped_coro.__name__):
-                    # await client.send_message(
-                    #    message.channel,
-                    #    ":no_entry: You do not have any of the required roles: `{}`!"
-                    #        .format({role.val for role in allowed_roles})
-                    ss = ctx.loc['perms.bad_role'].format(roles={role for role in new_roles})
-                    await ctx.client.send_message(ctx.message.channel, ss)
+        # Get the user's roles.
+        # Ignore role checks if we're a self-bot.
+        if not ctx.client.config.get("self_bot"):
+            if hasattr(self, "_roles"):
+                try:
+                    assert isinstance(ctx.message.author, discord.Member)
+                except AssertionError:
+                    await ctx.client.send_message(ctx.message.channel, ctx.loc["perms.cannot_determine_role"])
                     return
+
+                # Load roles correctly.
+                new_roles = await self._load_roles(ctx.message.server)
+
+                if not ctx.message.server.owner == ctx.message.author:
+                    if not await has_permissions_with_override(ctx.message.author, new_roles, ctx.message.server.id,
+                                                               self._wrapped_coro.__name__):
+                        # await client.send_message(
+                        #    message.channel,
+                        #    ":no_entry: You do not have any of the required roles: `{}`!"
+                        #        .format({role.val for role in allowed_roles})
+                        ss = ctx.loc['perms.bad_role'].format(roles={role for role in new_roles})
+                        await ctx.client.send_message(ctx.message.channel, ss)
+                        return
 
         # Arguments check.
         if hasattr(self, "_args_type"):
@@ -225,6 +247,7 @@ class Command(object):
                     return
         # Create the context.
         ctx = CommandContext(ctx.client, ctx.message, locale=ctx.loc)
+        ctx.command_name = command_name
 
         # Now that we've gotten all of the returns out of the way, invoke the coroutine.
         if hasattr(self, "_args_type"):

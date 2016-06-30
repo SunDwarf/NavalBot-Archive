@@ -122,13 +122,3 @@ async def factoids(ctx: CommandContext):
     if index == 0:
         s += ctx.locale["core.factoids.match.none"]
     await ctx.client.send_message(ctx.message.channel, s)
-
-
-@command("factoid")
-async def factoid(client: discord.Client, message: discord.Message):
-    """
-    Displays help on how to create a factoid.
-    """
-    prefix = await db.get_config(message.server.id, "command_prefix", "?")
-    await client.send_message(message.channel,
-                              "You can create a factoid by typing `{}<factoid_name> is <answer>`".format(prefix))

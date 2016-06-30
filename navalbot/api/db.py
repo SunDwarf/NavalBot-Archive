@@ -38,7 +38,10 @@ async def get_config(server_id: str, key: str, default=None, type_: type = str) 
         if not data:
             return default
         try:
-            return type_(data.decode())
+            if type_ == bool:
+                return data.decode().lower() == "true"
+            else:
+                return type_(data.decode())
         except (ValueError, AttributeError):
             return default
 

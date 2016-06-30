@@ -59,6 +59,18 @@ help.factoid: |
 help.version: |
         Shows the current version of the bot.
 
+help.disable_command: |
+        Disables a command from being run.
+
+        You can specify a user as an optional second arg - this will only disable the command for that user.
+
+help.enable_command: |
+        Enables a command.
+
+        You can specify a user as an optional second arg - this un-disable the command for that user. It will not override a global disable.
+
+        *Note: You cannot disable this command.*
+
 # core strings
 core.cfg.setcfg_updated: ":heavy_check_mark: Config updated: `{name}` -> `{val}`"
 core.cfg.no_such_config: ":x: Config val `{name}` has not been set."
@@ -105,6 +117,13 @@ core.ndc.globalblacklist_abort: ":x: Aborting global blacklist."
 core.ndc.globalblacklist_success: ":gun: Okay, user `{u}` has been banned from using the bot."
 core.ndc.globalunblacklist: ":angel: User `{u}` has repented their sins."
 
+core.disabled.disabled: ":heavy_check_mark: Command `{command}` disabled for all."
+core.disabled.disabled_user: ":heavy_check_mark: Command `{command}` disabled for user `{user.display_name}`."
+core.disabled.enabled: ":heavy_check_mark: Command `{command}` enabled for all."
+core.disabled.enabled_user: ":heavy_check_mark: Command `{command}` enabled for user `{user.display_name}`."
+
+core.leaving: ":wave:"
+
 # Permissions keys
 perms.not_owner: ":no_entry: This command is restricted to the bot owner."
 perms.cannot_determine_role: ":no_entry: Cannot determine your role!"
@@ -116,4 +135,9 @@ generic.file_too_big: ":x: File {fname} is too big to download."
 generic.no_mention: ":x: You must mention a user."
 generic.cannot_find_user: ":x: Cannot find user `{user}`."
 generic.cannot_find_command: ":x: Cannot find command `{cmd}`."
+generic.cannot_find_channel: ":x: Cannot find channel `{channel}`."
 generic.no_role_provided: ":x: You must provide (a) role(s)."
+generic.no_user_provided: ":x: You must provide a user."
+generic.command_disabled: ":no_entry: The command `{command}` is disabled."
+generic.command_user_disabled: ":no_entry: The command `{command}` is disabled for you."
+generic.bad_permission: ":no_entry: I do not have permission to perform this action here."

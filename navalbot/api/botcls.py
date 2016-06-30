@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 # Subclass of discord.Client.
 import asyncio
 import copy
+import collections
 import importlib
 import json
 import logging
@@ -35,6 +36,8 @@ import traceback
 import aiohttp
 import aioredis
 import discord
+import logbook
+from logbook import StreamHandler
 import yaml
 from raven import Client
 from raven_aiohttp import AioHttpTransport
@@ -42,40 +45,85 @@ from raven_aiohttp import AioHttpTransport
 from navalbot.api import db
 from navalbot.api import util
 from navalbot.api.contexts import OnMessageEventContext
+from navalbot.api import contexts
 from navalbot.api.locale import get_locale
 from navalbot.api.util import get_pool
 from navalbot.voice import voiceclient
 
-logger = logging.getLogger("NavalBot")
+from logbook.compat import redirect_logging
+redirect_logging()
+
+StreamHandler(sys.stderr).push_application()
+
+
+logger = logbook.Logger("NavalBot")
 
 
 class NavalClient(discord.Client):
     """
     An overridden discord Client.
     """
-    instance = None
+    _instance = None
 
     @classmethod
     def get_navalbot(cls) -> 'NavalClient':
         """
         Get the current instance of the bot.
         """
-        return cls.instance
+        return cls._instance
 
-    @classmethod
-    def init_logging(cls):
-        if sys.platform == "win32":
-            logging.basicConfig(filename='nul', level=logging.INFO)
+    # Metamethods.
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.modules = {}
+        self.hooks = collections.defaultdict(lambda *args, **kwargs: {})
+
+        self._hook_subclasses = {}
+
+        try:
+            config_file = sys.argv[1]
+        except IndexError:
+            config_file = "config.yml"
+
+        if not os.path.exists(config_file):
+            shutil.copyfile("config.example.yml", config_file)
+
+        with open(config_file, "r") as f:
+            self.config = yaml.load(f)
+
+        # Create a client if the config says so.
+        if self.config.get("use_sentry"):
+            logger.info("Using Sentry for error reporting.")
+            self._raven_client = Client(dsn=self.config.get("sentry_dsn"), transport=AioHttpTransport)
         else:
-            logging.basicConfig(filename='/dev/null', level=logging.INFO)
+            self._raven_client = None
 
-        formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(name)s -> %(message)s')
-        root = logging.getLogger()
+        self.tb_session = aiohttp.ClientSession()
 
-        consoleHandler = logging.StreamHandler()
-        consoleHandler.setFormatter(formatter)
-        root.addHandler(consoleHandler)
+        self.loaded = False
 
+        logger.level = getattr(logbook, self.config.get("log_level", "INFO"))
+        # We still have to do this
+        logging.root.setLevel(getattr(logging, self.config.get("log_level", "INFO")))
+
+        #logging.getLogger().setLevel(getattr(logging, self.config.get("log_level", "INFO")))
+        logger.info("NavalBot is loading...")
+
+    def __del__(self):
+        # Fuck off asyncio
+        self.loop.set_exception_handler(lambda *args, **kwargs: None)
+
+    def __new__(cls, *args, **kwargs):
+        """
+        Singleton class
+        """
+        if not cls._instance:
+            cls._instance = super().__new__(cls, *args)
+
+        return cls._instance
+
+    # Overrides.
     def vc_factory(self):
         """
         Method to return a new voice client class.
@@ -137,46 +185,115 @@ class NavalClient(discord.Client):
         self.connection._add_voice_client(server.id, voice)
         return voice
 
-    def __new__(cls, *args, **kwargs):
+    def dispatch(self, event, *args, **kwargs):
         """
-        Singleton class
+        Handles dispatching.
+
+        This is overriden so we can dispatch to hook-subclasses that handle ALL hooks, regardless of event.
         """
-        if not cls.instance:
-            cls.init_logging()
-            cls.instance = super().__new__(cls, *args)
-        return cls.instance
+        super().dispatch(event, *args, **kwargs)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        # Handle the hook subclasses.
+        for name, hook_subclass in self._hook_subclasses.items():
+            method = 'on_' + event
+            if hasattr(hook_subclass, method):
+                logger.debug("Dispatching to hook class `{}` -> `{}`.".format(name, method))
+                self.loop.create_task(self._n_run_event(method, *args, cls=hook_subclass, **kwargs))
 
-        self.modules = {}
-        self.hooks = {}
-
+    async def _n_run_event(self, event, *args, cls: 'NavalClient'=None, **kwargs):
+        """
+        Run an event, delegating to a subclass if appropriate.
+        """
+        if cls is None:
+            cls = self
         try:
-            config_file = sys.argv[1]
-        except IndexError:
-            config_file = "config.yml"
+            await getattr(cls, event)(self, *args, **kwargs)
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            try:
+                await cls.on_error(self, event, *args, **kwargs)
+            except asyncio.CancelledError:
+                pass
 
-        if not os.path.exists(config_file):
-            shutil.copyfile("config.example.yml", config_file)
+    # Misc utilities.
 
-        with open(config_file, "r") as f:
-            self.config = yaml.load(f)
+    def register_hook_class(self, cls):
+        logger.info("Registered new hook class -> {cls.__class__.__name__}".format(cls=cls))
+        self._hook_subclasses[cls.__class__.__name__] = cls
 
-        # Create a client if the config says so.
-        if self.config.get("use_sentry"):
-            logger.info("Using Sentry for error reporting.")
-            self._raven_client = Client(dsn=self.config.get("sentry_dsn"), transport=AioHttpTransport)
-        else:
-            self._raven_client = None
+    async def load_plugins(self):
+        """
+        Loads plugins from plugins/.
+        """
+        if not os.path.exists(os.path.join(os.getcwd(), "plugins/")):
+            logger.critical("No plugins directory exists. Your bot is effectively useless.")
+            return
+        # Add cwd to sys.path
+        sys.path.insert(0, os.path.join(os.getcwd()))
+        to_pop = 1
+        # Loop over things in plugins/
+        paths = ["./plugins", *self.config.get("plugin_dirs", [])]
+        for path in paths:
+            sys.path.insert(0, os.path.abspath(path))
+            for entry in os.scandir(path):
+                if entry.name == "__pycache__" or entry.name == "__init__.py" or entry.name.startswith("."):
+                    continue
+                if entry.name.endswith(".py"):
+                    name = entry.name.split(".")[0]
+                else:
+                    if os.path.isdir(entry.path) or os.path.islink(entry.path):
+                        name = entry.name
+                    else:
+                        continue
+                # Check in the config.
+                if name in self.config.get("disabled", []):
+                    logger.info("Skipping disabled plugin {}.".format(name))
+                    continue
+                if path == "./plugins":
+                    import_name = "plugins." + name
+                else:
+                    import_name = name
+                # Import using importlib.
+                try:
+                    mod = importlib.import_module(import_name)
+                    if hasattr(mod, "load_plugin"):
+                        await mod.load_plugin(self)
+                    self.modules[mod.__name__] = mod
+                    logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
+                except Exception as e:
+                    logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
+                    traceback.print_exc()
+                    continue
+            sys.path.pop(0)
+        # Remove from path.
+        for x in range(to_pop):
+            sys.path.pop(0)
+        self.loaded = True
 
-        self.tb_session = aiohttp.ClientSession()
+    async def _delegate_hooks(self, event: str, ctx: contexts.EventContext, pause=True):
+        """
+        Delegates hooks to the subhook handlers.
+        """
+        hook_handler = self.hooks[event]
+        for name, subhook in hook_handler.items():
+            if pause:
+                try:
+                    await subhook(ctx)
+                except Exception:
+                    logger.error("Caught exception in hook {} -> {}".format(event, name))
+                    traceback.print_exc()
+                    return
+            else:
+                self.loop.create_task(subhook)
 
-        self.loaded = False
-
-    def __del__(self):
-        # Fuck off asyncio
-        self.loop.set_exception_handler(lambda *args, **kwargs: None)
+    # Events.
+    async def on_server_join(self, server: discord.Server):
+        if await db.get_key("protection") == "y":
+            await self.send_message(server.default_channel, "Hi. I can't currently join new servers as I am in "
+                                                            "protection mode right now to prevent against abusive "
+                                                            "users. I am automatically leaving.")
+            await self.leave_server(server)
 
     async def on_socket_response(self, raw_data: json):
         """
@@ -202,46 +319,6 @@ class NavalClient(discord.Client):
         # Run error hooks.
         for hook in self.hooks.get("on_error", []):
             self.loop.create_task(hook(event_method, *args, **kwargs))
-
-    async def load_plugins(self):
-        """
-        Loads plugins from plugins/.
-        """
-        if not os.path.exists(os.path.join(os.getcwd(), "plugins/")):
-            logger.critical("No plugins directory exists. Your bot is effectively useless.")
-            return
-        # Add cwd to sys.path
-        sys.path.insert(0, os.path.join(os.getcwd()))
-        # Loop over things in plugins/
-        for entry in os.scandir("plugins/"):
-            if entry.name == "__pycache__" or entry.name == "__init__.py":
-                continue
-            if entry.name.endswith(".py"):
-                name = entry.name.split(".")[0]
-            else:
-                if os.path.isdir(entry.path) or os.path.islink(entry.path):
-                    name = entry.name
-                else:
-                    continue
-            # Check in the config.
-            if name in self.config.get("disabled", []):
-                logger.info("Skipping disabled plugin {}.".format(name))
-                continue
-            import_name = "plugins." + name
-            # Import using importlib.
-            try:
-                mod = importlib.import_module(import_name)
-                if hasattr(mod, "load_plugin"):
-                    await mod.load_plugin(self)
-                self.modules[mod.__name__] = mod
-                logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
-            except Exception as e:
-                logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
-                traceback.print_exc()
-                continue
-        # Remove from path.
-        sys.path.pop(0)
-        self.loaded = True
 
     async def on_ready(self):
         # Get the OAuth2 URL, or something
@@ -287,13 +364,14 @@ class NavalClient(discord.Client):
         util.msgcount += 1
 
         if self.config.get("self_bot"):
+            if not message.server:
+                return
             if message.author != message.server.me:
                 logger.info("Ignoring message from not me.")
                 return
 
-        if message.author.bot:
-            logger.info("Ignoring message from bot account.")
-            return
+            if message.content.startswith("`"):
+                return
 
         # Load locale.
         _loc_key = await db.get_config(message.server.id, "lang", default=None)
@@ -323,8 +401,8 @@ class NavalClient(discord.Client):
         if not isinstance(message.channel, discord.PrivateChannel):
             # print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
             #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
-            logger.info("Recieved message: {message.content} from {message.author.display_name}"
-                        .format(message=message))
+            logger.info("Recieved message: {message.content} from {message.author.display_name}{bot}"
+                        .format(message=message, bot=" [BOT]" if message.author.bot else ""))
             logger.info(" On channel: #{message.channel.name}".format(message=message))
 
         # Check for a valid server.
@@ -361,6 +439,28 @@ class NavalClient(discord.Client):
                 traceback.print_exc()
                 continue
 
+    async def on_message_delete(self, message: discord.Message):
+        """
+        Fired upon a message deletion.
+        """
+        ctx = contexts.OnMessageDeleteEventContext(self, message)
+        await ctx._load_locale()
+        await self._delegate_hooks("on_message_delete", ctx)
+
+    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+        """
+        Fired upon a message edit.
+        """
+        ctx = contexts.OnMessageEditEventContext(self, before, after)
+        await ctx._load_locale()
+        await self._delegate_hooks("on_message_edit", ctx)
+
+    async def on_member_join(self, member: discord.Member):
+        ctx = contexts.OnMemberJoinEventContext(self, member)
+        await ctx._load_locale()
+        await self._delegate_hooks("on_member_join", ctx)
+
+    # Main
     def navalbot(self):
         # Switch login method based on args.
         login = (self.config.get("client", {}).get("oauth_bot_token", ""),)

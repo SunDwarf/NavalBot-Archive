@@ -24,30 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 """
 
 from .cmdclass import Command
-from navalbot.api.contexts import CommandContext
 
 commands = {}
 _func_cmd_mapping = {}
-
-
-# Deprecated. Use @command which is much better.
-def oldcommand(*names):
-    """
-    Register a new basic command.
-
-    This is a single command decorator.
-    """
-
-    def __decorator(func):
-        for name in names:
-            commands[name] = func
-        # Update __methods.
-        if hasattr(func, "__methods"):
-            for k, v in func.__methods.items():
-                setattr(func, k, v)
-        return func
-
-    return __decorator
 
 
 def command(*names, **kwargs):
