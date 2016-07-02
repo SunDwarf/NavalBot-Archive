@@ -74,7 +74,7 @@ async def reset(ctx: CommandContext):
         return
 
     # Reset the voice client
-    channels = [vc.channel, find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
+    channels = [vc.channel, await find_voice_channel(ctx.message.server), ctx.message.author.voice_channel]
 
     if not author_is_valid(ctx.message.author, channels):
         await ctx.reply("voice.cant_control")

@@ -89,10 +89,14 @@ async def get_factoid(ctx: CommandContext, data: str):
     """
     prefix = await ctx.get_config("command_prefix", "?")
     # Split data apart and load that factoid, because fuck spaces.
-    content = await ctx.get_config("fac:{}".format(data))
+    # Try data.split(" ")[0]
+    ff = data.split(" ")[0]
+    content = await ctx.get_config("fac:{}".format(ff))
     if not content:
         # Don't do anything.
-        return
+        content = await ctx.get_config("fac:{}".format(data))
+        if not content:
+            return
 
     # Check if it is an inline command.
     inline_cmd = command_matcher.match(content)
@@ -116,11 +120,11 @@ async def get_factoid(ctx: CommandContext, data: str):
         # Load up the old arguments and content
         old_content = ctx.message.content
         try:
-            old_args = shlex.split(old_content)[1:]
+            old_args = shlex.split(old_content[len(prefix):])[1:]
         except ValueError:
-            old_args = old_content.split(" ")[1:]
+            old_args = old_content[len(prefix):].split(" ")[1:]
 
-        if not ('{' in old_content and '}' in old_content):
+        if not ('{' in content and '}' in content):
             # Just replace the data with the factoid data, instead of parsing out args.
             ctx.message.content = prefix + data
         else:

@@ -1,4 +1,6 @@
-# NavalBot 6.x
+# This bot is abandoned. It may or may not work in the future.
+
+## NavalBot 6.x
 
 [![Requirements Status](https://requires.io/github/SunDwarf/NavalBot/requirements.svg?branch=develop)](https://requires.io/github/SunDwarf/NavalBot/requirements/?branch=develop)
 ![https://img.shields.io/github/release/SunDwarf/NavalBot.svg](https://img.shields.io/github/release/SunDwarf/NavalBot.svg)

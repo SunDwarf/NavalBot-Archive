@@ -56,9 +56,6 @@ redirect_logging()
 StreamHandler(sys.stderr).push_application()
 
 
-logger = logbook.Logger("NavalBot")
-
-
 class NavalClient(discord.Client):
     """
     An overridden discord Client.
@@ -81,6 +78,8 @@ class NavalClient(discord.Client):
 
         self._hook_subclasses = {}
 
+        self.logger = logbook.Logger("NavalBot")
+
         try:
             config_file = sys.argv[1]
         except IndexError:
@@ -94,7 +93,7 @@ class NavalClient(discord.Client):
 
         # Create a client if the config says so.
         if self.config.get("use_sentry"):
-            logger.info("Using Sentry for error reporting.")
+            self.logger.info("Using Sentry for error reporting.")
             self._raven_client = Client(dsn=self.config.get("sentry_dsn"), transport=AioHttpTransport)
         else:
             self._raven_client = None
@@ -102,13 +101,13 @@ class NavalClient(discord.Client):
         self.tb_session = aiohttp.ClientSession()
 
         self.loaded = False
+        self.testing = False
 
-        logger.level = getattr(logbook, self.config.get("log_level", "INFO"))
+        self.logger.level = getattr(logbook, self.config.get("log_level", "INFO"))
         # We still have to do this
         logging.root.setLevel(getattr(logging, self.config.get("log_level", "INFO")))
 
-        #logging.getLogger().setLevel(getattr(logging, self.config.get("log_level", "INFO")))
-        logger.info("NavalBot is loading...")
+        self.logger.info("NavalBot is loading...")
 
     def __del__(self):
         # Fuck off asyncio
@@ -145,7 +144,7 @@ class NavalClient(discord.Client):
         if self.is_voice_connected(server):
             raise discord.ClientException('Already connected to a voice channel in this server')
 
-        logger.info('attempting to join voice channel {0.name}'.format(channel))
+        self.logger.info('attempting to join voice channel {0.name}'.format(channel))
 
         def session_id_found(data):
             user_id = data.get('user_id')
@@ -197,7 +196,7 @@ class NavalClient(discord.Client):
         for name, hook_subclass in self._hook_subclasses.items():
             method = 'on_' + event
             if hasattr(hook_subclass, method):
-                logger.debug("Dispatching to hook class `{}` -> `{}`.".format(name, method))
+                self.logger.debug("Dispatching to hook class `{}` -> `{}`.".format(name, method))
                 self.loop.create_task(self._n_run_event(method, *args, cls=hook_subclass, **kwargs))
 
     async def _n_run_event(self, event, *args, cls: 'NavalClient'=None, **kwargs):
@@ -219,7 +218,7 @@ class NavalClient(discord.Client):
     # Misc utilities.
 
     def register_hook_class(self, cls):
-        logger.info("Registered new hook class -> {cls.__class__.__name__}".format(cls=cls))
+        self.logger.info("Registered new hook class -> {cls.__class__.__name__}".format(cls=cls))
         self._hook_subclasses[cls.__class__.__name__] = cls
 
     async def load_plugins(self):
@@ -227,7 +226,7 @@ class NavalClient(discord.Client):
         Loads plugins from plugins/.
         """
         if not os.path.exists(os.path.join(os.getcwd(), "plugins/")):
-            logger.critical("No plugins directory exists. Your bot is effectively useless.")
+            self.logger.critical("No plugins directory exists. Your bot is effectively useless.")
             return
         # Add cwd to sys.path
         sys.path.insert(0, os.path.join(os.getcwd()))
@@ -248,7 +247,7 @@ class NavalClient(discord.Client):
                         continue
                 # Check in the config.
                 if name in self.config.get("disabled", []):
-                    logger.info("Skipping disabled plugin {}.".format(name))
+                    self.logger.info("Skipping disabled plugin {}.".format(name))
                     continue
                 if path == "./plugins":
                     import_name = "plugins." + name
@@ -260,9 +259,9 @@ class NavalClient(discord.Client):
                     if hasattr(mod, "load_plugin"):
                         await mod.load_plugin(self)
                     self.modules[mod.__name__] = mod
-                    logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
+                    self.logger.info("Loaded plugin {} (from {})".format(mod.__name__, mod.__file__))
                 except Exception as e:
-                    logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
+                    self.logger.error("Error upon loading plugin `{}`! Cannot continue loading.".format(import_name))
                     traceback.print_exc()
                     continue
             sys.path.pop(0)
@@ -281,7 +280,7 @@ class NavalClient(discord.Client):
                 try:
                     await subhook(ctx)
                 except Exception:
-                    logger.error("Caught exception in hook {} -> {}".format(event, name))
+                    self.logger.error("Caught exception in hook {} -> {}".format(event, name))
                     traceback.print_exc()
                     return
             else:
@@ -313,7 +312,7 @@ class NavalClient(discord.Client):
         if self._raven_client:
             self._raven_client.captureException()
         else:
-            logger.error("Caught error in {}".format(event_method))
+            self.logger.error("Caught error in {}".format(event_method))
             traceback.print_exc()
 
         # Run error hooks.
@@ -327,14 +326,14 @@ class NavalClient(discord.Client):
             permissions = discord.Permissions.all_channel()
             oauth_url = discord.utils.oauth_url(str(bot_id), permissions=permissions)
             if bot_id is None:
-                logger.critical("You didn't set the bot ID in config.yml. Your bot cannot be invited anywhere.")
+                self.logger.critical("You didn't set the bot ID in config.yml. Your bot cannot be invited anywhere.")
                 sys.exit(1)
-            logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
+            self.logger.info("NavalBot is now using OAuth2, OAuth URL: {}".format(oauth_url))
         else:
-            logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
+            self.logger.warning("NavalBot is still using a legacy account. This will stop working soon!")
 
         # print ready msg
-        logger.info("Loaded NavalBot, logged in as `{}`.".format(self.user.name))
+        self.logger.info("Loaded NavalBot, logged in as `{}`.".format(self.user.name))
         # make file dir
         try:
             os.makedirs(os.path.join(os.getcwd(), "files"))
@@ -349,7 +348,7 @@ class NavalClient(discord.Client):
             try:
                 await hook(self)
             except:
-                logger.error("Caught exception in hook on_ready -> {}".format(hook.__name__))
+                self.logger.error("Caught exception in hook on_ready -> {}".format(hook.__name__))
                 traceback.print_exc()
                 continue
 
@@ -358,7 +357,7 @@ class NavalClient(discord.Client):
 
     async def on_message(self, message: discord.Message):
         if not self.loaded:
-            logger.info("Ignoring messages until plugins are loaded.")
+            self.logger.info("Ignoring messages until plugins are loaded.")
             return
         # Increment the message count.
         util.msgcount += 1
@@ -367,7 +366,7 @@ class NavalClient(discord.Client):
             if not message.server:
                 return
             if message.author != message.server.me:
-                logger.info("Ignoring message from not me.")
+                self.logger.info("Ignoring message from not me.")
                 return
 
             if message.content.startswith("`"):
@@ -383,31 +382,31 @@ class NavalClient(discord.Client):
             try:
                 result = await hook(ctx)
             except:
-                logger.error("Caught exception in hook on_message_before_blacklist -> {}".format(hook.__name__))
+                self.logger.error("Caught exception in hook on_message_before_blacklist -> {}".format(hook.__name__))
                 traceback.print_exc()
                 continue
             # Don't process if the hook returns True.
             if result:
-                logger.info("Hook `on_message_before_blacklist -> {}` forced end of processing.".format(hook.__name__))
+                self.logger.info("Hook `on_message_before_blacklist -> {}` forced end of processing.".format(hook.__name__))
                 return
 
         global_blacklist = await db.get_set("global_blacklist") or set()
 
         # Check if they are globally blacklist.
         if message.author.id in global_blacklist:
-            logger.info("Ignoring message from globally blacklisted user.")
+            self.logger.info("Ignoring message from globally blacklisted user.")
             return
 
         if not isinstance(message.channel, discord.PrivateChannel):
             # print(Fore.RED + message.server.name, ":", Fore.GREEN + message.channel.name, ":",
             #      Fore.CYAN + message.author.name , ":", Fore.RESET + message.content)
-            logger.info("Recieved message: {message.content} from {message.author.display_name}{bot}"
+            self.logger.info("Recieved message: {message.content} from {message.author.display_name}{bot}"
                         .format(message=message, bot=" [BOT]" if message.author.bot else ""))
-            logger.info(" On channel: #{message.channel.name}".format(message=message))
+            self.logger.info(" On channel: #{message.channel.name}".format(message=message))
 
         # Check for a valid server.
         if message.server is not None:
-            logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
+            self.logger.info(" On server: {} ({})".format(message.server.name, message.server.id))
         else:
             # No DMs
             await self.send_message(message.channel, "I don't accept private messages.")
@@ -421,12 +420,12 @@ class NavalClient(discord.Client):
 
         if blacklist and message.author.id in blacklist:
             # Ignore the message.
-            logger.info("Ignoring message from blacklisted member {message.author.display_name}"
+            self.logger.info("Ignoring message from blacklisted member {message.author.display_name}"
                         .format(message=message))
             return
 
         if len(message.content) == 0:
-            logger.info("Ignoring (presumably) image-only message.")
+            self.logger.info("Ignoring (presumably) image-only message.")
             return
 
         # Run on_message hooks.
@@ -435,7 +434,7 @@ class NavalClient(discord.Client):
             try:
                 await hook(ctx)
             except Exception:
-                logger.error("Caught exception in hook on_message -> {}".format(hook.__name__))
+                self.logger.error("Caught exception in hook on_message -> {}".format(hook.__name__))
                 traceback.print_exc()
                 continue
 
@@ -471,7 +470,7 @@ class NavalClient(discord.Client):
                 self.loop.run_until_complete(self.login(*login))
         except discord.errors.HTTPException as e:
             if e.response.status == 401:
-                logger.error("Your bot token is incorrect. Cannot login.")
+                self.logger.error("Your bot token is incorrect. Cannot login.")
                 return
             else:
                 raise
@@ -482,13 +481,13 @@ class NavalClient(discord.Client):
             try:
                 self.loop.run_until_complete(self.logout())
             except Exception:
-                logger.error("Couldn't log out. Oh well. We tried!")
+                self.logger.error("Couldn't log out. Oh well. We tried!")
                 return
             return
         except RuntimeError:
-            logger.error("Session appears to have errored. Exiting.")
+            self.logger.error("Session appears to have errored. Exiting.")
             return
         except Exception:
             traceback.print_exc()
-            logger.error("Crashed.")
+            self.logger.error("Crashed.")
             return

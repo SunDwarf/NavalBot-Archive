@@ -17,7 +17,7 @@ async def get_profile_json(btag: str, endpoint: str = "stats", version=1) -> dic
     """
     Get the profile JSON using owapi.
     """
-    url = OWAPI_BASE_URL + "/api/v{}/u/{}/{}".format(version, btag, endpoint)
+    url = OWAPI_BASE_URL + "/api/v{}/u/{}/{}/general".format(version, btag, endpoint)
     logger.info("GET => {}".format(url))
     async with aiohttp.ClientSession() as sess:
         async with sess.get(url) as r:
@@ -97,6 +97,7 @@ async def get_ow_profile_data(ctx: CommandContext):
 
     if btag is None:
         await ctx.reply("ow.btag_not_set")
+        return
 
     # Build the stats.
     stats = await get_stats_formatted(btag)
