@@ -48,8 +48,6 @@ startup = datetime.datetime.fromtimestamp(time.time())
 # Some useful variables
 msgcount = 0
 
-loop = asyncio.get_event_loop()
-
 threaded = futures.ThreadPoolExecutor()
 
 # Declare redis pool
@@ -66,6 +64,7 @@ async def with_threading(func):
     """
     Runs a func inside a Threaded executor.
     """
+    loop = asyncio.get_event_loop()
     return await loop.run_in_executor(threaded, func)
 
 
@@ -116,7 +115,7 @@ async def get_pool() -> aioredis.RedisPool:
     """
     global redis_pool
     global_config = botcls.NavalClient.get_navalbot().config
-    if not redis_pool:
+    if botcls.NavalClient.get_navalbot().testing or not redis_pool:
         redis_pool = await aioredis.create_pool(
             (global_config["redis"]["ip"], global_config["redis"]["port"]),
             db=int(global_config["redis"].get("db", 0)),
