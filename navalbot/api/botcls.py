@@ -107,7 +107,6 @@ class NavalClient(discord.Client):
         # We still have to do this
         logging.root.setLevel(getattr(logging, self.config.get("log_level", "INFO")))
 
-        #logging.getLogger().setLevel(getattr(logging, self.config.get("log_level", "INFO")))
         logger.info("NavalBot is loading...")
 
     def __del__(self):
