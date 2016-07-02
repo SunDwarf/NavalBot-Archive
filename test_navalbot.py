@@ -46,7 +46,7 @@ NavalClient._instance = tc
 
 
 @pytest.mark.asyncio
-async def test_on_ready(event_loop):
+async def test_on_ready():
     """
     Test on_ready firing.
     """
@@ -68,7 +68,7 @@ def test_locale_loader():
 
 
 @pytest.mark.asyncio
-async def test_some_message(event_loop):
+async def test_some_message():
     with tc:
         await tc.fire_event("on_message", test_msg)
         # No data should be returned for our sample message.
@@ -76,7 +76,7 @@ async def test_some_message(event_loop):
 
 
 @pytest.mark.asyncio
-async def test_command_firing(event_loop):
+async def test_command_firing():
     """
     Test commands fire by running a very basic command.
     """
